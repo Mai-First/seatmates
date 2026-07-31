@@ -415,9 +415,9 @@ enabled = true
 
 # App sends 6-digit codes, not magic links; templates must include {{ .Token }}.
 [auth.email.template.magic_link]
-subject = "Your Seatmates sign-in code"
+subject = "your seatmates sign-in code"
 content_path = "./supabase/templates/otp.html"
 
 [auth.email.template.confirmation]
-subject = "Your Seatmates sign-in code"
+subject = "your seatmates sign-in code"
 content_path = "./supabase/templates/otp.html"

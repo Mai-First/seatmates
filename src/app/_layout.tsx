@@ -30,6 +30,7 @@ export default function RootLayout() {
             options={{ presentation: 'modal', title: 'Profile' }}
           />
           <Stack.Screen name="inbox" options={{ title: 'Notifications' }} />
+          <Stack.Screen name="chats-archived" options={{ title: 'Archived chats' }} />
           <Stack.Screen name="study/new" options={{ title: 'New study session' }} />
           <Stack.Screen name="courses" options={{ title: 'My classes' }} />
         </Stack>

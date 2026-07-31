@@ -99,8 +99,9 @@ export default function ProfileViewer() {
           {[p.major, p.hometown].filter(Boolean).join(' · ') || 'Columbia student'}
         </Text>
         <View style={styles.sharedWrap}>
+          {/* Every shared class, name + code (team decision) */}
           {(shared.data ?? []).map((s) => (
-            <Badge key={`${s.code}-${s.section}`} text={`${s.code} §${s.section}`} />
+            <Badge key={`${s.code}-${s.section}`} text={`${s.title} · ${s.code} §${s.section}`} />
           ))}
         </View>
       </View>

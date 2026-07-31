@@ -71,7 +71,7 @@ export default function SignIn() {
       style={styles.screen}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.inner}>
-        <Text style={styles.logo}>Seatmates</Text>
+        <Text style={styles.logo}>seatmates</Text>
         <Text style={type.sub}>Make friends with the people already in the room.</Text>
 
         {stage === 'choice' && (

@@ -36,11 +36,16 @@ export default function Chats() {
 
   if (rows.length === 0) {
     return (
-      <Empty
-        icon="💬"
-        title="No chats yet"
-        body="Add classes to join their group chats, or match with a classmate to start a DM."
-      />
+      <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        <Empty
+          icon="💬"
+          title="No chats yet"
+          body="Add classes to join their group chats, or match with a classmate to start a DM."
+        />
+        <Pressable onPress={() => router.push('/chats-archived')} style={styles.archivedLink}>
+          <Text style={{ color: colors.subtle }}>Archived chats →</Text>
+        </Pressable>
+      </View>
     );
   }
 
@@ -51,6 +56,11 @@ export default function Chats() {
       style={{ backgroundColor: colors.bg }}
       data={rows}
       keyExtractor={(c) => c.id}
+      ListFooterComponent={
+        <Pressable onPress={() => router.push('/chats-archived')} style={styles.archivedLink}>
+          <Text style={{ color: colors.subtle }}>Archived chats →</Text>
+        </Pressable>
+      }
       renderItem={({ item, index }) => (
         <>
           {index === 0 && item.kind === 'section' && <SectionHeader label="Class group chats" />}
@@ -115,4 +125,5 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: colors.primary,
   },
+  archivedLink: { padding: space.lg, alignItems: 'center' },
 });

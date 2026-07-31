@@ -52,11 +52,21 @@ export default function Study() {
 
   if (feed.isLoading) return <Loading />;
 
+  // Upcoming first (soonest on top), past below under their own header.
+  const upcoming = (feed.data ?? []).filter((s) => +new Date(s.starts_at) >= Date.now());
+  const past = (feed.data ?? [])
+    .filter((s) => +new Date(s.starts_at) < Date.now())
+    .reverse();
+  const rows: (StudySession | { header: string })[] = [
+    ...upcoming,
+    ...(past.length ? [{ header: 'Past sessions' }, ...past] : []),
+  ];
+
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
       <FlatList
-        data={feed.data ?? []}
-        keyExtractor={(s) => s.id}
+        data={rows}
+        keyExtractor={(s) => ('header' in s ? s.header : s.id)}
         contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: 100 }}
         ListEmptyComponent={
           <Empty
@@ -66,6 +76,9 @@ export default function Study() {
           />
         }
         renderItem={({ item }) => {
+          if ('header' in item) {
+            return <Text style={styles.pastHeader}>{item.header}</Text>;
+          }
           const when = new Date(item.starts_at);
           const past = +when < Date.now();
           return (
@@ -110,6 +123,13 @@ export default function Study() {
 }
 
 const styles = StyleSheet.create({
+  pastHeader: {
+    ...type.tiny,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
+    marginTop: space.md,
+  },
   card: {
     borderWidth: 1,
     borderColor: colors.border,

@@ -1,4 +1,4 @@
-# Seatmates
+# seatmates
 
 Make friends with the people already in the room. Columbia-only: swipe on
 classmates who share your sections, get dropped into per-section group chats,

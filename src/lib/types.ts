@@ -22,7 +22,7 @@ export type DeckCard = {
   linkedin: string | null;
   photo_url: string | null;
   email: string;
-  shared_code: string;
+  shared: SharedSection[];
   shared_count: number;
 };
 
@@ -85,9 +85,16 @@ export type Relationship =
   | 'none'
   | 'blocked';
 
+export type ArchivedConversation = {
+  id: string;
+  title: string;
+  subtitle: string | null;
+  last_at: string;
+};
+
 export type InboxItem = {
   id: string;
-  kind: 'friend_request' | 'request_accepted' | 'new_match' | 'announcement';
+  kind: 'friend_request' | 'request_accepted' | 'new_match' | 'announcement' | 'study_rsvp';
   body: string;
   created_at: string;
   read_at: string | null;

@@ -1,13 +1,36 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Loading } from '../../components/ui';
 import { useMyProfile } from '../../lib/auth';
+import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { colors, radius, space, type } from '../../lib/theme';
 
 export default function Account() {
   const profile = useMyProfile();
+  const queryClient = useQueryClient();
+
+  const archiveSemester = async () => {
+    const ok = await confirm(
+      'Are you sure the semester is over?',
+      'All your class group chats move to Archived (readable, not deleted), your classes are cleared, and your swipe deck resets for next semester. DMs and friends are untouched.',
+      'Archive semester',
+      true,
+    );
+    if (!ok) return;
+    const { data, error } = await supabase.rpc('archive_semester');
+    if (error) {
+      notify('Could not archive', error.message);
+      return;
+    }
+    queryClient.invalidateQueries();
+    notify(
+      'Semester archived',
+      `${data} class${data === 1 ? '' : 'es'} moved to Archived. See you next term 🎓`,
+    );
+  };
   if (profile.isLoading) return <Loading />;
   const p = profile.data;
 
@@ -26,6 +49,11 @@ export default function Account() {
       icon: 'notifications-outline' as const,
       label: 'Notifications',
       onPress: () => router.push('/inbox'),
+    },
+    {
+      icon: 'archive-outline' as const,
+      label: 'Archive this semester',
+      onPress: archiveSemester,
     },
     {
       icon: 'log-out-outline' as const,

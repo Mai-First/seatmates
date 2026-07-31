@@ -111,11 +111,16 @@ export default function Swipe() {
 
   if (!card) {
     return (
-      <Empty
-        icon="🎓"
-        title="That’s everyone for now"
-        body="You’ve seen every classmate in your sections. Add another class, or check back as more people join."
-      />
+      <View style={{ flex: 1 }}>
+        <Empty
+          icon="🎓"
+          title="That’s everyone for now"
+          body="You’ve seen every classmate in your sections. Add another class, or check back as more people join."
+        />
+        <View style={{ padding: space.lg }}>
+          <Button title="Add a class" variant="outline" onPress={() => router.push('/courses')} />
+        </View>
+      </View>
     );
   }
 
@@ -192,19 +197,19 @@ export default function Swipe() {
 }
 
 function CardFace({ card }: { card: DeckCard }) {
+  // Course name + code, not just the code (team decision); first shared
+  // class on the badge, the rest summarized — all listed on the profile.
+  const first = card.shared[0];
+  const label = first
+    ? `${first.title} · ${first.code} §${first.section}`
+    : 'Shared class';
   return (
     <View style={styles.face}>
       <View style={styles.faceTop}>
         <Avatar uri={card.photo_url} name={card.full_name} size={132} />
       </View>
       <View style={styles.faceBody}>
-        <Badge
-          text={
-            card.shared_count > 1
-              ? `${card.shared_code} + ${card.shared_count - 1} more`
-              : card.shared_code
-          }
-        />
+        <Badge text={card.shared_count > 1 ? `${label} +${card.shared_count - 1}` : label} />
         <Text style={type.title}>{card.full_name}</Text>
         <Text style={type.body}>
           {[card.major, card.hometown].filter(Boolean).join(' · ') || 'Columbia student'}

@@ -42,7 +42,14 @@ export default function ChatThread() {
       const { data, error } = await supabase.rpc('get_conversation_info', { p_id: id });
       if (error) throw error;
       return data?.[0] as
-        | { id: string; kind: 'section' | 'dm'; title: string; subtitle: string | null; member: boolean }
+        | {
+            id: string;
+            kind: 'section' | 'dm';
+            title: string;
+            subtitle: string | null;
+            member: boolean;
+            can_post: boolean;
+          }
         | undefined;
     },
   });
@@ -110,6 +117,7 @@ export default function ChatThread() {
   };
 
   const isSection = info.data?.kind === 'section';
+  const readOnly = info.data ? !info.data.can_post : false;
   const showIcebreakers =
     info.data?.kind === 'dm' && (messages.data?.length ?? 0) === 0 && !messages.isLoading;
 
@@ -126,7 +134,7 @@ export default function ChatThread() {
         options={{
           title: info.data?.title ?? 'Chat',
           headerRight: () =>
-            isSection ? (
+            isSection && !readOnly ? (
               <View style={{ flexDirection: 'row', gap: 18 }}>
                 <Pressable onPress={() => setMembersOpen(true)} hitSlop={8}>
                   <Ionicons name="people-outline" size={24} color={colors.primary} />
@@ -168,22 +176,29 @@ export default function ChatThread() {
         )}
       />
 
-      <View style={styles.composer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Message…"
-          placeholderTextColor={colors.subtle}
-          value={draft}
-          onChangeText={setDraft}
-          multiline
-        />
-        <Pressable
-          onPress={() => draft.trim() && send.mutate(draft.trim())}
-          disabled={!draft.trim() || send.isPending}
-          style={[styles.sendBtn, { opacity: draft.trim() ? 1 : 0.4 }]}>
-          <Ionicons name="arrow-up" size={22} color={colors.white} />
-        </Pressable>
-      </View>
+      {readOnly ? (
+        <View style={styles.readOnlyBar}>
+          <Ionicons name="archive-outline" size={16} color={colors.subtle} />
+          <Text style={type.sub}>Archived — read-only</Text>
+        </View>
+      ) : (
+        <View style={styles.composer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Message…"
+            placeholderTextColor={colors.subtle}
+            value={draft}
+            onChangeText={setDraft}
+            multiline
+          />
+          <Pressable
+            onPress={() => draft.trim() && send.mutate(draft.trim())}
+            disabled={!draft.trim() || send.isPending}
+            style={[styles.sendBtn, { opacity: draft.trim() ? 1 : 0.4 }]}>
+            <Ionicons name="arrow-up" size={22} color={colors.white} />
+          </Pressable>
+        </View>
+      )}
 
       <MembersModal open={membersOpen} onClose={() => setMembersOpen(false)} conversationId={id!} />
     </KeyboardAvoidingView>
@@ -325,6 +340,16 @@ const styles = StyleSheet.create({
     padding: space.md,
     borderTopWidth: 1,
     borderTopColor: colors.border,
+  },
+  readOnlyBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: space.sm,
+    padding: space.md,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
