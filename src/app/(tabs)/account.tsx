@@ -32,8 +32,14 @@ export default function Account() {
       label: 'Sign out',
       danger: true,
       onPress: async () => {
-        await supabase.auth.signOut();
-        router.replace('/');
+        // scope:'local' clears this device's session without needing the
+        // server round-trip to succeed; never let a rejection strand the user.
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch {
+          // session is gone locally either way
+        }
+        router.replace('/(auth)/sign-in');
       },
     },
   ];

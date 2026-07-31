@@ -11,12 +11,22 @@ import { Button, Field } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { colors, space, type } from '../../lib/theme';
 
+type Stage = 'choice' | 'email' | 'code';
+type Mode = 'create' | 'signin';
+
 export default function SignIn() {
+  const [stage, setStage] = useState<Stage>('choice');
+  const [mode, setMode] = useState<Mode>('create');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [stage, setStage] = useState<'email' | 'code'>('email');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const pick = (m: Mode) => {
+    setMode(m);
+    setError(null);
+    setStage('email');
+  };
 
   const sendCode = async () => {
     const clean = email.trim().toLowerCase();
@@ -28,11 +38,19 @@ export default function SignIn() {
     setError(null);
     const { error: err } = await supabase.auth.signInWithOtp({
       email: clean,
-      options: { shouldCreateUser: true },
+      // "Sign in" never creates an account; "Create account" does (D1).
+      options: { shouldCreateUser: mode === 'create' },
     });
     setBusy(false);
-    if (err) setError(err.message);
-    else setStage('code');
+    if (err) {
+      setError(
+        /signup|not allowed|not found/i.test(err.message)
+          ? 'No account with that email yet — go back and create one.'
+          : err.message,
+      );
+    } else {
+      setStage('code');
+    }
   };
 
   const verify = async () => {
@@ -56,10 +74,20 @@ export default function SignIn() {
         <Text style={styles.logo}>Seatmates</Text>
         <Text style={type.sub}>Make friends with the people already in the room.</Text>
 
-        {stage === 'email' ? (
+        {stage === 'choice' && (
+          <>
+            <Button title="Create account" onPress={() => pick('create')} />
+            <Button title="Sign in" variant="outline" onPress={() => pick('signin')} />
+            <Text style={[type.tiny, { textAlign: 'center' }]}>
+              Columbia students only — you’ll verify with your @columbia.edu email.
+            </Text>
+          </>
+        )}
+
+        {stage === 'email' && (
           <>
             <Field
-              label="Columbia email"
+              label={mode === 'create' ? 'Your Columbia email' : 'Columbia email'}
               placeholder="you@columbia.edu"
               autoCapitalize="none"
               autoComplete="email"
@@ -67,10 +95,18 @@ export default function SignIn() {
               value={email}
               onChangeText={setEmail}
               onSubmitEditing={sendCode}
+              autoFocus
             />
-            <Button title="Send code" onPress={sendCode} loading={busy} />
+            <Button
+              title={mode === 'create' ? 'Create account' : 'Send code'}
+              onPress={sendCode}
+              loading={busy}
+            />
+            <Button title="Back" variant="ghost" onPress={() => setStage('choice')} />
           </>
-        ) : (
+        )}
+
+        {stage === 'code' && (
           <>
             <Field
               label={`Enter the 6-digit code sent to ${email.trim()}`}
@@ -80,6 +116,7 @@ export default function SignIn() {
               value={code}
               onChangeText={setCode}
               onSubmitEditing={verify}
+              autoFocus
             />
             <Button title="Verify" onPress={verify} loading={busy} disabled={code.length < 6} />
             <Button title="Different email" variant="ghost" onPress={() => setStage('email')} />

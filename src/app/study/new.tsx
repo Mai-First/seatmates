@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import DateField from '../../components/DateField';
 import { Button, Field } from '../../components/ui';
 import { useMyCourses } from '../../features/schedule/CourseManager';
 import { useAuth } from '../../lib/auth';
@@ -18,7 +19,7 @@ export default function NewStudySession() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [location, setLocation] = useState('');
-  const [when, setWhen] = useState('');
+  const [when, setWhen] = useState<Date | null>(null);
 
   // Sessions scope to the course, not the section (PLAN A2) — dedupe.
   const courses = useMemo(() => {
@@ -31,8 +32,8 @@ export default function NewStudySession() {
 
   const create = useMutation({
     mutationFn: async () => {
-      const starts = new Date(when.trim().replace(' ', 'T'));
-      if (Number.isNaN(+starts)) throw new Error('Date format: 2026-08-05 19:00');
+      const starts = when;
+      if (!starts) throw new Error('Pick a date and time.');
       const { data, error } = await supabase
         .from('study_sessions')
         .insert({
@@ -88,19 +89,13 @@ export default function NewStudySession() {
         style={{ minHeight: 70, textAlignVertical: 'top' }}
       />
       <Field label="Location" placeholder="Butler 403" value={location} onChangeText={setLocation} />
-      <Field
-        label="When (YYYY-MM-DD HH:MM)"
-        placeholder="2026-08-05 19:00"
-        autoCapitalize="none"
-        value={when}
-        onChangeText={setWhen}
-      />
+      <DateField label="When" value={when} onChange={setWhen} />
 
       <Button
         title="Post it"
         onPress={() => create.mutate()}
         loading={create.isPending}
-        disabled={!courseId || !title.trim() || !when.trim()}
+        disabled={!courseId || !title.trim() || !when}
       />
       <Text style={type.tiny}>
         Everyone enrolled in the course — any section — can see this and RSVP.
