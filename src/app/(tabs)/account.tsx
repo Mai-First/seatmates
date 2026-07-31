@@ -3,13 +3,14 @@ import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Loading } from '../../components/ui';
-import { useMyProfile } from '../../lib/auth';
+import { useAuth, useMyProfile } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { colors, radius, space, type } from '../../lib/theme';
 
 export default function Account() {
   const profile = useMyProfile();
+  const { session } = useAuth();
   const queryClient = useQueryClient();
 
   const archiveSemester = async () => {
@@ -59,6 +60,43 @@ export default function Account() {
       icon: 'key-outline' as const,
       label: 'Change password',
       onPress: () => router.push('/change-password'),
+    },
+    {
+      icon: 'trash-outline' as const,
+      label: 'Delete account',
+      danger: true,
+      onPress: async () => {
+        const ok = await confirm(
+          'Delete your account?',
+          'This permanently removes your profile, matches, messages, RSVPs, and study sessions. It cannot be undone.',
+          'Delete forever',
+          true,
+        );
+        if (!ok) return;
+        const really = await confirm(
+          'Last check',
+          'There is no recovery after this. Delete the account?',
+          'Yes, delete it',
+          true,
+        );
+        if (!really) return;
+        // Storage blocks SQL deletes, so the avatar goes first via the API.
+        await supabase.storage
+          .from('avatars')
+          .remove([`${session!.user.id}/avatar.jpg`])
+          .catch(() => {});
+        const { error } = await supabase.rpc('delete_my_account');
+        if (error) {
+          notify('Could not delete', error.message);
+          return;
+        }
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch {
+          // account is already gone; local session cleanup is best-effort
+        }
+        router.replace('/(auth)/sign-in');
+      },
     },
     {
       icon: 'log-out-outline' as const,

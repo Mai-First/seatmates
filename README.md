@@ -130,6 +130,10 @@ device.
 7. **Account tab.** Edit profile; **My classes** → drop W3157 (chat membership
    ends, deck empties of its people, DMs survive) → re-add it.
 8. **Block/report:** any profile → Block. They vanish from your deck; DMs stop.
+9. **Delete account** (Account tab, double confirm): removes the profile,
+   matches, messages, and hosted sessions, frees the email for re-signup, and
+   kills the other side's DM thread. Required by App Store guideline 5.1.1(v),
+   verified by the e2e suite.
 
 ### Realtime across two accounts
 
