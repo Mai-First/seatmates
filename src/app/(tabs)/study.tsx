@@ -50,6 +50,25 @@ export default function Study() {
     onError: (e) => notify('RSVP failed', e.message),
   });
 
+  const remove = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('study_sessions').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['study-feed'] }),
+    onError: (e) => notify('Could not delete', e.message),
+  });
+
+  const confirmDelete = async (s: StudySession) => {
+    const ok = await confirm(
+      `Delete "${s.title}"?`,
+      'Everyone who RSVP’d gets told it was cancelled.',
+      'Delete',
+      true,
+    );
+    if (ok) remove.mutate(s.id);
+  };
+
   if (feed.isLoading) return <Loading />;
 
   // Upcoming first (soonest on top), past below under their own header.
@@ -81,9 +100,22 @@ export default function Study() {
           }
           const when = new Date(item.starts_at);
           const past = +when < Date.now();
+          const mine = item.host_id === session?.user.id;
           return (
             <View style={[styles.card, past && { opacity: 0.5 }]}>
-              <Badge text={item.course_code} />
+              <View style={styles.cardTop}>
+                <Badge text={item.course_code} />
+                {mine && (
+                  <View style={{ flexDirection: 'row', gap: space.md }}>
+                    <Pressable onPress={() => router.push(`/study/new?edit=${item.id}`)} hitSlop={8}>
+                      <Ionicons name="create-outline" size={20} color={colors.primary} />
+                    </Pressable>
+                    <Pressable onPress={() => confirmDelete(item)} hitSlop={8}>
+                      <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                    </Pressable>
+                  </View>
+                )}
+              </View>
               <Text style={type.h2}>{item.title}</Text>
               <Text style={type.sub}>
                 {when.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
@@ -136,6 +168,11 @@ const styles = StyleSheet.create({
     borderRadius: radius.lg,
     padding: space.md,
     gap: space.sm,
+  },
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   cardFooter: {
     flexDirection: 'row',

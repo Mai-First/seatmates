@@ -1,13 +1,15 @@
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Empty, Loading } from '../components/ui';
+import { notify } from '../lib/dialogs';
 import { supabase } from '../lib/supabase';
 import { colors, space, type } from '../lib/theme';
 import type { ArchivedConversation } from '../lib/types';
 
 /** Past semesters' class chats — readable forever, read-only (not deleted). */
 export default function ArchivedChats() {
+  const queryClient = useQueryClient();
   const archived = useQuery({
     queryKey: ['archived-conversations'],
     queryFn: async (): Promise<ArchivedConversation[]> => {
@@ -15,6 +17,17 @@ export default function ArchivedChats() {
       if (error) throw error;
       return data;
     },
+  });
+
+  const restore = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const { error } = await supabase.rpc('unarchive_section_chat', {
+        p_conversation: conversationId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries(),
+    onError: (e) => notify('Could not restore', e.message),
   });
 
   if (archived.isLoading) return <Loading />;
@@ -43,8 +56,11 @@ export default function ArchivedChats() {
           <View style={{ flex: 1, gap: 2 }}>
             <Text style={type.body}>{item.title}</Text>
             {item.subtitle ? <Text style={type.sub}>{item.subtitle}</Text> : null}
+            <Text style={type.tiny}>read-only</Text>
           </View>
-          <Text style={type.tiny}>read-only</Text>
+          <Pressable onPress={() => restore.mutate(item.id)} disabled={restore.isPending} hitSlop={8}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Restore</Text>
+          </Pressable>
         </Pressable>
       )}
     />

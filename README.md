@@ -90,11 +90,13 @@ in at bundle time, so restart `expo start` after editing it.
 
 ### Sign-in (local backend)
 
-Sign up with **any** address ending in `@columbia.edu` — it doesn't need to
-exist. The local stack traps all outgoing email in a fake inbox at
-**http://127.0.0.1:54324** — open it, find the message, type the 6-digit code
-into the app. (Non-Columbia addresses are rejected twice: in the UI and by a
-database trigger.)
+**Create account** with any address ending in `@columbia.edu` — it doesn't need
+to exist. The emailed 6-digit code verifies the address (grab it from the fake
+inbox at **http://127.0.0.1:54324**), then you set a password. From then on you
+**sign in with email + password**; the "email me a code" link on the sign-in
+screen covers forgotten passwords. Creating an account with an already-used
+email redirects you to sign-in. (Non-Columbia addresses are rejected twice: in
+the UI and by a database trigger.)
 
 ### The seeded world
 
@@ -165,10 +167,26 @@ python3 scripts/catalog_to_sql.py data/courses_20263.json data/sections_20263.js
 npm run db:reset
 ```
 
+## Operating the app (team runbook)
+
+- **Announcements:** `select app_announce('text');` as postgres (SQL editor /
+  psql) — lands in every user's inbox. Use it for the end-of-semester
+  "archive your classes" nudge.
+- **Reports:** mark your team's accounts once —
+  `update profiles set is_admin = true where email in ('you@columbia.edu');`
+  — and every filed report arrives in your inbox; tapping the avatar opens the
+  reported profile. Removing a user is manual SQL for now.
+- **Term rollover:** scrape the new term, load it, then
+  `update app_settings set value = '20271' where key = 'current_term';`
+  Search only ever shows the current term.
+- **Push notifications:** the plumbing is live (tokens on profiles, a DB
+  trigger POSTs every notification to Expo's push API). It activates the day
+  you make an **EAS dev build** with a projectId — in Expo Go and on web,
+  registration is a silent no-op and the in-app inbox covers everything.
+
 ## What's deliberately not here (yet)
 
-Push notifications (in-app inbox badge covers the demo; needs an EAS dev
-build), LLM icebreakers (static list ships; swap in an Edge Function), profile
-prompt questions, meeting times (the Directory stopped publishing them —
-sections are identified by number + instructor + call number, see PLAN A1),
-announcements UI (insert via `select app_announce('…')` as postgres).
+LLM icebreakers (static list ships; swap in an Edge Function), profile prompt
+questions, meeting times (the Directory stopped publishing them — sections are
+identified by number + instructor + call number, see PLAN A1), in-app
+moderation tooling beyond report routing.

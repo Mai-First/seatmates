@@ -1,7 +1,9 @@
 import { Redirect } from 'expo-router';
+import { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Loading } from '../components/ui';
 import { useAuth, useMyEnrollmentCount, useMyProfile } from '../lib/auth';
+import { registerPush } from '../lib/push';
 import { hasSupabaseConfig } from '../lib/supabase';
 import { colors, space, type } from '../lib/theme';
 
@@ -10,6 +12,10 @@ export default function Index() {
   const { session, loading } = useAuth();
   const profile = useMyProfile();
   const enrollments = useMyEnrollmentCount();
+
+  useEffect(() => {
+    if (session) registerPush(session.user.id);
+  }, [session]);
 
   if (!hasSupabaseConfig) {
     return (

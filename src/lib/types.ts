@@ -94,7 +94,14 @@ export type ArchivedConversation = {
 
 export type InboxItem = {
   id: string;
-  kind: 'friend_request' | 'request_accepted' | 'new_match' | 'announcement' | 'study_rsvp';
+  kind:
+    | 'friend_request'
+    | 'request_accepted'
+    | 'new_match'
+    | 'announcement'
+    | 'study_rsvp'
+    | 'study_update'
+    | 'report';
   body: string;
   created_at: string;
   read_at: string | null;

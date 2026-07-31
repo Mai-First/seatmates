@@ -56,6 +56,11 @@ export default function Account() {
       onPress: archiveSemester,
     },
     {
+      icon: 'key-outline' as const,
+      label: 'Change password',
+      onPress: () => router.push('/change-password'),
+    },
+    {
       icon: 'log-out-outline' as const,
       label: 'Sign out',
       danger: true,

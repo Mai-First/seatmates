@@ -11,6 +11,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
+import Celebration from '../../components/Celebration';
 import { Avatar, Badge, Button, Empty, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { colors, radius, space, type } from '../../lib/theme';
@@ -175,22 +176,11 @@ export default function Swipe() {
       </View>
 
       {match && (
-        <View style={styles.matchOverlay}>
-          <Text style={{ fontSize: 52 }}>🎉</Text>
-          <Text style={type.title}>You’re connected!</Text>
-          <Text style={[type.body, { textAlign: 'center' }]}>
-            You and {match.name} both swiped right.
-          </Text>
-          <Button
-            title="Say hi"
-            onPress={() => {
-              const id = match.conversationId;
-              setMatch(null);
-              if (id) router.push(`/chat/${id}`);
-            }}
-          />
-          <Button title="Keep swiping" variant="ghost" onPress={() => setMatch(null)} />
-        </View>
+        <Celebration
+          name={match.name}
+          conversationId={match.conversationId}
+          onClose={() => setMatch(null)}
+        />
       )}
     </View>
   );
@@ -285,16 +275,4 @@ const styles = StyleSheet.create({
   },
   fabNope: { borderWidth: 1, borderColor: colors.border },
   fabLike: { borderWidth: 1, borderColor: colors.border },
-  matchOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(255,255,255,0.97)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.md,
-    padding: space.xl,
-  },
 });

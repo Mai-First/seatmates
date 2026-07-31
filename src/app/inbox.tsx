@@ -1,15 +1,19 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import Celebration from '../components/Celebration';
 import { Avatar, Button, Empty, Loading } from '../components/ui';
-import { confirm, notify } from '../lib/dialogs';
+import { notify } from '../lib/dialogs';
 import { supabase } from '../lib/supabase';
 import { colors, space, type } from '../lib/theme';
 import type { InboxItem } from '../lib/types';
 
 export default function Inbox() {
   const queryClient = useQueryClient();
+  const [celebrate, setCelebrate] = useState<{ name: string; conversationId: string | null } | null>(
+    null,
+  );
 
   const inbox = useQuery({
     queryKey: ['inbox'],
@@ -28,7 +32,7 @@ export default function Inbox() {
   }, [queryClient]);
 
   const respond = useMutation({
-    mutationFn: async (args: { requestId: string; accept: boolean }) => {
+    mutationFn: async (args: { requestId: string; accept: boolean; actorName?: string | null }) => {
       const { data, error } = await supabase.rpc('respond_friend_request', {
         p_request: args.requestId,
         p_accept: args.accept,
@@ -41,9 +45,8 @@ export default function Inbox() {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
       queryClient.invalidateQueries({ queryKey: ['deck'] });
       if (args.accept && conversationId) {
-        confirm('Connected!', 'Say hi — there are icebreakers waiting.', 'Open chat').then(
-          (go) => go && router.push(`/chat/${conversationId}`),
-        );
+        // Same 🎉 as a swipe match — it's the same event (team decision).
+        setCelebrate({ name: args.actorName ?? 'your classmate', conversationId });
       }
     },
     onError: (e) => notify('Something broke', e.message),
@@ -52,17 +55,29 @@ export default function Inbox() {
   if (inbox.isLoading) return <Loading />;
 
   const items = inbox.data ?? [];
+  const overlay = celebrate ? (
+    <Celebration
+      name={celebrate.name}
+      conversationId={celebrate.conversationId}
+      onClose={() => setCelebrate(null)}
+    />
+  ) : null;
+
   if (items.length === 0) {
     return (
-      <Empty
-        icon="🔔"
-        title="Nothing yet"
-        body="Friend requests, matches, and announcements land here."
-      />
+      <>
+        <Empty
+          icon="🔔"
+          title="Nothing yet"
+          body="Friend requests, matches, and announcements land here."
+        />
+        {overlay}
+      </>
     );
   }
 
   return (
+    <>
     <FlatList
       style={{ backgroundColor: colors.bg }}
       data={items}
@@ -92,7 +107,13 @@ export default function Inbox() {
                 <Button
                   small
                   title="Accept"
-                  onPress={() => respond.mutate({ requestId: item.entity_id!, accept: true })}
+                  onPress={() =>
+                    respond.mutate({
+                      requestId: item.entity_id!,
+                      accept: true,
+                      actorName: item.actor_name,
+                    })
+                  }
                 />
                 <Button
                   small
@@ -119,6 +140,8 @@ export default function Inbox() {
         </View>
       )}
     />
+    {overlay}
+    </>
   );
 }
 
