@@ -65,16 +65,9 @@ where p.id = d.id;
 -- conversations -- the same code path a real signup uses.
 -- ---------------------------------------------------------------------------
 
-create or replace function pg_temp.enroll(p_profile uuid, p_code text, p_section text)
-returns void language sql as $$
-  insert into public.enrollments (profile_id, section_id)
-  select p_profile, s.id
-  from public.sections s join public.courses c on c.id = s.course_id
-  where c.code = p_code and s.section = p_section
-  on conflict do nothing;
-$$;
-
-select pg_temp.enroll(id, code, sec) from (values
+insert into public.enrollments (profile_id, section_id)
+select t.id, s.id
+from (values
   ('d0000000-0000-0000-0000-000000000001'::uuid, 'COMS W3157', '001'),
   ('d0000000-0000-0000-0000-000000000001'::uuid, 'COMS W3134', '001'),
   ('d0000000-0000-0000-0000-000000000001'::uuid, 'MATH UN1101', '001'),
@@ -95,24 +88,18 @@ select pg_temp.enroll(id, code, sec) from (values
   ('d0000000-0000-0000-0000-000000000008'::uuid, 'BIOL UN2005', '001'),
   ('d0000000-0000-0000-0000-000000000008'::uuid, 'MATH UN1101', '001'),
   ('d0000000-0000-0000-0000-000000000008'::uuid, 'COMS W3157', '001')
-) as t (id, code, sec);
+) as t (id, code, sec)
+join public.courses c on c.code = t.code
+join public.sections s on s.course_id = c.id and s.section = t.sec
+on conflict do nothing;
 
 -- ---------------------------------------------------------------------------
 -- A little life in the two busiest chats.
 -- ---------------------------------------------------------------------------
 
-create or replace function pg_temp.say(p_profile uuid, p_code text, p_section text,
-                                       p_body text, p_mins_ago int)
-returns void language sql as $$
-  insert into public.messages (conversation_id, sender_id, body, created_at)
-  select cv.id, p_profile, p_body, now() - (p_mins_ago || ' minutes')::interval
-  from public.conversations cv
-  join public.sections s on s.id = cv.section_id
-  join public.courses c on c.id = s.course_id
-  where c.code = p_code and s.section = p_section;
-$$;
-
-select pg_temp.say(id, 'COMS W3157', '001', body, mins) from (values
+insert into public.messages (conversation_id, sender_id, body, created_at)
+select cv.id, t.id, t.body, now() - (t.mins || ' minutes')::interval
+from (values
   ('d0000000-0000-0000-0000-000000000001'::uuid,
    'has anyone started the makefile lab or are we all in denial', 340),
   ('d0000000-0000-0000-0000-000000000002'::uuid,
@@ -125,16 +112,30 @@ select pg_temp.say(id, 'COMS W3157', '001', body, mins) from (values
    'a moment of silence for the segfault', 240),
   ('d0000000-0000-0000-0000-000000000001'::uuid,
    'starting a study session for the midterm, check the study tab', 55)
-) as t (id, body, mins);
+) as t (id, body, mins)
+cross join lateral (
+  select cv.id from public.conversations cv
+  join public.sections s on s.id = cv.section_id
+  join public.courses c on c.id = s.course_id
+  where c.code = 'COMS W3157' and s.section = '001'
+) cv;
 
-select pg_temp.say(id, 'MATH UN1101', '001', body, mins) from (values
+insert into public.messages (conversation_id, sender_id, body, created_at)
+select cv.id, t.id, t.body, now() - (t.mins || ' minutes')::interval
+from (values
   ('d0000000-0000-0000-0000-000000000005'::uuid,
    'ps4 q3 is evil and I need to talk about it', 400),
   ('d0000000-0000-0000-0000-000000000004'::uuid,
    'the trick is integration by parts twice. you''re welcome. I lost an evening to it.', 390),
   ('d0000000-0000-0000-0000-000000000008'::uuid,
    'castronovo dropped a practice midterm on courseworks btw', 120)
-) as t (id, body, mins);
+) as t (id, body, mins)
+cross join lateral (
+  select cv.id from public.conversations cv
+  join public.sections s on s.id = cv.section_id
+  join public.courses c on c.id = s.course_id
+  where c.code = 'MATH UN1101' and s.section = '001'
+) cv;
 
 -- ---------------------------------------------------------------------------
 -- Study sessions + RSVPs (D11/D12: Partiful-style, visible to course-mates).

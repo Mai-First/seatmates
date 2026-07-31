@@ -412,3 +412,12 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# App sends 6-digit codes, not magic links; templates must include {{ .Token }}.
+[auth.email.template.magic_link]
+subject = "Your Seatmates sign-in code"
+content_path = "./supabase/templates/otp.html"
+
+[auth.email.template.confirmation]
+subject = "Your Seatmates sign-in code"
+content_path = "./supabase/templates/otp.html"
