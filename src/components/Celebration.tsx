@@ -2,7 +2,7 @@
 // inbox (accepted friend request). Same event, same feeling.
 import { router } from 'expo-router';
 import { Modal, StyleSheet, Text, View } from 'react-native';
-import { colors, space, type } from '../lib/theme';
+import { space, useTheme } from '../lib/theme';
 import { Button } from './ui';
 
 export default function Celebration({
@@ -14,12 +14,14 @@ export default function Celebration({
   conversationId: string | null;
   onClose: () => void;
 }) {
+  const { colors, type } = useTheme();
   return (
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      <View style={styles.overlay}>
+      <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
         <Text style={{ fontSize: 52 }}>🎉</Text>
         <Text style={type.title}>You’re connected!</Text>
-        <Text style={[type.body, { textAlign: 'center' }]}>
+        {/* the serif accent's second home, per the type scale */}
+        <Text style={[type.accent, { color: colors.primary, textAlign: 'center' }]}>
           You and {name} are now friends.
         </Text>
         <View style={{ gap: space.sm, alignSelf: 'stretch' }}>
@@ -40,7 +42,6 @@ export default function Celebration({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(255,255,255,0.97)',
     alignItems: 'center',
     justifyContent: 'center',
     gap: space.md,

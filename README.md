@@ -12,6 +12,11 @@ on the front; Supabase (Postgres, Auth, Realtime, Storage, RLS) on the back.
 Course catalog scraped from the
 [CU Directory of Classes](https://doc.sis.columbia.edu).
 
+**Design:** the visual system (warm palette, Instrument Sans + Instrument Serif,
+light/dark) comes from the *Seatmates app redesign brief* Claude Design project.
+All of it lives in `src/lib/theme.ts` — every screen reads `useTheme()`, so
+changing a token there re-skins the whole app.
+
 ---
 
 ## Run it
@@ -161,6 +166,7 @@ supabase/seed.sql       demo students, messages, study sessions, demo greeter
 src/app/                expo-router screens (tabs = directories, PLAN §7)
 src/features/           shared feature components (course search/manage)
 src/lib/                supabase client, auth context, theme, row types
+src/lib/theme.ts        design tokens + ThemeProvider/useTheme (light + dark)
 ```
 
 To widen the catalog beyond the seeded 9 subjects:

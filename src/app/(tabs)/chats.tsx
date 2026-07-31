@@ -4,10 +4,11 @@ import { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Empty, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { colors, space, type } from '../../lib/theme';
+import { fontFamily, space, useTheme } from '../../lib/theme';
 import type { ConversationSummary } from '../../lib/types';
 
 export default function Chats() {
+  const { colors, type } = useTheme();
   const queryClient = useQueryClient();
   const conversations = useQuery({
     queryKey: ['conversations'],
@@ -22,6 +23,12 @@ export default function Chats() {
     useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     }, [queryClient]),
+  );
+
+  const archivedLink = (
+    <Pressable onPress={() => router.push('/chats-archived')} style={styles.archivedLink}>
+      <Text style={type.sub}>Archived chats →</Text>
+    </Pressable>
   );
 
   if (conversations.isLoading) return <Loading />;
@@ -42,9 +49,7 @@ export default function Chats() {
           title="No chats yet"
           body="Add classes to join their group chats, or match with a classmate to start a DM."
         />
-        <Pressable onPress={() => router.push('/chats-archived')} style={styles.archivedLink}>
-          <Text style={{ color: colors.subtle }}>Archived chats →</Text>
-        </Pressable>
+        {archivedLink}
       </View>
     );
   }
@@ -56,11 +61,7 @@ export default function Chats() {
       style={{ backgroundColor: colors.bg }}
       data={rows}
       keyExtractor={(c) => c.id}
-      ListFooterComponent={
-        <Pressable onPress={() => router.push('/chats-archived')} style={styles.archivedLink}>
-          <Text style={{ color: colors.subtle }}>Archived chats →</Text>
-        </Pressable>
-      }
+      ListFooterComponent={archivedLink}
       renderItem={({ item, index }) => (
         <>
           {index === 0 && item.kind === 'section' && <SectionHeader label="Class group chats" />}
@@ -69,19 +70,26 @@ export default function Chats() {
             {item.kind === 'dm' ? (
               <Avatar uri={item.photo_url} name={item.title} size={48} />
             ) : (
-              <View style={styles.sectionIcon}>
+              <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
                 <Text style={{ fontSize: 20 }}>🏫</Text>
               </View>
             )}
             <View style={{ flex: 1, gap: 2 }}>
-              <Text style={[type.body, item.unread && styles.unreadText]} numberOfLines={1}>
+              <Text
+                style={[type.body, item.unread && { fontFamily: fontFamily.bold }]}
+                numberOfLines={1}>
                 {item.title}
               </Text>
-              <Text style={[type.sub, item.unread && styles.unreadText]} numberOfLines={1}>
+              <Text
+                style={[
+                  type.sub,
+                  item.unread && { color: colors.text, fontFamily: fontFamily.medium },
+                ]}
+                numberOfLines={1}>
                 {item.last_body ?? item.subtitle ?? 'Say something first'}
               </Text>
             </View>
-            {item.unread && <View style={styles.unreadDot} />}
+            {item.unread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
           </Pressable>
         </>
       )}
@@ -90,15 +98,12 @@ export default function Chats() {
 }
 
 function SectionHeader({ label }: { label: string }) {
-  return <Text style={styles.header}>{label}</Text>;
+  const { type } = useTheme();
+  return <Text style={[type.tiny, styles.header]}>{label}</Text>;
 }
 
 const styles = StyleSheet.create({
   header: {
-    ...type.tiny,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
     paddingHorizontal: space.lg,
     paddingTop: space.md,
     paddingBottom: space.xs,
@@ -114,16 +119,9 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.accentSoft,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  unreadText: { fontWeight: '700', color: colors.text },
-  unreadDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: colors.primary,
-  },
+  unreadDot: { width: 10, height: 10, borderRadius: 5 },
   archivedLink: { padding: space.lg, alignItems: 'center' },
 });

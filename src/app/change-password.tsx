@@ -4,11 +4,12 @@ import { ScrollView, StyleSheet, Text } from 'react-native';
 import { Button, Field } from '../components/ui';
 import { notify } from '../lib/dialogs';
 import { supabase } from '../lib/supabase';
-import { colors, space, type } from '../lib/theme';
+import { space, useTheme } from '../lib/theme';
 
 /** Set or change the account password (also the escape hatch for accounts
  *  that signed in with an email code and never had one). */
 export default function ChangePassword() {
+  const { colors, type } = useTheme();
   const [password, setPassword] = useState('');
   const [password2, setPassword2] = useState('');
   const [busy, setBusy] = useState(false);

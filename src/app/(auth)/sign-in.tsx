@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { Button, Field } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
-import { colors, space, type } from '../../lib/theme';
+import { fontFamily, space, useTheme } from '../../lib/theme';
 
 // Flow (team decision): the emailed code is for account VERIFICATION only.
 // create:  email -> code -> set a password -> in.
@@ -19,6 +19,7 @@ import { colors, space, type } from '../../lib/theme';
 type Stage = 'choice' | 'create-email' | 'code' | 'set-password' | 'signin' | 'signin-code';
 
 export default function SignIn() {
+  const { colors, type } = useTheme();
   const [stage, setStage] = useState<Stage>('choice');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
@@ -141,19 +142,22 @@ export default function SignIn() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.screen}
+      style={[styles.screen, { backgroundColor: colors.bg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <View style={styles.inner}>
-        <Text style={styles.logo}>seatmates</Text>
-        <Text style={type.sub}>Make friends with the people already in the room.</Text>
+        <Text style={[styles.logo, { color: colors.primary }]}>seatmates</Text>
+        {/* the serif accent as the app's voice on first contact */}
+        <Text style={[type.accent, { color: colors.subtle }]}>
+          Make friends with the people already in the room.
+        </Text>
 
-        {notice ? <Text style={styles.notice}>{notice}</Text> : null}
+        {notice ? <Text style={[type.sub, { color: colors.success }]}>{notice}</Text> : null}
 
         {stage === 'choice' && (
           <>
             <Button title="Create account" onPress={() => go('create-email')} />
             <Button title="Sign in" variant="outline" onPress={() => go('signin')} />
-            <Text style={[type.tiny, { textAlign: 'center' }]}>
+            <Text style={[type.fine, { textAlign: 'center' }]}>
               Columbia students only — you’ll verify with your @columbia.edu email.
             </Text>
           </>
@@ -242,7 +246,9 @@ export default function SignIn() {
             />
             <Button title="Sign in" onPress={signInWithPassword} loading={busy} />
             <Pressable onPress={sendSigninCode}>
-              <Text style={styles.link}>Forgot password / no password yet? Email me a code</Text>
+              <Text style={[type.sub, { color: colors.primary, textAlign: 'center' }]}>
+                Forgot password / no password yet? Email me a code
+              </Text>
             </Pressable>
             <Button title="Back" variant="ghost" onPress={() => go('choice')} />
           </>
@@ -273,17 +279,14 @@ export default function SignIn() {
           </>
         )}
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+        {error ? <Text style={[type.sub, { color: colors.danger }]}>{error}</Text> : null}
       </View>
     </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: colors.bg, justifyContent: 'center' },
+  screen: { flex: 1, justifyContent: 'center' },
   inner: { padding: space.xl, gap: space.md, maxWidth: 480, width: '100%', alignSelf: 'center' },
-  logo: { fontSize: 40, fontWeight: '800', color: colors.primary },
-  error: { color: colors.danger, fontSize: 14 },
-  notice: { color: colors.success, fontSize: 14 },
-  link: { color: colors.primary, textAlign: 'center', paddingVertical: 4 },
+  logo: { fontSize: 44, fontFamily: fontFamily.bold, letterSpacing: -1 },
 });

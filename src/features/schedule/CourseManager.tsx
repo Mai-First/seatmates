@@ -8,7 +8,7 @@ import { Badge, Field, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
-import { colors, radius, space, type } from '../../lib/theme';
+import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import type { CatalogResult, MyCourse } from '../../lib/types';
 
 export function useMyCourses() {
@@ -23,6 +23,7 @@ export function useMyCourses() {
 }
 
 export default function CourseManager({ showDrop }: { showDrop: boolean }) {
+  const { colors, type } = useTheme();
   const { session } = useAuth();
   const [q, setQ] = useState('');
   const queryClient = useQueryClient();
@@ -85,7 +86,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
   const results = q.trim().length >= 2 ? (search.data ?? []) : [];
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <Field
         placeholder="Course code, title, or SSOL call number"
         value={q}
@@ -112,7 +113,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
               <Pressable
                 disabled={item.enrolled_here || enroll.isPending}
                 onPress={() => enroll.mutate(item.section_id)}
-                style={styles.row}>
+                style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={type.body}>
                     {item.code} §{item.section}
@@ -131,7 +132,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
                 {item.enrolled_here ? (
                   <Badge text="Joined" />
                 ) : (
-                  <Text style={styles.join}>Join</Text>
+                  <Text style={[styles.join, { color: colors.primary }]}>Join</Text>
                 )}
               </Pressable>
             )}
@@ -153,7 +154,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
             </Text>
           }
           renderItem={({ item }) => (
-            <View style={styles.row}>
+            <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}>
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={type.body}>
                   {item.code} §{item.section}
@@ -177,7 +178,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, gap: space.md, padding: space.lg, backgroundColor: colors.bg },
+  root: { flex: 1, gap: space.md, padding: space.lg },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -185,9 +186,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: space.md,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
     marginBottom: space.sm,
   },
-  join: { color: colors.primary, fontWeight: '700' },
+  join: { fontFamily: fontFamily.bold },
 });

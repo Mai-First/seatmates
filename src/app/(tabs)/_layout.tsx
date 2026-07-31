@@ -3,10 +3,11 @@ import { useQuery } from '@tanstack/react-query';
 import { router, Tabs } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
-import { colors } from '../../lib/theme';
+import { fontFamily, useTheme } from '../../lib/theme';
 
 /** Top-right notification inbox (PLAN D17) — present on every tab. */
 function InboxButton() {
+  const { colors } = useTheme();
   const { data: unread } = useQuery({
     queryKey: ['unread-count'],
     refetchInterval: 15_000,
@@ -20,8 +21,10 @@ function InboxButton() {
     <Pressable onPress={() => router.push('/inbox')} style={styles.bell} hitSlop={8}>
       <Ionicons name="notifications-outline" size={24} color={colors.primary} />
       {!!unread && (
-        <View style={styles.dot}>
-          <Text style={styles.dotText}>{unread > 9 ? '9+' : unread}</Text>
+        <View style={[styles.dot, { backgroundColor: colors.warm }]}>
+          <Text style={[styles.dotText, { color: colors.onFill }]}>
+            {unread > 9 ? '9+' : unread}
+          </Text>
         </View>
       )}
     </Pressable>
@@ -29,19 +32,27 @@ function InboxButton() {
 }
 
 export default function TabsLayout() {
+  const { colors, type } = useTheme();
   return (
     <Tabs
       screenOptions={{
         headerRight: () => <InboxButton />,
+        headerStyle: { backgroundColor: colors.bg },
+        headerTitleStyle: { color: colors.text, fontFamily: type.h2.fontFamily, fontSize: 19 },
+        headerShadowVisible: false,
+        sceneStyle: { backgroundColor: colors.bg },
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: colors.subtle,
-        headerTitleStyle: { color: colors.text },
+        tabBarStyle: { backgroundColor: colors.card, borderTopColor: colors.border },
+        tabBarLabelStyle: { fontFamily: fontFamily.semibold, fontSize: 10 },
       }}>
       <Tabs.Screen
         name="index"
         options={{
           title: 'Swipe',
-          tabBarIcon: ({ color, size }) => <Ionicons name="albums-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="albums-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -57,7 +68,9 @@ export default function TabsLayout() {
         name="study"
         options={{
           title: 'Study Groups',
-          tabBarIcon: ({ color, size }) => <Ionicons name="book-outline" size={size} color={color} />,
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="book-outline" size={size} color={color} />
+          ),
         }}
       />
       <Tabs.Screen
@@ -79,7 +92,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: -4,
     right: -6,
-    backgroundColor: colors.danger,
     borderRadius: 9,
     minWidth: 18,
     height: 18,
@@ -87,5 +99,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 3,
   },
-  dotText: { color: colors.white, fontSize: 11, fontWeight: '700' },
+  dotText: { fontSize: 11, fontFamily: fontFamily.bold },
 });

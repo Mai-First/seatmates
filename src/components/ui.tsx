@@ -10,7 +10,7 @@ import {
   View,
   type TextInputProps,
 } from 'react-native';
-import { colors, radius, space, type } from '../lib/theme';
+import { fontFamily, radius, space, useTheme } from '../lib/theme';
 
 export function Button({
   title,
@@ -27,9 +27,10 @@ export function Button({
   loading?: boolean;
   small?: boolean;
 }) {
+  const { colors } = useTheme();
   const bg =
     variant === 'primary' ? colors.primary : variant === 'danger' ? colors.danger : 'transparent';
-  const fg = variant === 'primary' || variant === 'danger' ? colors.white : colors.primary;
+  const fg = variant === 'primary' || variant === 'danger' ? colors.onFill : colors.primary;
   return (
     <Pressable
       onPress={onPress}
@@ -51,12 +52,17 @@ export function Button({
 
 export function Field(props: TextInputProps & { label?: string }) {
   const { label, style, ...rest } = props;
+  const { colors, type, space: sp } = useTheme();
   return (
-    <View style={{ gap: space.xs }}>
+    <View style={{ gap: sp.xs }}>
       {label ? <Text style={type.sub}>{label}</Text> : null}
       <TextInput
         placeholderTextColor={colors.subtle}
-        style={[styles.field, style]}
+        style={[
+          styles.field,
+          { borderColor: colors.border, color: colors.text, backgroundColor: colors.card },
+          style,
+        ]}
         {...rest}
       />
     </View>
@@ -72,6 +78,7 @@ export function Avatar({
   name?: string | null;
   size?: number;
 }) {
+  const { colors } = useTheme();
   const [failed, setFailed] = useState(false);
   const initials = (name ?? '?')
     .split(/\s+/)
@@ -84,9 +91,10 @@ export function Avatar({
       <View
         style={[
           styles.avatarFallback,
-          { width: size, height: size, borderRadius: size / 2 },
+          { width: size, height: size, borderRadius: size / 2, backgroundColor: colors.accentSoft },
         ]}>
-        <Text style={{ color: colors.primary, fontWeight: '600', fontSize: size * 0.38 }}>
+        <Text
+          style={{ color: colors.primary, fontFamily: fontFamily.semibold, fontSize: size * 0.38 }}>
           {initials}
         </Text>
       </View>
@@ -102,6 +110,7 @@ export function Avatar({
 }
 
 export function Empty({ icon, title, body }: { icon?: string; title: string; body?: string }) {
+  const { type } = useTheme();
   return (
     <View style={styles.empty}>
       {icon ? <Text style={{ fontSize: 40 }}>{icon}</Text> : null}
@@ -112,21 +121,26 @@ export function Empty({ icon, title, body }: { icon?: string; title: string; bod
 }
 
 export function Loading() {
+  const { colors } = useTheme();
   return (
-    <View style={styles.empty}>
+    <View style={[styles.empty, { backgroundColor: colors.bg }]}>
       <ActivityIndicator size="large" color={colors.primary} />
     </View>
   );
 }
 
 export function Badge({ text }: { text: string }) {
+  const { colors } = useTheme();
   return (
-    <View style={styles.badge}>
-      <Text style={{ color: colors.primary, fontSize: 12, fontWeight: '600' }}>{text}</Text>
+    <View style={[styles.badge, { backgroundColor: colors.accentSoft }]}>
+      <Text style={{ color: colors.primary, fontSize: 12, fontFamily: fontFamily.semibold }}>
+        {text}
+      </Text>
     </View>
   );
 }
 
+// Structural-only styles — no color here, so they don't need the theme.
 const styles = StyleSheet.create({
   btn: {
     borderRadius: radius.md,
@@ -136,31 +150,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   btnSmall: { paddingVertical: 8, paddingHorizontal: space.md },
-  btnText: { fontSize: 16, fontWeight: '600' },
+  btnText: { fontSize: 16, fontFamily: fontFamily.semibold },
   field: {
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: space.md,
     paddingVertical: 12,
     fontSize: 16,
-    color: colors.text,
-    backgroundColor: colors.bg,
+    fontFamily: fontFamily.ui,
   },
-  avatarFallback: {
-    backgroundColor: colors.accentSoft,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  empty: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: space.sm,
-    padding: space.xl,
-  },
+  avatarFallback: { alignItems: 'center', justifyContent: 'center' },
+  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.sm, padding: space.xl },
   badge: {
-    backgroundColor: colors.accentSoft,
     borderRadius: radius.full,
     paddingHorizontal: 10,
     paddingVertical: 4,

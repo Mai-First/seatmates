@@ -6,9 +6,48 @@ import { Avatar, Loading } from '../../components/ui';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
-import { colors, radius, space, type } from '../../lib/theme';
+import { fontFamily, radius, space, useTheme, type Scheme } from '../../lib/theme';
+
+/** System / Light / Dark, per the redesign brief. Defaults to System. */
+function Appearance() {
+  const { colors, type, override, setOverride } = useTheme();
+  const options: { label: string; value: Scheme | null }[] = [
+    { label: 'System', value: null },
+    { label: 'Light', value: 'light' },
+    { label: 'Dark', value: 'dark' },
+  ];
+  return (
+    <View style={{ gap: space.sm }}>
+      <Text style={type.tiny}>Appearance</Text>
+      <View style={[styles.segment, { backgroundColor: colors.surface }]}>
+        {options.map((o) => {
+          const active = override === o.value;
+          return (
+            <Pressable
+              key={o.label}
+              onPress={() => setOverride(o.value)}
+              style={[
+                styles.segmentItem,
+                active && { backgroundColor: colors.card, borderColor: colors.border },
+              ]}>
+              <Text
+                style={{
+                  color: active ? colors.text : colors.subtle,
+                  fontFamily: active ? fontFamily.semibold : fontFamily.ui,
+                  fontSize: 14,
+                }}>
+                {o.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
 
 export default function Account() {
+  const { colors, type } = useTheme();
   const profile = useMyProfile();
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -32,6 +71,7 @@ export default function Account() {
       `${data} class${data === 1 ? '' : 'es'} moved to Archived. See you next term 🎓`,
     );
   };
+
   if (profile.isLoading) return <Loading />;
   const p = profile.data;
 
@@ -117,26 +157,32 @@ export default function Account() {
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
-      <View style={styles.card}>
+      <View style={[styles.card, { backgroundColor: colors.surface }]}>
         <Avatar uri={p?.photo_url} name={p?.full_name} size={72} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={type.h2}>{p?.full_name ?? 'Unnamed'}</Text>
           <Text style={type.sub}>{p?.email}</Text>
-          <Text style={type.sub}>
-            {[p?.major, p?.hometown].filter(Boolean).join(' · ')}
-          </Text>
+          <Text style={type.sub}>{[p?.major, p?.hometown].filter(Boolean).join(' · ')}</Text>
         </View>
       </View>
 
+      <Appearance />
+
+      <View style={{ height: space.sm }} />
+
       {rows.map((row) => (
-        <Pressable key={row.label} onPress={row.onPress} style={styles.row}>
-          <Ionicons
-            name={row.icon}
-            size={22}
-            color={row.danger ? colors.danger : colors.primary}
-          />
+        <Pressable
+          key={row.label}
+          onPress={row.onPress}
+          style={[styles.row, { borderBottomColor: colors.border }]}>
+          <Ionicons name={row.icon} size={22} color={row.danger ? colors.danger : colors.primary} />
           <Text style={[type.body, row.danger && { color: colors.danger }]}>{row.label}</Text>
-          <Ionicons name="chevron-forward" size={18} color={colors.subtle} style={{ marginLeft: 'auto' }} />
+          <Ionicons
+            name="chevron-forward"
+            size={18}
+            color={colors.subtle}
+            style={{ marginLeft: 'auto' }}
+          />
         </Pressable>
       ))}
     </ScrollView>
@@ -144,15 +190,23 @@ export default function Account() {
 }
 
 const styles = StyleSheet.create({
-  body: { padding: space.lg, gap: space.sm },
+  body: { padding: space.lg, gap: space.sm, paddingBottom: space.xl },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
-    backgroundColor: colors.surface,
     borderRadius: radius.lg,
     padding: space.md,
     marginBottom: space.md,
+  },
+  segment: { flexDirection: 'row', borderRadius: radius.md, padding: 3, gap: 3 },
+  segmentItem: {
+    flex: 1,
+    alignItems: 'center',
+    paddingVertical: 8,
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   row: {
     flexDirection: 'row',
@@ -161,6 +215,5 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: space.xs,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
 });

@@ -8,10 +8,11 @@ import { useMyCourses } from '../../features/schedule/CourseManager';
 import { useAuth } from '../../lib/auth';
 import { notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
-import { colors, radius, space, type } from '../../lib/theme';
+import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 
 /** Create OR edit a study session (?edit=<id>). Edits notify everyone going. */
 export default function StudySessionForm() {
+  const { colors, type } = useTheme();
   const { edit } = useLocalSearchParams<{ edit?: string }>();
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -104,8 +105,16 @@ export default function StudySessionForm() {
           <Pressable
             key={c.id}
             onPress={() => setCourseId(c.id)}
-            style={[styles.chip, courseId === c.id && styles.chipOn]}>
-            <Text style={{ color: courseId === c.id ? colors.white : colors.primary, fontWeight: '600' }}>
+            style={[
+              styles.chip,
+              { borderColor: colors.primary },
+              courseId === c.id && { backgroundColor: colors.primary },
+            ]}>
+            <Text
+              style={{
+                color: courseId === c.id ? colors.onFill : colors.primary,
+                fontFamily: fontFamily.semibold,
+              }}>
               {c.code}
             </Text>
           </Pressable>
@@ -130,7 +139,7 @@ export default function StudySessionForm() {
         loading={save.isPending}
         disabled={!courseId || !title.trim() || !when}
       />
-      <Text style={type.tiny}>
+      <Text style={type.fine}>
         {edit
           ? 'Everyone who RSVP’d gets a notification about the change.'
           : 'Everyone enrolled in the course — any section — can see this and RSVP.'}
@@ -144,10 +153,9 @@ const styles = StyleSheet.create({
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: {
     borderWidth: 1,
-    borderColor: colors.primary,
     borderRadius: radius.full,
     paddingHorizontal: 14,
     paddingVertical: 8,
   },
-  chipOn: { backgroundColor: colors.primary },
+
 });

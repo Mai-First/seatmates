@@ -6,11 +6,12 @@ import { Avatar, Badge, Button, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
-import { colors, space, type } from '../../lib/theme';
+import { space, useTheme } from '../../lib/theme';
 import type { Profile, Relationship, SharedSection } from '../../lib/types';
 
 export default function ProfileViewer() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { colors, type } = useTheme();
   const { session } = useAuth();
   const queryClient = useQueryClient();
 
@@ -117,13 +118,13 @@ export default function ProfileViewer() {
 
       {p.bio ? (
         <View style={styles.section}>
-          <Text style={styles.sectionLabel}>About</Text>
+          <Text style={type.tiny}>About</Text>
           <Text style={type.body}>{p.bio}</Text>
         </View>
       ) : null}
 
       <View style={styles.section}>
-        <Text style={styles.sectionLabel}>Contact</Text>
+        <Text style={type.tiny}>Contact</Text>
         <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
         {p.instagram ? (
           <Row
@@ -162,6 +163,7 @@ function LinkedinRow({ handle }: { handle: string }) {
 }
 
 function Row({ icon, text, onPress }: { icon: string; text: string; onPress: () => void }) {
+  const { colors, type } = useTheme();
   return (
     <Pressable onPress={onPress} style={styles.row}>
       <Ionicons name={icon as never} size={20} color={colors.primary} />
@@ -180,11 +182,5 @@ const styles = StyleSheet.create({
     marginTop: space.xs,
   },
   section: { gap: space.sm },
-  sectionLabel: {
-    ...type.tiny,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-  },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: 4 },
 });

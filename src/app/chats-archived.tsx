@@ -4,11 +4,12 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Empty, Loading } from '../components/ui';
 import { notify } from '../lib/dialogs';
 import { supabase } from '../lib/supabase';
-import { colors, space, type } from '../lib/theme';
+import { space, useTheme } from '../lib/theme';
 import type { ArchivedConversation } from '../lib/types';
 
 /** Past semesters' class chats — readable forever, read-only (not deleted). */
 export default function ArchivedChats() {
+  const { colors, type } = useTheme();
   const queryClient = useQueryClient();
   const archived = useQuery({
     queryKey: ['archived-conversations'],
@@ -50,7 +51,7 @@ export default function ArchivedChats() {
       keyExtractor={(c) => c.id}
       renderItem={({ item }) => (
         <Pressable onPress={() => router.push(`/chat/${item.id}`)} style={styles.row}>
-          <View style={styles.icon}>
+          <View style={[styles.icon, { backgroundColor: colors.surface }]}>
             <Text style={{ fontSize: 20 }}>📦</Text>
           </View>
           <View style={{ flex: 1, gap: 2 }}>
@@ -79,7 +80,6 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: colors.surface,
     alignItems: 'center',
     justifyContent: 'center',
   },

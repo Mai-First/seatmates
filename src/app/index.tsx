@@ -5,10 +5,11 @@ import { Loading } from '../components/ui';
 import { useAuth, useMyEnrollmentCount, useMyProfile } from '../lib/auth';
 import { registerPush } from '../lib/push';
 import { hasSupabaseConfig } from '../lib/supabase';
-import { colors, space, type } from '../lib/theme';
+import { fontFamily, space, useTheme } from '../lib/theme';
 
 /** Entry gate: config → auth → onboarding (profile, then schedule) → tabs. */
 export default function Index() {
+  const { colors, type } = useTheme();
   const { session, loading } = useAuth();
   const profile = useMyProfile();
   const enrollments = useMyEnrollmentCount();
@@ -17,14 +18,16 @@ export default function Index() {
     if (session) registerPush(session.user.id);
   }, [session]);
 
+  const code = [styles.code, { color: colors.primary }];
+
   if (!hasSupabaseConfig) {
     return (
-      <View style={styles.config}>
+      <View style={[styles.config, { backgroundColor: colors.bg }]}>
         <Text style={type.title}>Almost there</Text>
         <Text style={[type.body, { textAlign: 'center' }]}>
-          Supabase isn’t configured. Copy <Text style={styles.code}>.env.example</Text> to{' '}
-          <Text style={styles.code}>.env</Text>, fill in the URL and anon key, then restart{' '}
-          <Text style={styles.code}>npx expo start</Text>. Full steps are in the README.
+          Supabase isn’t configured. Copy <Text style={code}>.env.example</Text> to{' '}
+          <Text style={code}>.env</Text>, fill in the URL and anon key, then restart{' '}
+          <Text style={code}>npx expo start</Text>. Full steps are in the README.
         </Text>
       </View>
     );
@@ -45,7 +48,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: space.md,
     padding: space.xl,
-    backgroundColor: colors.bg,
   },
-  code: { fontFamily: 'monospace' as const, color: colors.primary },
+  code: { fontFamily: fontFamily.semibold },
 });

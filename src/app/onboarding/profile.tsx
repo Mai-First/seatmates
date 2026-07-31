@@ -6,10 +6,11 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { Avatar, Button, Field } from '../../components/ui';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
-import { colors, space, type } from '../../lib/theme';
+import { space, useTheme } from '../../lib/theme';
 import { confirm, notify } from '../../lib/dialogs';
 
 export default function OnboardingProfile() {
+  const { colors, type } = useTheme();
   const { edit } = useLocalSearchParams<{ edit?: string }>();
   const isEdit = edit === '1';
   const { session } = useAuth();

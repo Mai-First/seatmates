@@ -16,7 +16,7 @@ import {
 import { Avatar, Button, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
-import { colors, radius, space, type } from '../../lib/theme';
+import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import type { Member, Message } from '../../lib/types';
 import { confirm, notify } from '../../lib/dialogs';
 
@@ -30,6 +30,7 @@ const ICEBREAKERS = [
 ];
 
 export default function ChatThread() {
+  const { colors, type } = useTheme();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -127,7 +128,7 @@ export default function ChatThread() {
 
   return (
     <KeyboardAvoidingView
-      style={styles.root}
+      style={[styles.root, { backgroundColor: colors.bg }]}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       keyboardVerticalOffset={90}>
       <Stack.Screen
@@ -160,8 +161,11 @@ export default function ChatThread() {
                 Starting is the hard part. Steal one:
               </Text>
               {ICEBREAKERS.map((line) => (
-                <Pressable key={line} onPress={() => setDraft(line)} style={styles.icebreaker}>
-                  <Text style={{ color: colors.primary }}>{line}</Text>
+                <Pressable
+                  key={line}
+                  onPress={() => setDraft(line)}
+                  style={[styles.icebreaker, { borderColor: colors.accent }]}>
+                  <Text style={[type.accent, { color: colors.primary, fontSize: 15 }]}>{line}</Text>
                 </Pressable>
               ))}
             </View>
@@ -177,14 +181,14 @@ export default function ChatThread() {
       />
 
       {readOnly ? (
-        <View style={styles.readOnlyBar}>
+        <View style={[styles.readOnlyBar, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
           <Ionicons name="archive-outline" size={16} color={colors.subtle} />
           <Text style={type.sub}>Archived — read-only</Text>
         </View>
       ) : (
-        <View style={styles.composer}>
+        <View style={[styles.composer, { borderTopColor: colors.border }]}>
           <TextInput
-            style={styles.input}
+            style={[styles.input, { borderColor: colors.border, color: colors.text }]}
             placeholder="Message…"
             placeholderTextColor={colors.subtle}
             value={draft}
@@ -194,8 +198,11 @@ export default function ChatThread() {
           <Pressable
             onPress={() => draft.trim() && send.mutate(draft.trim())}
             disabled={!draft.trim() || send.isPending}
-            style={[styles.sendBtn, { opacity: draft.trim() ? 1 : 0.4 }]}>
-            <Ionicons name="arrow-up" size={22} color={colors.white} />
+            style={[
+              styles.sendBtn,
+              { backgroundColor: colors.primary, opacity: draft.trim() ? 1 : 0.4 },
+            ]}>
+            <Ionicons name="arrow-up" size={22} color={colors.onFill} />
           </Pressable>
         </View>
       )}
@@ -214,6 +221,7 @@ function MessageBubble({
   mine: boolean;
   showSender: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <View style={[styles.bubbleRow, mine && { flexDirection: 'row-reverse' }]}>
       {!mine && showSender && (
@@ -221,14 +229,26 @@ function MessageBubble({
           <Avatar uri={message.sender?.photo_url} name={message.sender?.full_name} size={32} />
         </Pressable>
       )}
-      <View style={[styles.bubble, mine ? styles.bubbleMine : styles.bubbleTheirs]}>
+      <View
+        style={[
+          styles.bubble,
+          mine ? styles.bubbleMine : styles.bubbleTheirs,
+          { backgroundColor: mine ? colors.primary : colors.surface },
+        ]}>
         {!mine && showSender && (
           // Tap a name to open the profile → add friend from there (PLAN D9).
           <Pressable onPress={() => router.push(`/profile/${message.sender_id}`)}>
-            <Text style={styles.senderName}>{message.sender?.full_name ?? 'Classmate'}</Text>
+            <Text style={[styles.senderName, { color: colors.primary }]}>
+              {message.sender?.full_name ?? 'Classmate'}
+            </Text>
           </Pressable>
         )}
-        <Text style={{ color: mine ? colors.white : colors.text, fontSize: 16 }}>
+        <Text
+          style={{
+            color: mine ? colors.onFill : colors.text,
+            fontSize: 16,
+            fontFamily: fontFamily.ui,
+          }}>
           {message.body}
         </Text>
       </View>
@@ -245,6 +265,7 @@ function MembersModal({
   onClose: () => void;
   conversationId: string;
 }) {
+  const { colors, type } = useTheme();
   const queryClient = useQueryClient();
   const members = useQuery({
     queryKey: ['members', conversationId],
@@ -272,8 +293,8 @@ function MembersModal({
 
   return (
     <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={styles.membersRoot}>
-        <View style={styles.membersHeader}>
+      <View style={[styles.membersRoot, { backgroundColor: colors.bg }]}>
+        <View style={[styles.membersHeader, { borderBottomColor: colors.border }]}>
           <Text style={type.h2}>Members</Text>
           <Pressable onPress={onClose} hitSlop={8}>
             <Ionicons name="close" size={26} color={colors.text} />
@@ -326,20 +347,20 @@ function MembersModal({
   );
 }
 
+// Structural only — colour comes from useTheme() at the usage site.
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.bg },
+  root: { flex: 1 },
   bubbleRow: { flexDirection: 'row', alignItems: 'flex-end', gap: 8 },
   bubble: { maxWidth: '78%', borderRadius: radius.lg, paddingHorizontal: 14, paddingVertical: 9 },
-  bubbleMine: { backgroundColor: colors.primary, borderBottomRightRadius: 4 },
-  bubbleTheirs: { backgroundColor: colors.surface, borderBottomLeftRadius: 4 },
-  senderName: { fontSize: 12, fontWeight: '700', color: colors.primary, marginBottom: 2 },
+  bubbleMine: { borderBottomRightRadius: 4 },
+  bubbleTheirs: { borderBottomLeftRadius: 4 },
+  senderName: { fontSize: 12, fontFamily: fontFamily.bold, marginBottom: 2 },
   composer: {
     flexDirection: 'row',
     alignItems: 'flex-end',
     gap: space.sm,
     padding: space.md,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
   readOnlyBar: {
     flexDirection: 'row',
@@ -348,22 +369,18 @@ const styles = StyleSheet.create({
     gap: space.sm,
     padding: space.md,
     borderTopWidth: 1,
-    borderTopColor: colors.border,
-    backgroundColor: colors.surface,
   },
   input: {
     flex: 1,
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.lg,
     paddingHorizontal: 14,
     paddingVertical: 10,
     fontSize: 16,
     maxHeight: 120,
-    color: colors.text,
+    fontFamily: fontFamily.ui,
   },
   sendBtn: {
-    backgroundColor: colors.primary,
     width: 40,
     height: 40,
     borderRadius: 20,
@@ -373,20 +390,18 @@ const styles = StyleSheet.create({
   icebreakers: { gap: space.sm, padding: space.md, transform: [{ scaleY: -1 }] },
   icebreaker: {
     borderWidth: 1,
-    borderColor: colors.accent,
     borderRadius: radius.full,
     paddingHorizontal: 14,
     paddingVertical: 8,
     alignSelf: 'center',
   },
-  membersRoot: { flex: 1, backgroundColor: colors.bg },
+  membersRoot: { flex: 1 },
   membersHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: space.lg,
     borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   memberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   memberInfo: { flexDirection: 'row', alignItems: 'center', gap: space.md, flex: 1 },

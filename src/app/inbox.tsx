@@ -6,10 +6,11 @@ import Celebration from '../components/Celebration';
 import { Avatar, Button, Empty, Loading } from '../components/ui';
 import { notify } from '../lib/dialogs';
 import { supabase } from '../lib/supabase';
-import { colors, space, type } from '../lib/theme';
+import { space, useTheme } from '../lib/theme';
 import type { InboxItem } from '../lib/types';
 
 export default function Inbox() {
+  const { colors, type } = useTheme();
   const queryClient = useQueryClient();
   const [celebrate, setCelebrate] = useState<{ name: string; conversationId: string | null } | null>(
     null,
@@ -84,7 +85,11 @@ export default function Inbox() {
       keyExtractor={(n) => n.id}
       contentContainerStyle={{ padding: space.lg, gap: space.md }}
       renderItem={({ item }) => (
-        <View style={[styles.item, !item.read_at && styles.itemUnread]}>
+        <View
+          style={[
+            styles.item,
+            !item.read_at && [styles.itemUnread, { backgroundColor: colors.accentSoft }],
+          ]}>
           {item.actor_id ? (
             <Pressable onPress={() => router.push(`/profile/${item.actor_id}`)}>
               <Avatar uri={item.actor_photo} name={item.actor_name} size={44} />
@@ -124,7 +129,7 @@ export default function Inbox() {
               </View>
             )}
             {item.kind === 'friend_request' && item.request_status === 'accepted' && (
-              <Text style={{ color: colors.success, fontSize: 13, fontWeight: '600' }}>
+              <Text style={[type.sub, { color: colors.success }]}>
                 Accepted ✓
               </Text>
             )}
@@ -148,7 +153,6 @@ export default function Inbox() {
 const styles = StyleSheet.create({
   item: { flexDirection: 'row', gap: space.md, alignItems: 'flex-start' },
   itemUnread: {
-    backgroundColor: colors.accentSoft,
     marginHorizontal: -space.sm,
     paddingHorizontal: space.sm,
     paddingVertical: space.sm,

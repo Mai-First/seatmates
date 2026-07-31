@@ -6,7 +6,7 @@ import DateTimePicker, {
 } from '@react-native-community/datetimepicker';
 import { useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
-import { colors, radius, space, type } from '../lib/theme';
+import { radius, space, useTheme } from '../lib/theme';
 import { formatWhen, type DateFieldProps } from './dateFieldShared';
 import { Button } from './ui';
 
@@ -19,6 +19,7 @@ function defaultStart(): Date {
 }
 
 export default function DateField({ label, value, onChange }: DateFieldProps) {
+  const { colors, type, scheme } = useTheme();
   const [iosOpen, setIosOpen] = useState(false);
   const [draft, setDraft] = useState<Date>(value ?? defaultStart());
 
@@ -52,19 +53,22 @@ export default function DateField({ label, value, onChange }: DateFieldProps) {
   return (
     <View style={{ gap: space.xs }}>
       <Text style={type.sub}>{label}</Text>
-      <Pressable onPress={open} style={styles.trigger}>
+      <Pressable
+        onPress={open}
+        style={[styles.trigger, { borderColor: colors.border, backgroundColor: colors.card }]}>
         <Text style={[type.body, !value && { color: colors.subtle }]}>{formatWhen(value)}</Text>
       </Pressable>
 
       {Platform.OS === 'ios' && (
         <Modal visible={iosOpen} transparent animationType="slide">
           <View style={styles.sheetBackdrop}>
-            <View style={styles.sheet}>
+            <View style={[styles.sheet, { backgroundColor: colors.bg }]}>
               <DateTimePicker
                 value={draft}
                 mode="datetime"
                 display="spinner"
                 minuteInterval={5}
+                themeVariant={scheme}
                 onChange={(_e, d) => d && setDraft(d)}
               />
               <Button
@@ -85,15 +89,12 @@ export default function DateField({ label, value, onChange }: DateFieldProps) {
 const styles = StyleSheet.create({
   trigger: {
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.md,
     paddingHorizontal: space.md,
     paddingVertical: 12,
-    backgroundColor: colors.bg,
   },
   sheetBackdrop: { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.35)' },
   sheet: {
-    backgroundColor: colors.bg,
     borderTopLeftRadius: radius.lg,
     borderTopRightRadius: radius.lg,
     padding: space.lg,

@@ -5,12 +5,13 @@ import { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Badge, Empty, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
-import { supabase } from '../../lib/supabase';
-import { colors, radius, space, type } from '../../lib/theme';
-import type { StudySession } from '../../lib/types';
 import { confirm, notify } from '../../lib/dialogs';
+import { supabase } from '../../lib/supabase';
+import { fontFamily, radius, space, useTheme } from '../../lib/theme';
+import type { StudySession } from '../../lib/types';
 
 export default function Study() {
+  const { colors, type } = useTheme();
   const { session } = useAuth();
   const queryClient = useQueryClient();
 
@@ -73,9 +74,7 @@ export default function Study() {
 
   // Upcoming first (soonest on top), past below under their own header.
   const upcoming = (feed.data ?? []).filter((s) => +new Date(s.starts_at) >= Date.now());
-  const past = (feed.data ?? [])
-    .filter((s) => +new Date(s.starts_at) < Date.now())
-    .reverse();
+  const past = (feed.data ?? []).filter((s) => +new Date(s.starts_at) < Date.now()).reverse();
   const rows: (StudySession | { header: string })[] = [
     ...upcoming,
     ...(past.length ? [{ header: 'Past sessions' }, ...past] : []),
@@ -96,18 +95,25 @@ export default function Study() {
         }
         renderItem={({ item }) => {
           if ('header' in item) {
-            return <Text style={styles.pastHeader}>{item.header}</Text>;
+            return <Text style={[type.tiny, { marginTop: space.md }]}>{item.header}</Text>;
           }
           const when = new Date(item.starts_at);
-          const past = +when < Date.now();
+          const isPast = +when < Date.now();
           const mine = item.host_id === session?.user.id;
           return (
-            <View style={[styles.card, past && { opacity: 0.5 }]}>
+            <View
+              style={[
+                styles.card,
+                { borderColor: colors.border, backgroundColor: colors.card },
+                isPast && { opacity: 0.5 },
+              ]}>
               <View style={styles.cardTop}>
                 <Badge text={item.course_code} />
                 {mine && (
                   <View style={{ flexDirection: 'row', gap: space.md }}>
-                    <Pressable onPress={() => router.push(`/study/new?edit=${item.id}`)} hitSlop={8}>
+                    <Pressable
+                      onPress={() => router.push(`/study/new?edit=${item.id}`)}
+                      hitSlop={8}>
                       <Ionicons name="create-outline" size={20} color={colors.primary} />
                     </Pressable>
                     <Pressable onPress={() => confirmDelete(item)} hitSlop={8}>
@@ -118,7 +124,11 @@ export default function Study() {
               </View>
               <Text style={type.h2}>{item.title}</Text>
               <Text style={type.sub}>
-                {when.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                {when.toLocaleDateString(undefined, {
+                  weekday: 'short',
+                  month: 'short',
+                  day: 'numeric',
+                })}
                 {' · '}
                 {when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                 {item.location ? ` · ${item.location}` : ''}
@@ -131,15 +141,22 @@ export default function Study() {
                   </Text>
                 </Pressable>
                 <Pressable
-                  disabled={past || rsvp.isPending}
+                  disabled={isPast || rsvp.isPending}
                   onPress={() => rsvp.mutate(item)}
-                  style={[styles.rsvp, item.my_status === 'going' && styles.rsvpOn]}>
+                  style={[
+                    styles.rsvp,
+                    { borderColor: colors.primary },
+                    item.my_status === 'going' && { backgroundColor: colors.primary },
+                  ]}>
                   <Text
                     style={{
-                      color: item.my_status === 'going' ? colors.white : colors.primary,
-                      fontWeight: '700',
+                      color: item.my_status === 'going' ? colors.onFill : colors.primary,
+                      fontFamily: fontFamily.bold,
+                      fontSize: 14,
                     }}>
-                    {item.my_status === 'going' ? `Going ✓ · ${item.going_count}` : `RSVP · ${item.going_count} going`}
+                    {item.my_status === 'going'
+                      ? `Going ✓ · ${item.going_count}`
+                      : `RSVP · ${item.going_count} going`}
                   </Text>
                 </Pressable>
               </View>
@@ -147,33 +164,23 @@ export default function Study() {
           );
         }}
       />
-      <Pressable style={styles.fab} onPress={() => router.push('/study/new')}>
-        <Ionicons name="add" size={30} color={colors.white} />
+      <Pressable
+        style={[styles.fab, { backgroundColor: colors.primary }]}
+        onPress={() => router.push('/study/new')}>
+        <Ionicons name="add" size={30} color={colors.onFill} />
       </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  pastHeader: {
-    ...type.tiny,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.6,
-    marginTop: space.md,
-  },
   card: {
     borderWidth: 1,
-    borderColor: colors.border,
     borderRadius: radius.lg,
     padding: space.md,
     gap: space.sm,
   },
-  cardTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
+  cardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -182,12 +189,10 @@ const styles = StyleSheet.create({
   },
   rsvp: {
     borderWidth: 1,
-    borderColor: colors.primary,
     borderRadius: radius.full,
     paddingHorizontal: 14,
     paddingVertical: 7,
   },
-  rsvpOn: { backgroundColor: colors.primary },
   fab: {
     position: 'absolute',
     right: 24,
@@ -195,7 +200,6 @@ const styles = StyleSheet.create({
     width: 58,
     height: 58,
     borderRadius: 29,
-    backgroundColor: colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
