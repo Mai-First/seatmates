@@ -202,9 +202,11 @@ export default function Swipe() {
 // hero detail (Hinge-style). Only this function + its styles changed. ───
 function CardFace({ card }: { card: DeckCard }) {
   const { colors, type } = useTheme();
-  const first = card.shared[0];
-  const label = first ? `${first.title} · ${first.code} §${first.section}` : 'Shared class';
-  const extra = card.shared_count > 1 ? ` +${card.shared_count - 1}` : '';
+  const shared = card.shared ?? [];
+  // Multiple shared classes squeeze the body, so give the bio less room
+  // rather than letting the class list get clipped — the overlap is the
+  // reason this person is on screen at all.
+  const bioLines = shared.length > 2 ? 1 : 2;
 
   const initials = (card.full_name ?? '?')
     .split(/\s+/)
@@ -242,16 +244,25 @@ function CardFace({ card }: { card: DeckCard }) {
       </View>
 
       <View style={styles.faceBody}>
-        {/* the shared class is the hero detail — italic serif, own row */}
-        <View style={styles.sharedRow}>
-          <Ionicons name="school-outline" size={16} color={colors.primary} />
-          <Text style={[type.accent, { color: colors.primary, flex: 1 }]} numberOfLines={1}>
-            {label}
-            {extra}
-          </Text>
+        {/* the shared classes are the hero detail — italic serif, one per line,
+            every one listed rather than collapsed into a "+N" */}
+        <View style={styles.sharedList}>
+          {shared.map((s, i) => (
+            <View key={`${s.code}-${s.section}`} style={styles.sharedRow}>
+              {i === 0 ? (
+                <Ionicons name="school-outline" size={16} color={colors.primary} />
+              ) : (
+                // keeps continuation lines aligned under the first
+                <View style={styles.sharedRowSpacer} />
+              )}
+              <Text style={[type.accent, { color: colors.primary, flex: 1 }]} numberOfLines={1}>
+                {s.title} · {s.code} §{s.section}
+              </Text>
+            </View>
+          ))}
         </View>
         {card.bio ? (
-          <Text style={type.sub} numberOfLines={2}>
+          <Text style={type.sub} numberOfLines={bioLines}>
             {card.bio}
           </Text>
         ) : null}
@@ -285,7 +296,9 @@ const styles = StyleSheet.create({
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '62%' },
   photoOverlay: { position: 'absolute', left: space.lg, right: space.lg, bottom: space.md, gap: 2 },
   faceBody: { flex: 1, padding: space.lg, gap: space.sm },
+  sharedList: { gap: 2 },
   sharedRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
+  sharedRowSpacer: { width: 16 },
   stamp: {
     position: 'absolute',
     top: 28,
