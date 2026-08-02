@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import DialogHost from '../components/DialogHost';
 import { AuthProvider } from '../lib/auth';
 import { ThemeProvider, useTheme } from '../lib/theme';
 
@@ -42,6 +43,7 @@ function Navigator() {
         <Stack.Screen name="study/new" options={{ title: 'New study session' }} />
         <Stack.Screen name="courses" options={{ title: 'My classes' }} />
       </Stack>
+      <DialogHost />
     </>
   );
 }

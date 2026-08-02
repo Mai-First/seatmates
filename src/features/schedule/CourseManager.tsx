@@ -22,6 +22,18 @@ export function useMyCourses() {
   });
 }
 
+/** Archived (not dropped) enrollments — shown as "Past classes" (PLAN review). */
+function usePastCourses() {
+  return useQuery({
+    queryKey: ['past-courses'],
+    queryFn: async (): Promise<MyCourse[]> => {
+      const { data, error } = await supabase.rpc('get_past_courses');
+      if (error) throw error;
+      return data;
+    },
+  });
+}
+
 export default function CourseManager({ showDrop }: { showDrop: boolean }) {
   const { colors, type } = useTheme();
   const { session } = useAuth();
@@ -38,9 +50,12 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
     },
   });
   const mine = useMyCourses();
+  // Past classes only make sense on the Account screen, not onboarding.
+  const past = usePastCourses();
 
   const refresh = () => {
     queryClient.invalidateQueries({ queryKey: ['my-courses'] });
+    queryClient.invalidateQueries({ queryKey: ['past-courses'] });
     queryClient.invalidateQueries({ queryKey: ['catalog'] });
     queryClient.invalidateQueries({ queryKey: ['enrollment-count'] });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
@@ -140,8 +155,13 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
         )
       ) : (
         <FlatList
-          data={mine.data ?? []}
-          keyExtractor={(c) => c.section_id}
+          data={[
+            ...(mine.data ?? []),
+            ...(showDrop && past.data?.length
+              ? [{ header: 'Past classes' } as const, ...past.data]
+              : []),
+          ]}
+          keyExtractor={(c) => ('header' in c ? c.header : c.section_id)}
           ListHeaderComponent={
             <Text style={[type.h2, { paddingVertical: space.sm }]}>
               My classes {mine.data?.length ? `(${mine.data.length})` : ''}
@@ -153,24 +173,39 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
               chat automatically.
             </Text>
           }
-          renderItem={({ item }) => (
-            <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}>
-              <View style={{ flex: 1, gap: 2 }}>
-                <Text style={type.body}>
-                  {item.code} §{item.section}
+          renderItem={({ item }) => {
+            if ('header' in item) {
+              return (
+                <Text style={[type.tiny, { marginTop: space.md, marginBottom: space.xs }]}>
+                  {item.header}
                 </Text>
-                <Text style={type.sub} numberOfLines={1}>
-                  {item.title}
-                  {item.instructor ? ` · ${item.instructor}` : ''}
-                </Text>
+              );
+            }
+            const isPast = !mine.data?.some((c) => c.section_id === item.section_id);
+            return (
+              <View
+                style={[
+                  styles.row,
+                  { borderColor: colors.border, backgroundColor: colors.card },
+                  isPast && { opacity: 0.6 },
+                ]}>
+                <View style={{ flex: 1, gap: 2 }}>
+                  <Text style={type.body}>
+                    {item.code} §{item.section}
+                  </Text>
+                  <Text style={type.sub} numberOfLines={1}>
+                    {item.title}
+                    {item.instructor ? ` · ${item.instructor}` : ''}
+                  </Text>
+                </View>
+                {showDrop && !isPast && (
+                  <Pressable onPress={() => confirmDrop(item)}>
+                    <Text style={{ color: colors.danger, fontWeight: '600' }}>Drop</Text>
+                  </Pressable>
+                )}
               </View>
-              {showDrop && (
-                <Pressable onPress={() => confirmDrop(item)}>
-                  <Text style={{ color: colors.danger, fontWeight: '600' }}>Drop</Text>
-                </Pressable>
-              )}
-            </View>
-          )}
+            );
+          }}
         />
       )}
     </View>

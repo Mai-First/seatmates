@@ -140,25 +140,35 @@ export default function Study() {
                     Hosted by <Text style={{ color: colors.primary }}>{item.host_name}</Text>
                   </Text>
                 </Pressable>
-                <Pressable
-                  disabled={isPast || rsvp.isPending}
-                  onPress={() => rsvp.mutate(item)}
-                  style={[
-                    styles.rsvp,
-                    { borderColor: colors.primary },
-                    item.my_status === 'going' && { backgroundColor: colors.primary },
-                  ]}>
-                  <Text
-                    style={{
-                      color: item.my_status === 'going' ? colors.onFill : colors.primary,
-                      fontFamily: fontFamily.bold,
-                      fontSize: 14,
-                    }}>
-                    {item.my_status === 'going'
-                      ? `Going ✓ · ${item.going_count}`
-                      : `RSVP · ${item.going_count} going`}
-                  </Text>
-                </Pressable>
+                {mine ? (
+                  // The host is always going to their own session — no toggle,
+                  // just the count (also enforced server-side, PLAN review).
+                  <View style={[styles.rsvp, { borderColor: colors.border }]}>
+                    <Text style={{ color: colors.subtle, fontFamily: fontFamily.bold, fontSize: 14 }}>
+                      Hosting · {item.going_count} going
+                    </Text>
+                  </View>
+                ) : (
+                  <Pressable
+                    disabled={isPast || rsvp.isPending}
+                    onPress={() => rsvp.mutate(item)}
+                    style={[
+                      styles.rsvp,
+                      { borderColor: colors.primary },
+                      item.my_status === 'going' && { backgroundColor: colors.primary },
+                    ]}>
+                    <Text
+                      style={{
+                        color: item.my_status === 'going' ? colors.onFill : colors.primary,
+                        fontFamily: fontFamily.bold,
+                        fontSize: 14,
+                      }}>
+                      {item.my_status === 'going'
+                        ? `Going ✓ · ${item.going_count}`
+                        : `RSVP · ${item.going_count} going`}
+                    </Text>
+                  </Pressable>
+                )}
               </View>
             </View>
           );
