@@ -76,14 +76,31 @@ straight to step 3 — someone else already did steps 1, 2, and 4.
    `config push` syncs auth settings from `config.toml` — in particular
    `otp_length`, which must stay **6** (the sign-in screen's code input is
    hardcoded to 6 digits; hosted projects default to 8 and will silently break
-   sign-in otherwise). The free tier rejects the repo's custom-branded OTP
-   email template on the default mailer, so `config push` will error on that
-   part — harmless, it just means hosted signups get Supabase's generic OTP
-   email instead of the branded one.
+   sign-in otherwise).
+
+   The free tier rejects custom email templates *on the default built-in
+   mailer* — `config push` errors on the template section until real SMTP is
+   configured (see step 4). Until then, hosted signups get Supabase's stock
+   template, which is a clickable link with no visible code, and the app's
+   type-in-a-code flow won't work at all.
 3. Put the project's URL and anon key (Project Settings → API) in `.env`.
-4. Auth → Providers → Email: make sure **Email OTP** is enabled. The hosted
-   free tier sends ~2 emails/hour through the built-in mailer — enough to test,
-   but wire up a free Resend/SMTP key in Auth → SMTP before demo day.
+4. Configure real SMTP so the custom template (and its 6-digit code) can
+   actually be pushed — the built-in mailer can't send it, free tier or not.
+   Gmail works and needs no domain verification (unlike most transactional
+   providers' free tiers, which only deliver to the account owner until you
+   verify a domain — a dealbreaker if your testers use other addresses):
+   1. On a Gmail-backed account (a Columbia address on Google Workspace works
+      fine), turn on 2-Step Verification, then Security → App passwords →
+      generate one for "Mail".
+   2. Fill in `[auth.email.smtp]` in `config.toml` (`host = "smtp.gmail.com"`,
+      `port = 587`, `user` = that Gmail address, `pass = "env(GMAIL_APP_PASSWORD)"`).
+      The password is never written to the file — it's read from your shell
+      at push time.
+   3. `GMAIL_APP_PASSWORD="<the 16-char app password, no spaces>" npx supabase config push`
+      — this both turns on SMTP and (now that it's no longer the default
+      mailer) pushes the branded OTP template in the same call.
+   4. Anyone who re-runs `supabase config push` later needs `GMAIL_APP_PASSWORD`
+      set locally too, or the push blanks the SMTP password out.
 
 ### 2. App
 
