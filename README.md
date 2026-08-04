@@ -24,9 +24,6 @@ changing a token there re-skins the whole app.
 ### 0. Prerequisites
 
 - Node 20+ (`node --version`)
-- **Docker Desktop** — only for the local backend path below
-  ([docker.com](https://www.docker.com/products/docker-desktop/)); the Supabase
-  CLI is already a dev dependency, no separate install
 - A phone with **Expo Go**, or an iOS simulator / Android emulator, or just a
   browser (`w` in the Expo CLI)
 
@@ -34,37 +31,20 @@ changing a token there re-skins the whole app.
 npm install
 ```
 
-### 1. Backend — pick one
+### 1. Backend
 
-**Option A: local (recommended for dev — free, resettable, fake email inbox)**
-
-```bash
-npm run db:start
-```
-
-First run downloads Docker images (a few minutes). When it finishes it prints
-the stack's URLs and keys. Then:
+The team shares one hosted Supabase project. Get the project URL and anon key
+from a teammate, then:
 
 ```bash
 cp .env.example .env
 ```
 
-Paste the printed **anon key** into `EXPO_PUBLIC_SUPABASE_ANON_KEY`. The URL in
-the example file (`http://127.0.0.1:54321`) is already correct for simulators
-and web on this machine.
+Paste them into `EXPO_PUBLIC_SUPABASE_URL` / `EXPO_PUBLIC_SUPABASE_ANON_KEY`.
+That's it — skip straight to [step 2](#2-app).
 
-`db:start` applies every migration and seed automatically. If you ever want a
-factory reset (fresh schema + catalog + demo data):
-
-```bash
-npm run db:reset
-```
-
-**Option B: hosted (needed for a multi-device demo, or testing with someone
-else on the same data)**
-
-Already have a URL + anon key from a teammate for a shared project? Skip
-straight to step 3 — someone else already did steps 1, 2, and 4.
+**Setting up a new hosted project from scratch** (starting a fresh
+team/instance, not joining the existing one):
 
 1. Create a project at [supabase.com](https://supabase.com) (free tier is fine).
 2. Link and push the schema + seeds:
@@ -110,10 +90,7 @@ npx expo start
 
 - `w` → web browser (fastest loop)
 - `i` → iOS simulator
-- Scan the QR in **Expo Go** for a real phone. Phone + local backend: your phone
-  can't reach `127.0.0.1` — set `EXPO_PUBLIC_SUPABASE_URL` to your Mac's LAN IP
-  (`ipconfig getifaddr en0`), e.g. `http://192.168.1.20:54321`, and restart
-  `expo start`.
+- Scan the QR in **Expo Go** for a real phone.
 
 If the app shows "Almost there," `.env` is missing or empty — env vars are baked
 in at bundle time, so restart `expo start` after editing it.
@@ -122,21 +99,22 @@ in at bundle time, so restart `expo start` after editing it.
 
 ## Test it
 
-### Sign-in (local backend)
+### Sign-in
 
-**Create account** with any address ending in `@columbia.edu` — it doesn't need
-to exist. The emailed 6-digit code verifies the address (grab it from the fake
-inbox at **http://127.0.0.1:54324**), then you set a password. From then on you
-**sign in with email + password**; the "email me a code" link on the sign-in
-screen covers forgotten passwords. Creating an account with an already-used
-email redirects you to sign-in. (Non-Columbia addresses are rejected twice: in
-the UI and by a database trigger.)
+**Create account** with a real address ending in `@columbia.edu` — the hosted
+project sends real email now, so it has to be one you can actually check (spam
+folder too). The emailed 6-digit code verifies the address, then you set a
+password. From then on you **sign in with email + password**; the "email me a
+code" link on the sign-in screen covers forgotten passwords. Creating an
+account with an already-used email redirects you to sign-in. (Non-Columbia
+addresses are rejected twice: in the UI and by a database trigger.)
 
 ### The seeded world
 
-`db:reset` gives you a Fall 2026 catalog (9 subjects, ~900 sections) and eight
-demo students — Emma, Liam, Sofia, Noah, Maya, Tariq, Leona, Diego — enrolled
-across **COMS W3157, COMS W3134, MATH UN1101, ECON UN1105, PSYC UN1001,
+The shared project comes pre-loaded with a Fall 2026 catalog (9 subjects,
+~900 sections) and eight demo students — Emma, Liam, Sofia, Noah, Maya, Tariq,
+Leona, Diego — enrolled across **COMS W3157, COMS W3134, MATH UN1101,
+ECON UN1105, PSYC UN1001,
 HIST UN1786, ENGL BC1068, BIOL UN2005**, with live-looking chatter in the
 COMS W3157 §001 and MATH UN1101 §001 group chats and four upcoming study
 sessions.
@@ -203,7 +181,7 @@ To widen the catalog beyond the seeded 9 subjects:
 ```bash
 python3 scripts/scrape_doc.py --term Fall2026 --out data/
 python3 scripts/catalog_to_sql.py data/courses_20263.json data/sections_20263.json
-npm run db:reset
+npx supabase db push --include-seed
 ```
 
 ## Operating the app (team runbook)
