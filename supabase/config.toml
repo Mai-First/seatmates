@@ -238,9 +238,9 @@ otp_expiry = 3600
 enabled = true
 host = "smtp.gmail.com"
 port = 587
-user = "ml5386@columbia.edu"
+user = "cuseatmates@gmail.com"
 pass = "env(GMAIL_APP_PASSWORD)"
-admin_email = "ml5386@columbia.edu"
+admin_email = "cuseatmates@gmail.com"
 sender_name = "Seatmates"
 
 # Uncomment to customize email template
