@@ -60,14 +60,26 @@ factory reset (fresh schema + catalog + demo data):
 npm run db:reset
 ```
 
-**Option B: hosted (needed for a multi-device demo)**
+**Option B: hosted (needed for a multi-device demo, or testing with someone
+else on the same data)**
+
+Already have a URL + anon key from a teammate for a shared project? Skip
+straight to step 3 — someone else already did steps 1, 2, and 4.
 
 1. Create a project at [supabase.com](https://supabase.com) (free tier is fine).
 2. Link and push the schema + seeds:
    ```bash
    npx supabase link --project-ref <your-project-ref>
    npx supabase db push --include-seed
+   npx supabase config push
    ```
+   `config push` syncs auth settings from `config.toml` — in particular
+   `otp_length`, which must stay **6** (the sign-in screen's code input is
+   hardcoded to 6 digits; hosted projects default to 8 and will silently break
+   sign-in otherwise). The free tier rejects the repo's custom-branded OTP
+   email template on the default mailer, so `config push` will error on that
+   part — harmless, it just means hosted signups get Supabase's generic OTP
+   email instead of the branded one.
 3. Put the project's URL and anon key (Project Settings → API) in `.env`.
 4. Auth → Providers → Email: make sure **Email OTP** is enabled. The hosted
    free tier sends ~2 emails/hour through the built-in mailer — enough to test,
