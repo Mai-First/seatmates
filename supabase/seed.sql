@@ -14,7 +14,7 @@ insert into auth.users
 select
   ('d0000000-0000-0000-0000-00000000000' || n)::uuid,
   '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
-  email, crypt('seatmates-demo', gen_salt('bf')), now(),
+  email, extensions.crypt('seatmates-demo', extensions.gen_salt('bf')), now(),
   '{"provider":"email","providers":["email"]}', '{}', now(), now(), '', '', '', ''
 from (values
   (1, 'emma.demo@columbia.edu'),
