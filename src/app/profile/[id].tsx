@@ -7,7 +7,7 @@ import { useAuth } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { space, useTheme } from '../../lib/theme';
-import type { Profile, Relationship, SharedSection } from '../../lib/types';
+import { schoolYearLabel, type Profile, type Relationship, type SharedSection } from '../../lib/types';
 
 export default function ProfileViewer() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -132,6 +132,11 @@ export default function ProfileViewer() {
       <View style={{ alignItems: 'center', gap: space.sm }}>
         <Avatar uri={p.photo_url} name={p.full_name} size={120} />
         <Text style={type.title}>{p.full_name}</Text>
+        {schoolYearLabel(p.school, p.grad_year) ? (
+          <Text style={[type.sub, { color: colors.primary }]}>
+            {schoolYearLabel(p.school, p.grad_year)}
+          </Text>
+        ) : null}
         <Text style={type.body}>
           {[p.major, p.hometown].filter(Boolean).join(' · ') || 'Columbia student'}
         </Text>

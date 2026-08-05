@@ -2,12 +2,16 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Button, Field } from '../../components/ui';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
-import { space, useTheme } from '../../lib/theme';
+import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import { confirm, notify } from '../../lib/dialogs';
+import type { School } from '../../lib/types';
+
+const SCHOOLS: School[] = ['CC', 'SEAS', 'BC', 'GS'];
+const GRAD_YEARS = [2027, 2028, 2029, 2030];
 
 export default function OnboardingProfile() {
   const { colors, type } = useTheme();
@@ -18,6 +22,8 @@ export default function OnboardingProfile() {
   const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
+  const [school, setSchool] = useState<School | null>(null);
+  const [gradYear, setGradYear] = useState<number | null>(null);
   const [major, setMajor] = useState('');
   const [hometown, setHometown] = useState('');
   const [bio, setBio] = useState('');
@@ -31,6 +37,8 @@ export default function OnboardingProfile() {
     const p = profile.data;
     if (!p) return;
     setName((v) => v || (p.full_name ?? ''));
+    setSchool((v) => v ?? p.school);
+    setGradYear((v) => v ?? p.grad_year);
     setMajor((v) => v || (p.major ?? ''));
     setHometown((v) => v || (p.hometown ?? ''));
     setBio((v) => v || (p.bio ?? ''));
@@ -76,11 +84,17 @@ export default function OnboardingProfile() {
       notify('Study spot required', 'Tell classmates where you like to study.');
       return;
     }
+    if (!school || !gradYear) {
+      notify('School and year required', 'Pick your school and graduation year.');
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from('profiles')
       .update({
         full_name: name.trim(),
+        school,
+        grad_year: gradYear,
         major: major.trim() || null,
         hometown: hometown.trim() || null,
         bio: bio.trim() || null,
@@ -107,7 +121,8 @@ export default function OnboardingProfile() {
       keyboardShouldPersistTaps="handled">
       {!isEdit && (
         <Text style={type.sub}>
-          This is what classmates see before they swipe. Name and study spot are required.
+          This is what classmates see before they swipe. Name, study spot, school, and
+          graduation year are required.
         </Text>
       )}
 
@@ -119,6 +134,55 @@ export default function OnboardingProfile() {
       </Pressable>
 
       <Field label="Name" placeholder="Alex Morgan" value={name} onChangeText={setName} />
+
+      <View style={{ gap: space.xs }}>
+        <Text style={type.sub}>School</Text>
+        <View style={styles.chips}>
+          {SCHOOLS.map((s) => (
+            <Pressable
+              key={s}
+              onPress={() => setSchool(s)}
+              style={[
+                styles.chip,
+                { borderColor: colors.primary },
+                school === s && { backgroundColor: colors.primary },
+              ]}>
+              <Text
+                style={{
+                  color: school === s ? colors.onFill : colors.primary,
+                  fontFamily: fontFamily.semibold,
+                }}>
+                {s}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      <View style={{ gap: space.xs }}>
+        <Text style={type.sub}>Graduation year</Text>
+        <View style={styles.chips}>
+          {GRAD_YEARS.map((y) => (
+            <Pressable
+              key={y}
+              onPress={() => setGradYear(y)}
+              style={[
+                styles.chip,
+                { borderColor: colors.primary },
+                gradYear === y && { backgroundColor: colors.primary },
+              ]}>
+              <Text
+                style={{
+                  color: gradYear === y ? colors.onFill : colors.primary,
+                  fontFamily: fontFamily.semibold,
+                }}>
+                '{String(y).slice(-2)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
       <Field label="Major" placeholder="Computer Science" value={major} onChangeText={setMajor} />
       <Field
         label="Where you're from"
@@ -160,7 +224,7 @@ export default function OnboardingProfile() {
         title={isEdit ? 'Save' : 'Continue'}
         onPress={save}
         loading={busy}
-        disabled={!name.trim() || !studySpot.trim()}
+        disabled={!name.trim() || !studySpot.trim() || !school || !gradYear}
       />
     </ScrollView>
   );
@@ -169,4 +233,6 @@ export default function OnboardingProfile() {
 const styles = StyleSheet.create({
   body: { padding: space.lg, gap: space.md, paddingBottom: space.xl * 2 },
   photoRow: { alignItems: 'center', gap: space.sm, paddingVertical: space.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  chip: { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: 14, paddingVertical: 8 },
 });

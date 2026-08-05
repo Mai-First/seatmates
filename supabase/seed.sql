@@ -31,33 +31,42 @@ on conflict (id) do nothing;
 update public.profiles p set
   full_name = d.full_name, major = d.major, hometown = d.hometown, bio = d.bio,
   instagram = d.instagram, linkedin = d.linkedin, photo_url = d.photo_url,
-  study_spot = d.study_spot, is_demo = true
+  study_spot = d.study_spot, school = d.school, grad_year = d.grad_year, is_demo = true
 from (values
   ('d0000000-0000-0000-0000-000000000001'::uuid, 'Emma Chen', 'Computer Science',
    'San Francisco, CA', 'Debugger by day, boba critic by night. Always down to whiteboard.',
-   'emmac.codes', null, 'https://i.pravatar.cc/300?img=47', 'Butler, 3rd floor by the windows'),
+   'emmac.codes', null, 'https://i.pravatar.cc/300?img=47', 'Butler, 3rd floor by the windows',
+   'SEAS', 2027),
   ('d0000000-0000-0000-0000-000000000002'::uuid, 'Liam O''Brien', 'Economics',
    'Chicago, IL', 'Problem sets are better with company. Butler 4th floor regular.',
-   'liam.obrien', 'in/liamobrien', 'https://i.pravatar.cc/300?img=12', 'Butler 4th floor'),
+   'liam.obrien', 'in/liamobrien', 'https://i.pravatar.cc/300?img=12', 'Butler 4th floor',
+   'CC', 2028),
   ('d0000000-0000-0000-0000-000000000003'::uuid, 'Sofia Reyes', 'Psychology',
    'Miami, FL', 'Here for study buddies and the occasional deli run.',
-   'sofia.reyes', null, 'https://i.pravatar.cc/300?img=32', 'Everett reading room'),
+   'sofia.reyes', null, 'https://i.pravatar.cc/300?img=32', 'Everett reading room',
+   'BC', 2029),
   ('d0000000-0000-0000-0000-000000000004'::uuid, 'Noah Kim', 'Computer Science',
    'Fort Lee, NJ', 'Ask me about my mechanical keyboard. Or don''t.',
-   null, 'in/noahkim', 'https://i.pravatar.cc/300?img=68', 'Milstein basement'),
+   null, 'in/noahkim', 'https://i.pravatar.cc/300?img=68', 'Milstein basement',
+   'SEAS', 2028),
   ('d0000000-0000-0000-0000-000000000005'::uuid, 'Maya Patel', 'Mathematics',
    'Austin, TX', 'Proofs before parties. Okay, sometimes parties.',
-   'maya.p', null, 'https://i.pravatar.cc/300?img=25', 'Math Library'),
+   'maya.p', null, 'https://i.pravatar.cc/300?img=25', 'Math Library',
+   'CC', 2027),
   ('d0000000-0000-0000-0000-000000000006'::uuid, 'Tariq Hassan', 'History',
    'Dearborn, MI', 'Will trade lecture notes for coffee recommendations.',
-   'tariqh', null, 'https://i.pravatar.cc/300?img=59', 'Butler 301'),
+   'tariqh', null, 'https://i.pravatar.cc/300?img=59', 'Butler 301',
+   'GS', 2030),
   ('d0000000-0000-0000-0000-000000000007'::uuid, 'Leona Marchetti', 'English',
    'Providence, RI', 'Annotating in the margins since 2019.',
-   null, null, 'https://i.pravatar.cc/300?img=44', 'Avery reading room'),
+   null, null, 'https://i.pravatar.cc/300?img=44', 'Avery reading room',
+   'BC', 2028),
   ('d0000000-0000-0000-0000-000000000008'::uuid, 'Diego Alvarez', 'Biology',
    'Los Angeles, CA', 'Pre-med but fun about it, I promise.',
-   'diego.alv', 'in/diegoalvarez', 'https://i.pravatar.cc/300?img=15', 'Uris Library')
-) as d (id, full_name, major, hometown, bio, instagram, linkedin, photo_url, study_spot)
+   'diego.alv', 'in/diegoalvarez', 'https://i.pravatar.cc/300?img=15', 'Uris Library',
+   'CC', 2029)
+) as d (id, full_name, major, hometown, bio, instagram, linkedin, photo_url, study_spot,
+        school, grad_year)
 where p.id = d.id;
 
 -- ---------------------------------------------------------------------------

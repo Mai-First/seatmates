@@ -1,5 +1,7 @@
 // Hand-maintained row/RPC types. If you change a migration, change these.
 
+export type School = 'CC' | 'SEAS' | 'BC' | 'GS';
+
 export type Profile = {
   id: string;
   email: string;
@@ -8,10 +10,21 @@ export type Profile = {
   hometown: string | null;
   bio: string | null;
   study_spot: string | null;
+  school: School | null;
+  grad_year: number | null;
   instagram: string | null;
   linkedin: string | null;
   photo_url: string | null;
 };
+
+/** "SEAS '29" — null unless both parts are set. */
+export function schoolYearLabel(
+  school: string | null | undefined,
+  gradYear: number | null | undefined,
+): string | null {
+  if (!school || !gradYear) return null;
+  return `${school} '${String(gradYear).slice(-2)}`;
+}
 
 export type DeckCard = {
   id: string;
@@ -20,6 +33,8 @@ export type DeckCard = {
   hometown: string | null;
   bio: string | null;
   study_spot: string | null;
+  school: School | null;
+  grad_year: number | null;
   instagram: string | null;
   linkedin: string | null;
   photo_url: string | null;

@@ -7,6 +7,7 @@ import { useAuth, useMyProfile } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme, type Scheme } from '../../lib/theme';
+import { schoolYearLabel } from '../../lib/types';
 
 /** System / Light / Dark, per the redesign brief. Defaults to System. */
 function Appearance() {
@@ -161,6 +162,11 @@ export default function Account() {
         <Avatar uri={p?.photo_url} name={p?.full_name} size={72} />
         <View style={{ flex: 1, gap: 2 }}>
           <Text style={type.h2}>{p?.full_name ?? 'Unnamed'}</Text>
+          {schoolYearLabel(p?.school, p?.grad_year) ? (
+            <Text style={[type.sub, { color: colors.primary }]}>
+              {schoolYearLabel(p?.school, p?.grad_year)}
+            </Text>
+          ) : null}
           <Text style={type.sub}>{p?.email}</Text>
           <Text style={type.sub}>{[p?.major, p?.hometown].filter(Boolean).join(' · ')}</Text>
         </View>

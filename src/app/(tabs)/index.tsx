@@ -17,7 +17,7 @@ import Celebration from '../../components/Celebration';
 import { Button, Empty, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
-import type { DeckCard } from '../../lib/types';
+import { schoolYearLabel, type DeckCard } from '../../lib/types';
 
 const SWIPE_THRESHOLD = 110;
 
@@ -237,6 +237,13 @@ function CardFace({ card }: { card: DeckCard }) {
           <Text style={[type.display, { color: colors.white }]} numberOfLines={1}>
             {card.full_name}
           </Text>
+          {schoolYearLabel(card.school, card.grad_year) ? (
+            <Text
+              style={[type.accent, { color: colors.white, opacity: 0.95 }]}
+              numberOfLines={1}>
+              {schoolYearLabel(card.school, card.grad_year)}
+            </Text>
+          ) : null}
           <Text style={[type.body, { color: colors.white, opacity: 0.92 }]} numberOfLines={1}>
             {[card.major, card.hometown].filter(Boolean).join(' · ') || 'Columbia student'}
           </Text>
