@@ -7,6 +7,7 @@ export type Profile = {
   major: string | null;
   hometown: string | null;
   bio: string | null;
+  study_spot: string | null;
   instagram: string | null;
   linkedin: string | null;
   photo_url: string | null;
@@ -18,6 +19,7 @@ export type DeckCard = {
   major: string | null;
   hometown: string | null;
   bio: string | null;
+  study_spot: string | null;
   instagram: string | null;
   linkedin: string | null;
   photo_url: string | null;
@@ -46,6 +48,7 @@ export type MyCourse = {
   title: string;
   section: string;
   instructor: string | null;
+  chat_left: boolean;
 };
 
 export type ConversationSummary = {

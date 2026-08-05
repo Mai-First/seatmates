@@ -266,6 +266,14 @@ function CardFace({ card }: { card: DeckCard }) {
             {card.bio}
           </Text>
         ) : null}
+        {card.study_spot ? (
+          <View style={styles.sharedRow}>
+            <Ionicons name="location-outline" size={16} color={colors.primary} />
+            <Text style={[type.sub, { flex: 1 }]} numberOfLines={1}>
+              Studies at {card.study_spot}
+            </Text>
+          </View>
+        ) : null}
         <Text style={[type.tiny, { marginTop: 'auto' }]}>Tap for full profile</Text>
       </View>
     </View>

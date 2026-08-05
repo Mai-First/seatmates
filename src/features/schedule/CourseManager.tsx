@@ -98,6 +98,15 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
     if (ok) drop.mutate(c.section_id);
   };
 
+  const rejoin = useMutation({
+    mutationFn: async (sectionId: string) => {
+      const { error } = await supabase.rpc('rejoin_section_chat', { p_section_id: sectionId });
+      if (error) throw error;
+    },
+    onSuccess: refresh,
+    onError: (e) => notify('Could not rejoin', e.message),
+  });
+
   const results = q.trim().length >= 2 ? (search.data ?? []) : [];
 
   return (
@@ -198,6 +207,13 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
                     {item.instructor ? ` · ${item.instructor}` : ''}
                   </Text>
                 </View>
+                {!isPast && item.chat_left && (
+                  <Pressable
+                    disabled={rejoin.isPending}
+                    onPress={() => rejoin.mutate(item.section_id)}>
+                    <Text style={{ color: colors.primary, fontWeight: '600' }}>Rejoin chat</Text>
+                  </Pressable>
+                )}
                 {showDrop && !isPast && (
                   <Pressable onPress={() => confirmDrop(item)}>
                     <Text style={{ color: colors.danger, fontWeight: '600' }}>Drop</Text>

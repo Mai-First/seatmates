@@ -50,6 +50,7 @@ export default function ChatThread() {
             subtitle: string | null;
             member: boolean;
             can_post: boolean;
+            blocked: boolean;
           }
         | undefined;
     },
@@ -120,7 +121,10 @@ export default function ChatThread() {
   const isSection = info.data?.kind === 'section';
   const readOnly = info.data ? !info.data.can_post : false;
   const showIcebreakers =
-    info.data?.kind === 'dm' && (messages.data?.length ?? 0) === 0 && !messages.isLoading;
+    info.data?.kind === 'dm' &&
+    !info.data?.blocked &&
+    (messages.data?.length ?? 0) === 0 &&
+    !messages.isLoading;
 
   const rows = useMemo(() => messages.data ?? [], [messages.data]);
 
@@ -182,8 +186,14 @@ export default function ChatThread() {
 
       {readOnly ? (
         <View style={[styles.readOnlyBar, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
-          <Ionicons name="archive-outline" size={16} color={colors.subtle} />
-          <Text style={type.sub}>Archived — read-only</Text>
+          <Ionicons
+            name={info.data?.blocked ? 'ban-outline' : 'archive-outline'}
+            size={16}
+            color={colors.subtle}
+          />
+          <Text style={type.sub}>
+            {info.data?.blocked ? 'This person is blocked' : 'Archived — read-only'}
+          </Text>
         </View>
       ) : (
         <View style={[styles.composer, { borderTopColor: colors.border }]}>

@@ -1,10 +1,11 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Badge, Empty, Loading } from '../../components/ui';
+import { useCallback, useState } from 'react';
+import { FlatList, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Badge, Button, Empty, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
+import { downloadIcs, googleCalendarUrl } from '../../lib/calendar';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
@@ -14,6 +15,7 @@ export default function Study() {
   const { colors, type } = useTheme();
   const { session } = useAuth();
   const queryClient = useQueryClient();
+  const [calendarSession, setCalendarSession] = useState<StudySession | null>(null);
 
   const feed = useQuery({
     queryKey: ['study-feed'],
@@ -109,18 +111,23 @@ export default function Study() {
               ]}>
               <View style={styles.cardTop}>
                 <Badge text={item.course_code} />
-                {mine && (
-                  <View style={{ flexDirection: 'row', gap: space.md }}>
-                    <Pressable
-                      onPress={() => router.push(`/study/new?edit=${item.id}`)}
-                      hitSlop={8}>
-                      <Ionicons name="create-outline" size={20} color={colors.primary} />
-                    </Pressable>
-                    <Pressable onPress={() => confirmDelete(item)} hitSlop={8}>
-                      <Ionicons name="trash-outline" size={20} color={colors.danger} />
-                    </Pressable>
-                  </View>
-                )}
+                <View style={{ flexDirection: 'row', gap: space.md }}>
+                  <Pressable onPress={() => setCalendarSession(item)} hitSlop={8}>
+                    <Ionicons name="calendar-outline" size={20} color={colors.primary} />
+                  </Pressable>
+                  {mine && (
+                    <>
+                      <Pressable
+                        onPress={() => router.push(`/study/new?edit=${item.id}`)}
+                        hitSlop={8}>
+                        <Ionicons name="create-outline" size={20} color={colors.primary} />
+                      </Pressable>
+                      <Pressable onPress={() => confirmDelete(item)} hitSlop={8}>
+                        <Ionicons name="trash-outline" size={20} color={colors.danger} />
+                      </Pressable>
+                    </>
+                  )}
+                </View>
               </View>
               <Text style={type.h2}>{item.title}</Text>
               <Text style={type.sub}>
@@ -179,7 +186,53 @@ export default function Study() {
         onPress={() => router.push('/study/new')}>
         <Ionicons name="add" size={30} color={colors.onFill} />
       </Pressable>
+
+      <AddToCalendarModal session={calendarSession} onClose={() => setCalendarSession(null)} />
     </View>
+  );
+}
+
+/** One-hour block, title + time — either a Google Calendar link or a .ics
+ * handed to the share sheet (native) / downloaded (web). */
+function AddToCalendarModal({
+  session,
+  onClose,
+}: {
+  session: StudySession | null;
+  onClose: () => void;
+}) {
+  const { colors, type } = useTheme();
+  return (
+    <Modal
+      visible={!!session}
+      transparent
+      animationType="fade"
+      onRequestClose={onClose}>
+      <Pressable style={styles.calendarBackdrop} onPress={onClose}>
+        <Pressable style={[styles.calendarCard, { backgroundColor: colors.bg }]}>
+          <Text style={type.h2}>Add to calendar</Text>
+          <Text style={[type.sub, { marginBottom: space.sm }]}>
+            One-hour block starting when the session does.
+          </Text>
+          <Button
+            title="Add to Google Calendar"
+            onPress={() => {
+              if (session) Linking.openURL(googleCalendarUrl(session));
+              onClose();
+            }}
+          />
+          <Button
+            title="Apple / Outlook (.ics)"
+            variant="outline"
+            onPress={() => {
+              if (session) downloadIcs(session);
+              onClose();
+            }}
+          />
+          <Button title="Cancel" variant="ghost" onPress={onClose} />
+        </Pressable>
+      </Pressable>
+    </Modal>
   );
 }
 
@@ -218,4 +271,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 3 },
     elevation: 5,
   },
+  calendarBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: space.xl,
+  },
+  calendarCard: { width: '100%', maxWidth: 420, borderRadius: 20, padding: space.lg, gap: space.sm },
 });

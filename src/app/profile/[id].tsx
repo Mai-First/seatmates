@@ -42,6 +42,22 @@ export default function ProfileViewer() {
     },
   });
 
+  // RLS only ever returns rows this user is the blocker on, so a hit here
+  // means "I blocked them" specifically, not just "this pair is blocked."
+  const myBlock = useQuery({
+    queryKey: ['my-block', id],
+    queryFn: async (): Promise<boolean> => {
+      const { data, error } = await supabase
+        .from('blocks')
+        .select('blocked_id')
+        .eq('blocker_id', session!.user.id)
+        .eq('blocked_id', id)
+        .maybeSingle();
+      if (error) throw error;
+      return !!data;
+    },
+  });
+
   const request = useMutation({
     mutationFn: async () => {
       const { error } = await supabase.rpc('send_friend_request', {
@@ -59,6 +75,14 @@ export default function ProfileViewer() {
     if (data) router.push(`/chat/${data}`);
   };
 
+  const invalidateBlockState = () => {
+    queryClient.invalidateQueries({ queryKey: ['deck'] });
+    queryClient.invalidateQueries({ queryKey: ['study-feed'] });
+    queryClient.invalidateQueries({ queryKey: ['relationship', id] });
+    queryClient.invalidateQueries({ queryKey: ['my-block', id] });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+  };
+
   const block = async () => {
     const ok = await confirm(
       'Block this person?',
@@ -68,8 +92,20 @@ export default function ProfileViewer() {
     );
     if (!ok) return;
     await supabase.from('blocks').insert({ blocker_id: session!.user.id, blocked_id: id });
-    queryClient.invalidateQueries({ queryKey: ['deck'] });
+    invalidateBlockState();
     router.back();
+  };
+
+  const unblock = async () => {
+    const ok = await confirm(
+      'Unblock this person?',
+      'They’ll be able to message you and reappear in your deck and study feed.',
+      'Unblock',
+      false,
+    );
+    if (!ok) return;
+    await supabase.from('blocks').delete().eq('blocker_id', session!.user.id).eq('blocked_id', id);
+    invalidateBlockState();
   };
 
   const report = async () => {
@@ -123,6 +159,13 @@ export default function ProfileViewer() {
         </View>
       ) : null}
 
+      {p.study_spot ? (
+        <View style={styles.section}>
+          <Text style={type.tiny}>Favorite study spot</Text>
+          <Text style={type.body}>{p.study_spot}</Text>
+        </View>
+      ) : null}
+
       <View style={styles.section}>
         <Text style={type.tiny}>Contact</Text>
         <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
@@ -140,9 +183,17 @@ export default function ProfileViewer() {
 
       {rel !== 'self' && (
         <View style={[styles.section, { flexDirection: 'row', gap: space.lg }]}>
-          <Pressable onPress={block}>
-            <Text style={{ color: colors.danger }}>Block</Text>
-          </Pressable>
+          {rel === 'blocked' ? (
+            myBlock.data ? (
+              <Pressable onPress={unblock}>
+                <Text style={{ color: colors.primary }}>Unblock</Text>
+              </Pressable>
+            ) : null
+          ) : (
+            <Pressable onPress={block}>
+              <Text style={{ color: colors.danger }}>Block</Text>
+            </Pressable>
+          )}
           <Pressable onPress={report}>
             <Text style={{ color: colors.danger }}>Report</Text>
           </Pressable>

@@ -21,6 +21,7 @@ export default function OnboardingProfile() {
   const [major, setMajor] = useState('');
   const [hometown, setHometown] = useState('');
   const [bio, setBio] = useState('');
+  const [studySpot, setStudySpot] = useState('');
   const [instagram, setInstagram] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export default function OnboardingProfile() {
     setMajor((v) => v || (p.major ?? ''));
     setHometown((v) => v || (p.hometown ?? ''));
     setBio((v) => v || (p.bio ?? ''));
+    setStudySpot((v) => v || (p.study_spot ?? ''));
     setInstagram((v) => v || (p.instagram ?? ''));
     setLinkedin((v) => v || (p.linkedin ?? ''));
     setPhotoUrl((v) => v ?? p.photo_url);
@@ -70,6 +72,10 @@ export default function OnboardingProfile() {
       notify('Name required', 'Classmates need something to call you.');
       return;
     }
+    if (!studySpot.trim()) {
+      notify('Study spot required', 'Tell classmates where you like to study.');
+      return;
+    }
     setBusy(true);
     const { error } = await supabase
       .from('profiles')
@@ -78,6 +84,7 @@ export default function OnboardingProfile() {
         major: major.trim() || null,
         hometown: hometown.trim() || null,
         bio: bio.trim() || null,
+        study_spot: studySpot.trim(),
         instagram: instagram.trim().replace(/^@/, '') || null,
         linkedin: linkedin.trim() || null,
         photo_url: photoUrl,
@@ -100,7 +107,7 @@ export default function OnboardingProfile() {
       keyboardShouldPersistTaps="handled">
       {!isEdit && (
         <Text style={type.sub}>
-          This is what classmates see before they swipe. Only your name is required.
+          This is what classmates see before they swipe. Name and study spot are required.
         </Text>
       )}
 
@@ -129,6 +136,12 @@ export default function OnboardingProfile() {
         style={{ minHeight: 80, textAlignVertical: 'top' }}
       />
       <Field
+        label="Favorite study spot"
+        placeholder="Butler 4th floor, Milstein, a specific bench…"
+        value={studySpot}
+        onChangeText={setStudySpot}
+      />
+      <Field
         label="Instagram (optional)"
         placeholder="handle"
         autoCapitalize="none"
@@ -147,7 +160,7 @@ export default function OnboardingProfile() {
         title={isEdit ? 'Save' : 'Continue'}
         onPress={save}
         loading={busy}
-        disabled={!name.trim()}
+        disabled={!name.trim() || !studySpot.trim()}
       />
     </ScrollView>
   );
