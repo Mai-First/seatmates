@@ -130,7 +130,7 @@ export default function Inbox() {
             )}
             {item.kind === 'friend_request' && item.request_status === 'accepted' && (
               <Text style={[type.sub, { color: colors.success }]}>
-                Accepted ✓
+                Accepted
               </Text>
             )}
             {(item.kind === 'new_match' || item.kind === 'request_accepted') && item.entity_id && (
