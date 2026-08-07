@@ -90,7 +90,7 @@ export default function Study() {
         contentContainerStyle={{ padding: space.lg, gap: space.md, paddingBottom: 100 }}
         ListEmptyComponent={
           <Empty
-            icon="📚"
+            icon="book-outline"
             title="No study sessions yet"
             body="Post one for any of your classes. Everyone taking that course will see it and can RSVP."
           />
