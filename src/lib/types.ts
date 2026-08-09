@@ -41,6 +41,8 @@ export type DeckCard = {
   email: string;
   shared: SharedSection[];
   shared_count: number;
+  /** Set when THEY sent a pending request to me — the card offers accept/decline. */
+  request_id: string | null;
 };
 
 export type CatalogResult = {

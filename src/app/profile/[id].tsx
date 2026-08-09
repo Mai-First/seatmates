@@ -81,6 +81,9 @@ export default function ProfileViewer() {
     queryClient.invalidateQueries({ queryKey: ['relationship', id] });
     queryClient.invalidateQueries({ queryKey: ['my-block', id] });
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    // Catches any open chat screen's cached "blocked" banner/read-only state,
+    // not just this DM — we don't know its conversation id from here.
+    queryClient.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'conversation' });
   };
 
   const block = async () => {
@@ -91,7 +94,13 @@ export default function ProfileViewer() {
       true,
     );
     if (!ok) return;
-    await supabase.from('blocks').insert({ blocker_id: session!.user.id, blocked_id: id });
+    const { error } = await supabase
+      .from('blocks')
+      .insert({ blocker_id: session!.user.id, blocked_id: id });
+    if (error) {
+      notify('Could not block', error.message);
+      return;
+    }
     invalidateBlockState();
     router.back();
   };
@@ -104,7 +113,15 @@ export default function ProfileViewer() {
       false,
     );
     if (!ok) return;
-    await supabase.from('blocks').delete().eq('blocker_id', session!.user.id).eq('blocked_id', id);
+    const { error } = await supabase
+      .from('blocks')
+      .delete()
+      .eq('blocker_id', session!.user.id)
+      .eq('blocked_id', id);
+    if (error) {
+      notify('Could not unblock', error.message);
+      return;
+    }
     invalidateBlockState();
   };
 
@@ -116,9 +133,13 @@ export default function ProfileViewer() {
       true,
     );
     if (!ok) return;
-    await supabase
+    const { error } = await supabase
       .from('reports')
       .insert({ reporter_id: session!.user.id, reported_id: id, reason: 'in-app report' });
+    if (error) {
+      notify('Could not report', error.message);
+      return;
+    }
     notify('Thanks', 'We got it.');
   };
 

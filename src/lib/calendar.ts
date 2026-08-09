@@ -5,6 +5,7 @@
 import { File, Paths } from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { Platform } from 'react-native';
+import { notify } from './dialogs';
 import type { StudySession } from './types';
 
 const SESSION_DURATION_MS = 60 * 60 * 1000;
@@ -95,5 +96,10 @@ export async function downloadIcs(s: StudySession) {
       dialogTitle: 'Add to calendar',
       UTI: 'com.apple.ical.ics',
     });
+  } else {
+    notify(
+      'No share sheet available',
+      'This device can’t hand the file off to a calendar app.',
+    );
   }
 }

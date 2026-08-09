@@ -55,6 +55,20 @@ export default function Swipe() {
     },
   });
 
+  // A card with request_id means THEY requested me — right accepts, left
+  // declines, instead of the usual record_swipe path.
+  const respond = useMutation({
+    mutationFn: async (args: { requestId: string; accept: boolean }) => {
+      const { data, error } = await supabase.rpc('respond_friend_request', {
+        p_request: args.requestId,
+        p_accept: args.accept,
+      });
+      if (error) throw error;
+      const conversationId = data as string | null;
+      return { matched: args.accept && !!conversationId, conversation_id: conversationId };
+    },
+  });
+
   // ─── Gesture logic below is UNCHANGED from the original screen ───
   const pan = useRef(new Animated.ValueXY()).current;
   const cards = deck.data ?? [];
@@ -64,22 +78,25 @@ export default function Swipe() {
     (direction: 'left' | 'right') => {
       if (!card) return;
       const current = card;
-      swipe.mutate(
-        { swipee: current.id, direction },
-        {
-          onSuccess: (res) => {
-            if (res.matched) {
-              setMatch({ name: current.full_name, conversationId: res.conversation_id });
-              queryClient.invalidateQueries({ queryKey: ['conversations'] });
-              queryClient.invalidateQueries({ queryKey: ['unread-count'] });
-            }
-          },
-        },
-      );
+      const onMatched = (res: { matched: boolean; conversation_id: string | null }) => {
+        if (res.matched) {
+          setMatch({ name: current.full_name, conversationId: res.conversation_id });
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+          queryClient.invalidateQueries({ queryKey: ['unread-count'] });
+        }
+      };
+      if (current.request_id) {
+        respond.mutate(
+          { requestId: current.request_id, accept: direction === 'right' },
+          { onSuccess: onMatched },
+        );
+      } else {
+        swipe.mutate({ swipee: current.id, direction }, { onSuccess: onMatched });
+      }
       setCursor((c) => c + 1);
       pan.setValue({ x: 0, y: 0 });
     },
-    [card, swipe, pan, queryClient],
+    [card, swipe, respond, pan, queryClient],
   );
 
   const fling = useCallback(
@@ -166,11 +183,15 @@ export default function Swipe() {
         </Pressable>
         <Animated.View
           style={[styles.stamp, styles.like, { borderColor: colors.success, opacity: likeOpacity }]}>
-          <Text style={[styles.stampText, { color: colors.success }]}>FRIEND</Text>
+          <Text style={[styles.stampText, { color: colors.success }]}>
+            {card.request_id ? 'ACCEPT' : 'FRIEND'}
+          </Text>
         </Animated.View>
         <Animated.View
           style={[styles.stamp, styles.nope, { borderColor: colors.danger, opacity: nopeOpacity }]}>
-          <Text style={[styles.stampText, { color: colors.danger }]}>PASS</Text>
+          <Text style={[styles.stampText, { color: colors.danger }]}>
+            {card.request_id ? 'DECLINE' : 'PASS'}
+          </Text>
         </Animated.View>
       </Animated.View>
 
@@ -251,6 +272,14 @@ function CardFace({ card }: { card: DeckCard }) {
       </View>
 
       <View style={styles.faceBody}>
+        {card.request_id ? (
+          <View style={[styles.requestBanner, { backgroundColor: colors.accentSoft }]}>
+            <Ionicons name="heart-outline" size={16} color={colors.primary} />
+            <Text style={[type.accent, { color: colors.primary, flex: 1 }]} numberOfLines={2}>
+              They requested you — swipe right to accept, left to decline
+            </Text>
+          </View>
+        ) : null}
         {/* the shared classes are the hero detail — italic serif, one per line,
             every one listed rather than collapsed into a "+N" */}
         <View style={styles.sharedList}>
@@ -311,6 +340,13 @@ const styles = StyleSheet.create({
   scrim: { position: 'absolute', left: 0, right: 0, bottom: 0, height: '62%' },
   photoOverlay: { position: 'absolute', left: space.lg, right: space.lg, bottom: space.md, gap: 2 },
   faceBody: { flex: 1, padding: space.lg, gap: space.sm },
+  requestBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.xs,
+    padding: space.sm,
+    borderRadius: radius.md,
+  },
   sharedList: { gap: 2 },
   sharedRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs },
   sharedRowSpacer: { width: 16 },
