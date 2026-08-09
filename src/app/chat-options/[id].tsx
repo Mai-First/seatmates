@@ -6,8 +6,9 @@ import { Avatar, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { notify } from '../../lib/dialogs';
 import { useModeration, useRelationship } from '../../lib/moderation';
+import { PASTEL_COLORS } from '../../lib/pastelColors';
 import { supabase } from '../../lib/supabase';
-import { space, useTheme } from '../../lib/theme';
+import { radius, space, useTheme } from '../../lib/theme';
 import type { Profile } from '../../lib/types';
 
 type ConversationInfo = {
@@ -18,6 +19,7 @@ type ConversationInfo = {
   muted: boolean;
   pinned: boolean;
   other_id: string | null;
+  icon_color: string | null;
 };
 
 export default function ChatOptions() {
@@ -87,6 +89,21 @@ export default function ChatOptions() {
     if (await doBlock()) router.back();
   };
 
+  const setColor = useMutation({
+    mutationFn: async (color: string) => {
+      const { error } = await supabase.rpc('set_conversation_color', {
+        p_conversation: id,
+        p_color: color,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', id] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (e) => notify('Could not update', e.message),
+  });
+
   if (info.isLoading) return <Loading />;
   const isDm = info.data?.kind === 'dm';
   const rel = relationship.data;
@@ -128,6 +145,31 @@ export default function ChatOptions() {
           thumbColor={colors.white}
         />
       </View>
+
+      <ActionRow
+        icon="images-outline"
+        label="Photos & files"
+        onPress={() => router.push(`/chat-media/${id}`)}
+      />
+
+      {!isDm ? (
+        <View style={[styles.colorSection, { borderBottomColor: colors.border }]}>
+          <Text style={type.body}>Chat color</Text>
+          <View style={styles.swatchRow}>
+            {PASTEL_COLORS.map((c) => (
+              <Pressable
+                key={c}
+                onPress={() => setColor.mutate(c)}
+                style={[
+                  styles.swatch,
+                  { backgroundColor: c },
+                  info.data?.icon_color === c && { borderColor: colors.text, borderWidth: 3 },
+                ]}
+              />
+            ))}
+          </View>
+        </View>
+      ) : null}
 
       {isDm && other.data?.instagram ? (
         <ActionRow
@@ -198,4 +240,7 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
   },
+  colorSection: { paddingVertical: 14, gap: space.sm, borderBottomWidth: 1 },
+  swatchRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  swatch: { width: 36, height: 36, borderRadius: radius.full },
 });

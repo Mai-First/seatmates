@@ -108,6 +108,21 @@ export default function Account() {
       onPress: () => router.push('/change-password'),
     },
     {
+      icon: 'log-out-outline' as const,
+      label: 'Sign out',
+      danger: true,
+      onPress: async () => {
+        // scope:'local' clears this device's session without needing the
+        // server round-trip to succeed; never let a rejection strand the user.
+        try {
+          await supabase.auth.signOut({ scope: 'local' });
+        } catch {
+          // session is gone locally either way
+        }
+        router.replace('/(auth)/sign-in');
+      },
+    },
+    {
       icon: 'trash-outline' as const,
       label: 'Delete account',
       danger: true,
@@ -140,21 +155,6 @@ export default function Account() {
           await supabase.auth.signOut({ scope: 'local' });
         } catch {
           // account is already gone; local session cleanup is best-effort
-        }
-        router.replace('/(auth)/sign-in');
-      },
-    },
-    {
-      icon: 'log-out-outline' as const,
-      label: 'Sign out',
-      danger: true,
-      onPress: async () => {
-        // scope:'local' clears this device's session without needing the
-        // server round-trip to succeed; never let a rejection strand the user.
-        try {
-          await supabase.auth.signOut({ scope: 'local' });
-        } catch {
-          // session is gone locally either way
         }
         router.replace('/(auth)/sign-in');
       },

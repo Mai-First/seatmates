@@ -2,7 +2,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import * as ImagePicker from 'expo-image-picker';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Avatar, Button, Field } from '../../components/ui';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
@@ -31,6 +31,9 @@ export default function OnboardingProfile() {
   const [instagram, setInstagram] = useState('');
   const [linkedin, setLinkedin] = useState('');
   const [photoUrl, setPhotoUrl] = useState<string | null>(null);
+  // null = "not loaded from the server yet" -- distinct from a real false,
+  // so a refetch can never clobber a user's already-flipped-off toggle.
+  const [showEmail, setShowEmail] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -46,6 +49,7 @@ export default function OnboardingProfile() {
     setInstagram((v) => v || (p.instagram ?? ''));
     setLinkedin((v) => v || (p.linkedin ?? ''));
     setPhotoUrl((v) => v ?? p.photo_url);
+    setShowEmail((v) => v ?? (p.show_email ?? true));
   }, [profile.data]);
 
   const pickPhoto = async () => {
@@ -80,6 +84,10 @@ export default function OnboardingProfile() {
       notify('Name required', 'Classmates need something to call you.');
       return;
     }
+    if (!photoUrl) {
+      notify('Photo required', 'Add a profile photo so classmates know who they’re meeting.');
+      return;
+    }
     if (!studySpot.trim()) {
       notify('Study spot required', 'Tell classmates where you like to study.');
       return;
@@ -102,6 +110,7 @@ export default function OnboardingProfile() {
         instagram: instagram.trim().replace(/^@/, '') || null,
         linkedin: linkedin.trim() || null,
         photo_url: photoUrl,
+        show_email: showEmail ?? true,
       })
       .eq('id', session.user.id);
     setBusy(false);
@@ -121,7 +130,7 @@ export default function OnboardingProfile() {
       keyboardShouldPersistTaps="handled">
       {!isEdit && (
         <Text style={type.sub}>
-          This is what classmates see before they swipe. Name, study spot, school, and
+          This is what classmates see before they swipe. Photo, name, study spot, school, and
           graduation year are required.
         </Text>
       )}
@@ -129,7 +138,7 @@ export default function OnboardingProfile() {
       <Pressable onPress={pickPhoto} style={styles.photoRow}>
         <Avatar uri={photoUrl} name={name || '?'} size={84} />
         <Text style={{ color: colors.primary, fontWeight: '600' }}>
-          {photoUrl ? 'Change photo' : 'Add a photo'}
+          {photoUrl ? 'Change photo' : 'Add a photo (required)'}
         </Text>
       </Pressable>
 
@@ -220,11 +229,24 @@ export default function OnboardingProfile() {
         onChangeText={setLinkedin}
       />
 
+      <View style={styles.emailToggleRow}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <Text style={type.body}>Show my Columbia email</Text>
+          <Text style={type.sub}>Visible on your profile to other signed-in students.</Text>
+        </View>
+        <Switch
+          value={showEmail ?? true}
+          onValueChange={setShowEmail}
+          trackColor={{ false: colors.border, true: colors.primary }}
+          thumbColor={colors.white}
+        />
+      </View>
+
       <Button
         title={isEdit ? 'Save' : 'Continue'}
         onPress={save}
         loading={busy}
-        disabled={!name.trim() || !studySpot.trim() || !school || !gradYear}
+        disabled={!name.trim() || !photoUrl || !studySpot.trim() || !school || !gradYear}
       />
     </ScrollView>
   );
@@ -235,4 +257,5 @@ const styles = StyleSheet.create({
   photoRow: { alignItems: 'center', gap: space.sm, paddingVertical: space.sm },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
   chip: { borderWidth: 1, borderRadius: radius.full, paddingHorizontal: 14, paddingVertical: 8 },
+  emailToggleRow: { flexDirection: 'row', alignItems: 'center', gap: space.md, paddingVertical: space.xs },
 });

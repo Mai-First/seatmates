@@ -28,6 +28,11 @@ function Navigator() {
           headerTintColor: colors.primary,
           headerStyle: { backgroundColor: colors.bg },
           headerTitleStyle: { color: colors.text, fontFamily: type.h2.fontFamily },
+          // The (tabs) group has no title of its own, so without this the
+          // back button on anything pushed from a tab reads the literal
+          // route segment, "(tabs)". An empty label leaves just the themed
+          // chevron (headerTintColor above).
+          headerBackTitle: '',
           contentStyle: { backgroundColor: colors.bg },
         }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
@@ -37,6 +42,7 @@ function Navigator() {
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="chat/[id]" options={{ title: '' }} />
         <Stack.Screen name="chat-options/[id]" options={{ title: 'Chat options' }} />
+        <Stack.Screen name="chat-media/[id]" options={{ title: 'Photos & files' }} />
         <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'Profile' }} />
         <Stack.Screen name="inbox" options={{ title: 'Notifications' }} />
         <Stack.Screen name="friend-requests" options={{ title: 'Friend requests' }} />

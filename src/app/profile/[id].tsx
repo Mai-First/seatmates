@@ -109,9 +109,12 @@ export default function ProfileViewer() {
         </View>
       ) : null}
 
+      {p.show_email !== false || p.instagram || p.linkedin ? (
       <View style={styles.section}>
         <Text style={type.tiny}>Contact</Text>
-        <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
+        {p.show_email !== false ? (
+          <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
+        ) : null}
         {p.instagram ? (
           <Row
             icon="logo-instagram"
@@ -123,6 +126,7 @@ export default function ProfileViewer() {
           <LinkedinRow handle={p.linkedin} />
         ) : null}
       </View>
+      ) : null}
 
       {rel !== 'self' && (
         <View style={[styles.section, { flexDirection: 'row', gap: space.lg }]}>

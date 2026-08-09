@@ -48,9 +48,12 @@ def main():
             f"{q(s.get('instructor'))}, {q(s.get('points'))}, {enrolled}, {capacity}, "
             f"{q(s.get('legacy_number'))} "
             f"from public.courses where term = {q(s['term'])} and code = {q(s['code'])} "
-            "on conflict (course_id, section) do update set "
-            "call_number = excluded.call_number, instructor = excluded.instructor, "
-            "enrolled = excluded.enrolled, capacity = excluded.capacity;"
+            # Cross-listed courses (two different course codes, same lecture)
+            # share a call number, which can conflict on the sections'
+            # separate (term, call_number) constraint even when this insert's
+            # own (course_id, section) pair is new. A bare ON CONFLICT DO
+            # NOTHING catches either constraint instead of just the one named.
+            "on conflict do nothing;"
         )
 
     dest = pathlib.Path(__file__).resolve().parent.parent / "supabase" / "seed_catalog.sql"

@@ -22,7 +22,7 @@ function InboxButton() {
     <Pressable onPress={() => router.push('/inbox')} style={styles.bell} hitSlop={8}>
       <Ionicons name="notifications-outline" size={24} color={colors.primary} />
       {!!unread && (
-        <View style={[styles.dot, { backgroundColor: colors.warm }]}>
+        <View style={[styles.dot, { backgroundColor: colors.primary }]}>
           <Text style={[styles.dotText, { color: colors.onFill }]}>
             {unread > 9 ? '9+' : unread}
           </Text>
@@ -49,6 +49,21 @@ export default function TabsLayout() {
   });
   const unreadChats = conversations?.filter((c) => c.unread).length ?? 0;
 
+  const { data: unreadStudy } = useQuery({
+    queryKey: ['unread-study-count'],
+    refetchInterval: 15_000,
+    queryFn: async (): Promise<number> => {
+      const { data, error } = await supabase.rpc('unread_study_notification_count');
+      if (error) throw error;
+      return Number(data ?? 0);
+    },
+  });
+
+  // React Navigation badges default to red; the app's one brand accent is
+  // this Columbia blue, so every "new stuff" bubble should read as the same
+  // signal instead of looking like three unrelated alerts.
+  const badgeStyle = { backgroundColor: colors.primary, color: colors.onFill };
+
   return (
     <Tabs
       screenOptions={{
@@ -64,7 +79,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Swipe',
+          title: 'swipe',
           headerRight: () => <InboxButton />,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="albums-outline" size={size} color={color} />
@@ -74,8 +89,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="chats"
         options={{
-          title: 'Chats',
+          title: 'chats',
           tabBarBadge: unreadChats > 0 ? unreadChats : undefined,
+          tabBarBadgeStyle: badgeStyle,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles-outline" size={size} color={color} />
           ),
@@ -84,7 +100,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="study"
         options={{
-          title: 'Study Groups',
+          title: 'study dates',
+          tabBarBadge: unreadStudy && unreadStudy > 0 ? unreadStudy : undefined,
+          tabBarBadgeStyle: badgeStyle,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="book-outline" size={size} color={color} />
           ),
@@ -93,7 +111,7 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="account"
         options={{
-          title: 'Account',
+          title: 'account',
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-circle-outline" size={size} color={color} />
           ),

@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import Celebration from '../../components/Celebration';
-import { Empty, Loading } from '../../components/ui';
+import { Button, Empty, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import { schoolYearLabel, type DeckCard } from '../../lib/types';
@@ -123,6 +123,12 @@ export default function Swipe() {
           title="That’s everyone for now"
           body="You’ve seen every classmate in your sections. Check back as more people join."
         />
+        <View style={{ padding: space.lg }}>
+          <Button
+            title="Say hi to your new friends"
+            onPress={() => router.push('/chats')}
+          />
+        </View>
       </View>
     );
   }

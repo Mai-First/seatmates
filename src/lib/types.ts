@@ -15,6 +15,7 @@ export type Profile = {
   instagram: string | null;
   linkedin: string | null;
   photo_url: string | null;
+  show_email: boolean;
   notification_prefs: NotificationPrefs;
 };
 
@@ -89,6 +90,7 @@ export type ConversationSummary = {
   unread: boolean;
   muted: boolean;
   pinned: boolean;
+  icon_color: string | null;
 };
 
 export type PendingFriendRequest = {
@@ -105,7 +107,11 @@ export type Message = {
   id: string;
   conversation_id: string;
   sender_id: string;
-  body: string;
+  body: string | null;
+  attachment_url: string | null;
+  attachment_type: 'image' | 'file' | null;
+  attachment_name: string | null;
+  deleted_at: string | null;
   created_at: string;
   sender?: Pick<Profile, 'id' | 'full_name' | 'photo_url'>;
 };

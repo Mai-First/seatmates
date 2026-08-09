@@ -114,7 +114,7 @@ export default function Chats() {
             {item.kind === 'dm' ? (
               <Avatar uri={item.photo_url} name={item.title} size={48} />
             ) : (
-              <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
+              <View style={[styles.sectionIcon, { backgroundColor: item.icon_color ?? colors.accentSoft }]}>
                 <Ionicons name={subjectIcon(item.title) as never} size={22} color={colors.primary} />
               </View>
             )}
