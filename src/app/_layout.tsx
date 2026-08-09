@@ -36,6 +36,7 @@ function Navigator() {
         <Stack.Screen name="onboarding/schedule" options={{ title: 'Your classes' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="chat/[id]" options={{ title: '' }} />
+        <Stack.Screen name="chat-options/[id]" options={{ title: 'Chat options' }} />
         <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'Profile' }} />
         <Stack.Screen name="inbox" options={{ title: 'Notifications' }} />
         <Stack.Screen name="friend-requests" options={{ title: 'Friend requests' }} />

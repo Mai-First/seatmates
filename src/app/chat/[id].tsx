@@ -119,21 +119,6 @@ export default function ChatThread() {
     router.back();
   };
 
-  const toggleMute = useMutation({
-    mutationFn: async () => {
-      const { error } = await supabase.rpc('set_conversation_muted', {
-        p_conversation: id,
-        p_muted: !info.data?.muted,
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['conversation', id] });
-      queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    },
-    onError: (e) => notify('Could not update', e.message),
-  });
-
   const isSection = info.data?.kind === 'section';
   const readOnly = info.data ? !info.data.can_post : false;
   const showIcebreakers =
@@ -162,18 +147,14 @@ export default function ChatThread() {
                     <Ionicons name="people-outline" size={24} color={colors.primary} />
                   </Pressable>
                 )}
-                <Pressable onPress={() => toggleMute.mutate()} disabled={toggleMute.isPending} hitSlop={8}>
-                  <Ionicons
-                    name={info.data.muted ? 'notifications-off' : 'notifications-outline'}
-                    size={24}
-                    color={info.data.muted ? colors.subtle : colors.primary}
-                  />
-                </Pressable>
                 {isSection && !readOnly && (
                   <Pressable onPress={leave} hitSlop={8}>
                     <Ionicons name="exit-outline" size={24} color={colors.danger} />
                   </Pressable>
                 )}
+                <Pressable onPress={() => router.push(`/chat-options/${id}`)} hitSlop={8}>
+                  <Ionicons name="ellipsis-vertical" size={22} color={colors.primary} />
+                </Pressable>
               </View>
             ) : undefined,
         }}

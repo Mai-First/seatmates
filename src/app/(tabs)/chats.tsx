@@ -5,6 +5,7 @@ import { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Badge, Empty, Avatar, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
+import { subjectIcon } from '../../lib/subjectIcon';
 import { fontFamily, space, useTheme } from '../../lib/theme';
 import type { ConversationSummary, PendingFriendRequest } from '../../lib/types';
 
@@ -47,7 +48,11 @@ export default function Chats() {
         <Ionicons name="person-add-outline" size={22} color={colors.primary} />
       </View>
       <Text style={[type.body, { flex: 1 }]}>Friend requests</Text>
-      {requestCount > 0 ? <Badge text={String(requestCount)} /> : null}
+      {requestCount > 0 ? (
+        <View>
+          <Badge text={String(requestCount)} />
+        </View>
+      ) : null}
       <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
     </Pressable>
   );
@@ -65,8 +70,10 @@ export default function Chats() {
 
   if (conversations.isLoading) return <Loading />;
 
-  // Section chats pinned on top, DMs below by recency (PLAN D8).
+  // Pinned chats (any kind) float to the very top; below that, sections
+  // pinned on top of DMs, DMs by recency (PLAN D8).
   const rows = [...(conversations.data ?? [])].sort((a, b) => {
+    if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
     if (a.kind !== b.kind) return a.kind === 'section' ? -1 : 1;
     return a.kind === 'section'
       ? a.title.localeCompare(b.title)
@@ -87,7 +94,9 @@ export default function Chats() {
     );
   }
 
-  const firstDm = rows.findIndex((r) => r.kind === 'dm');
+  const firstPinned = rows.findIndex((r) => r.pinned);
+  const firstUnpinnedSection = rows.findIndex((r) => !r.pinned && r.kind === 'section');
+  const firstUnpinnedDm = rows.findIndex((r) => !r.pinned && r.kind === 'dm');
 
   return (
     <FlatList
@@ -98,14 +107,15 @@ export default function Chats() {
       ListFooterComponent={archivedLink}
       renderItem={({ item, index }) => (
         <>
-          {index === 0 && item.kind === 'section' && <SectionHeader label="Class group chats" />}
-          {index === firstDm && <SectionHeader label="Direct messages" />}
+          {index === firstPinned && <SectionHeader label="Pinned" />}
+          {index === firstUnpinnedSection && <SectionHeader label="Class group chats" />}
+          {index === firstUnpinnedDm && <SectionHeader label="Direct messages" />}
           <Pressable onPress={() => router.push(`/chat/${item.id}`)} style={styles.row}>
             {item.kind === 'dm' ? (
               <Avatar uri={item.photo_url} name={item.title} size={48} />
             ) : (
               <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
-                <Ionicons name="school-outline" size={22} color={colors.primary} />
+                <Ionicons name={subjectIcon(item.title) as never} size={22} color={colors.primary} />
               </View>
             )}
             <View style={{ flex: 1, gap: 2 }}>
@@ -115,6 +125,7 @@ export default function Chats() {
                   numberOfLines={1}>
                   {item.title}
                 </Text>
+                {item.pinned && <Ionicons name="pin" size={13} color={colors.subtle} />}
                 {item.muted && <Ionicons name="notifications-off-outline" size={14} color={colors.subtle} />}
               </View>
               <Text

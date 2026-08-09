@@ -4,8 +4,9 @@ import { router, Tabs } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, useTheme } from '../../lib/theme';
+import type { ConversationSummary } from '../../lib/types';
 
-/** Top-right notification inbox (PLAN D17) — present on every tab. */
+/** Top-right notification inbox (PLAN D17) — Swipe tab only. */
 function InboxButton() {
   const { colors } = useTheme();
   const { data: unread } = useQuery({
@@ -33,10 +34,24 @@ function InboxButton() {
 
 export default function TabsLayout() {
   const { colors, type } = useTheme();
+
+  // Same queryKey the Chats tab itself uses, so this shares that cache
+  // instead of firing a second RPC — and stays fresh via the same
+  // invalidations chats.tsx already does.
+  const { data: conversations } = useQuery({
+    queryKey: ['conversations'],
+    refetchInterval: 15_000,
+    queryFn: async (): Promise<ConversationSummary[]> => {
+      const { data, error } = await supabase.rpc('get_conversations');
+      if (error) throw error;
+      return data;
+    },
+  });
+  const unreadChats = conversations?.filter((c) => c.unread).length ?? 0;
+
   return (
     <Tabs
       screenOptions={{
-        headerRight: () => <InboxButton />,
         headerStyle: { backgroundColor: colors.bg },
         headerTitleStyle: { color: colors.text, fontFamily: type.h2.fontFamily, fontSize: 19 },
         headerShadowVisible: false,
@@ -50,6 +65,7 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: 'Swipe',
+          headerRight: () => <InboxButton />,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="albums-outline" size={size} color={color} />
           ),
@@ -59,6 +75,7 @@ export default function TabsLayout() {
         name="chats"
         options={{
           title: 'Chats',
+          tabBarBadge: unreadChats > 0 ? unreadChats : undefined,
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="chatbubbles-outline" size={size} color={color} />
           ),

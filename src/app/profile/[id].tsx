@@ -4,10 +4,11 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Badge, Button, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
-import { confirm, notify } from '../../lib/dialogs';
+import { notify } from '../../lib/dialogs';
+import { useModeration, useRelationship } from '../../lib/moderation';
 import { supabase } from '../../lib/supabase';
 import { space, useTheme } from '../../lib/theme';
-import { schoolYearLabel, type Profile, type Relationship, type SharedSection } from '../../lib/types';
+import { schoolYearLabel, type Profile, type SharedSection } from '../../lib/types';
 
 export default function ProfileViewer() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -24,14 +25,7 @@ export default function ProfileViewer() {
     },
   });
 
-  const relationship = useQuery({
-    queryKey: ['relationship', id],
-    queryFn: async (): Promise<Relationship> => {
-      const { data, error } = await supabase.rpc('relationship_with', { p_other: id });
-      if (error) throw error;
-      return data;
-    },
-  });
+  const relationship = useRelationship(id);
 
   const shared = useQuery({
     queryKey: ['shared-sections', id],
@@ -42,21 +36,7 @@ export default function ProfileViewer() {
     },
   });
 
-  // RLS only ever returns rows this user is the blocker on, so a hit here
-  // means "I blocked them" specifically, not just "this pair is blocked."
-  const myBlock = useQuery({
-    queryKey: ['my-block', id],
-    queryFn: async (): Promise<boolean> => {
-      const { data, error } = await supabase
-        .from('blocks')
-        .select('blocked_id')
-        .eq('blocker_id', session!.user.id)
-        .eq('blocked_id', id)
-        .maybeSingle();
-      if (error) throw error;
-      return !!data;
-    },
-  });
+  const { myBlock, block: doBlock, unblock, report: doReport } = useModeration(id, session?.user.id);
 
   const request = useMutation({
     mutationFn: async () => {
@@ -75,73 +55,10 @@ export default function ProfileViewer() {
     if (data) router.push(`/chat/${data}`);
   };
 
-  const invalidateBlockState = () => {
-    queryClient.invalidateQueries({ queryKey: ['deck'] });
-    queryClient.invalidateQueries({ queryKey: ['study-feed'] });
-    queryClient.invalidateQueries({ queryKey: ['relationship', id] });
-    queryClient.invalidateQueries({ queryKey: ['my-block', id] });
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    // Catches any open chat screen's cached "blocked" banner/read-only state,
-    // not just this DM — we don't know its conversation id from here.
-    queryClient.invalidateQueries({ predicate: (q) => q.queryKey[0] === 'conversation' });
-  };
-
   const block = async () => {
-    const ok = await confirm(
-      'Block this person?',
-      'They disappear from your deck and can’t message you. They won’t be told.',
-      'Block',
-      true,
-    );
-    if (!ok) return;
-    const { error } = await supabase
-      .from('blocks')
-      .insert({ blocker_id: session!.user.id, blocked_id: id });
-    if (error) {
-      notify('Could not block', error.message);
-      return;
-    }
-    invalidateBlockState();
-    router.back();
+    if (await doBlock()) router.back();
   };
-
-  const unblock = async () => {
-    const ok = await confirm(
-      'Unblock this person?',
-      'They’ll be able to message you and reappear in your deck and study feed.',
-      'Unblock',
-      false,
-    );
-    if (!ok) return;
-    const { error } = await supabase
-      .from('blocks')
-      .delete()
-      .eq('blocker_id', session!.user.id)
-      .eq('blocked_id', id);
-    if (error) {
-      notify('Could not unblock', error.message);
-      return;
-    }
-    invalidateBlockState();
-  };
-
-  const report = async () => {
-    const ok = await confirm(
-      'Report this person?',
-      'Tell us what happened; the team reviews every report.',
-      'Report',
-      true,
-    );
-    if (!ok) return;
-    const { error } = await supabase
-      .from('reports')
-      .insert({ reporter_id: session!.user.id, reported_id: id, reason: 'in-app report' });
-    if (error) {
-      notify('Could not report', error.message);
-      return;
-    }
-    notify('Thanks', 'We got it.');
-  };
+  const report = () => doReport();
 
   if (profile.isLoading) return <Loading />;
   const p = profile.data;

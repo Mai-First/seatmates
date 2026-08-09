@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import Celebration from '../../components/Celebration';
-import { Button, Empty, Loading } from '../../components/ui';
+import { Empty, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import { schoolYearLabel, type DeckCard } from '../../lib/types';
@@ -121,11 +121,8 @@ export default function Swipe() {
         <Empty
           icon="school-outline"
           title="That’s everyone for now"
-          body="You’ve seen every classmate in your sections. Add another class, or check back as more people join."
+          body="You’ve seen every classmate in your sections. Check back as more people join."
         />
-        <View style={{ padding: space.lg }}>
-          <Button title="Add a class" variant="outline" onPress={() => router.push('/courses')} />
-        </View>
       </View>
     );
   }

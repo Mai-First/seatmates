@@ -88,6 +88,7 @@ export type ConversationSummary = {
   last_at: string;
   unread: boolean;
   muted: boolean;
+  pinned: boolean;
 };
 
 export type PendingFriendRequest = {
