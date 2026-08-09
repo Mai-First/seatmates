@@ -23,7 +23,7 @@ export default function Index() {
   if (!hasSupabaseConfig) {
     return (
       <View style={[styles.config, { backgroundColor: colors.bg }]}>
-        <Text style={type.title}>Almost there</Text>
+        <Text style={type.title}>almost there</Text>
         <Text style={[type.body, { textAlign: 'center' }]}>
           Supabase isn’t configured. Copy <Text style={code}>.env.example</Text> to{' '}
           <Text style={code}>.env</Text>, fill in the URL and anon key, then restart{' '}

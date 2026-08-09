@@ -155,8 +155,8 @@ export default function SignIn() {
 
         {stage === 'choice' && (
           <>
-            <Button title="Create account" onPress={() => go('create-email')} />
-            <Button title="Sign in" variant="outline" onPress={() => go('signin')} />
+            <Button title="create account" onPress={() => go('create-email')} />
+            <Button title="sign in" variant="outline" onPress={() => go('signin')} />
             <Text style={[type.fine, { textAlign: 'center' }]}>
               Columbia students only. You’ll verify with your @columbia.edu address.
             </Text>
@@ -166,7 +166,7 @@ export default function SignIn() {
         {stage === 'create-email' && (
           <>
             <Field
-              label="Your Columbia email"
+              label="your Columbia email"
               placeholder="you@columbia.edu"
               autoCapitalize="none"
               autoComplete="email"
@@ -176,8 +176,8 @@ export default function SignIn() {
               onSubmitEditing={startCreate}
               autoFocus
             />
-            <Button title="Send verification code" onPress={startCreate} loading={busy} />
-            <Button title="Back" variant="ghost" onPress={() => go('choice')} />
+            <Button title="send verification code" onPress={startCreate} loading={busy} />
+            <Button title="back" variant="ghost" onPress={() => go('choice')} />
           </>
         )}
 
@@ -194,19 +194,19 @@ export default function SignIn() {
               autoFocus
             />
             <Button
-              title="Verify"
+              title="verify"
               onPress={() => verifyCode('set-password')}
               loading={busy}
               disabled={code.length < 6}
             />
-            <Button title="Use a different email" variant="ghost" onPress={() => go('create-email')} />
+            <Button title="use a different email" variant="ghost" onPress={() => go('create-email')} />
           </>
         )}
 
         {stage === 'set-password' && (
           <>
             <Field
-              label="Create a password"
+              label="create a password"
               placeholder="At least 8 characters"
               secureTextEntry
               value={password}
@@ -214,14 +214,14 @@ export default function SignIn() {
               autoFocus
             />
             <Field
-              label="Confirm password"
+              label="confirm password"
               placeholder="Type it once more"
               secureTextEntry
               value={password2}
               onChangeText={setPassword2}
               onSubmitEditing={savePassword}
             />
-            <Button title="Save and continue" onPress={savePassword} loading={busy} />
+            <Button title="save and continue" onPress={savePassword} loading={busy} />
           </>
         )}
 
@@ -237,20 +237,20 @@ export default function SignIn() {
               onChangeText={setEmail}
             />
             <Field
-              label="Password"
+              label="password"
               placeholder="Your password"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
               onSubmitEditing={signInWithPassword}
             />
-            <Button title="Sign in" onPress={signInWithPassword} loading={busy} />
+            <Button title="sign in" onPress={signInWithPassword} loading={busy} />
             <Pressable onPress={sendSigninCode}>
               <Text style={[type.sub, { color: colors.primary, textAlign: 'center' }]}>
-                Forgot your password? Email me a code
+                forgot your password? email me a code
               </Text>
             </Pressable>
-            <Button title="Back" variant="ghost" onPress={() => go('choice')} />
+            <Button title="back" variant="ghost" onPress={() => go('choice')} />
           </>
         )}
 
@@ -267,7 +267,7 @@ export default function SignIn() {
               autoFocus
             />
             <Button
-              title="Verify"
+              title="verify"
               onPress={() => verifyCode('choice')}
               loading={busy}
               disabled={code.length < 6}
@@ -275,7 +275,7 @@ export default function SignIn() {
             <Text style={type.tiny}>
               You can set a password later in Account, under Change password.
             </Text>
-            <Button title="Back" variant="ghost" onPress={() => go('signin')} />
+            <Button title="back" variant="ghost" onPress={() => go('signin')} />
           </>
         )}
 

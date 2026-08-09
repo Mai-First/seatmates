@@ -29,6 +29,10 @@ export default function Study() {
   useFocusEffect(
     useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ['study-feed'] });
+      // Clears the tab's own badge — mirrors how opening Inbox clears the bell.
+      supabase.rpc('mark_study_notifications_read').then(() => {
+        queryClient.invalidateQueries({ queryKey: ['unread-study-count'] });
+      });
     }, [queryClient]),
   );
 
@@ -50,7 +54,7 @@ export default function Study() {
       }
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['study-feed'] }),
-    onError: (e) => notify('RSVP failed', e.message),
+    onError: (e) => notify('rsvp failed', e.message),
   });
 
   const remove = useMutation({
@@ -59,14 +63,14 @@ export default function Study() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['study-feed'] }),
-    onError: (e) => notify('Could not delete', e.message),
+    onError: (e) => notify('could not delete', e.message),
   });
 
   const confirmDelete = async (s: StudySession) => {
     const ok = await confirm(
-      `Delete "${s.title}"?`,
+      `delete "${s.title}"?`,
       'Everyone who RSVP’d gets told it was cancelled.',
-      'Delete',
+      'delete',
       true,
     );
     if (ok) remove.mutate(s.id);
@@ -79,7 +83,7 @@ export default function Study() {
   const past = (feed.data ?? []).filter((s) => +new Date(s.starts_at) < Date.now()).reverse();
   const rows: (StudySession | { header: string })[] = [
     ...upcoming,
-    ...(past.length ? [{ header: 'Past sessions' }, ...past] : []),
+    ...(past.length ? [{ header: 'past sessions' }, ...past] : []),
   ];
 
   return (
@@ -91,7 +95,7 @@ export default function Study() {
         ListEmptyComponent={
           <Empty
             icon="book-outline"
-            title="No study sessions yet"
+            title="no study sessions yet"
             body="Post one for any of your classes. Everyone taking that course will see it and can RSVP."
           />
         }
@@ -144,7 +148,7 @@ export default function Study() {
               <View style={styles.cardFooter}>
                 <Pressable onPress={() => router.push(`/profile/${item.host_id}`)}>
                   <Text style={type.sub}>
-                    Hosted by <Text style={{ color: colors.primary }}>{item.host_name}</Text>
+                    hosted by <Text style={{ color: colors.primary }}>{item.host_name}</Text>
                   </Text>
                 </Pressable>
                 {mine ? (
@@ -152,7 +156,7 @@ export default function Study() {
                   // just the count (also enforced server-side, PLAN review).
                   <View style={[styles.rsvp, { borderColor: colors.border }]}>
                     <Text style={{ color: colors.subtle, fontFamily: fontFamily.bold, fontSize: 14 }}>
-                      Hosting · {item.going_count} going
+                      hosting · {item.going_count} going
                     </Text>
                   </View>
                 ) : (
@@ -171,8 +175,8 @@ export default function Study() {
                         fontSize: 14,
                       }}>
                       {item.my_status === 'going'
-                        ? `Going · ${item.going_count}`
-                        : `RSVP · ${item.going_count} going`}
+                        ? `going · ${item.going_count}`
+                        : `rsvp · ${item.going_count} going`}
                     </Text>
                   </Pressable>
                 )}
@@ -210,26 +214,26 @@ function AddToCalendarModal({
       onRequestClose={onClose}>
       <Pressable style={styles.calendarBackdrop} onPress={onClose}>
         <Pressable style={[styles.calendarCard, { backgroundColor: colors.bg }]}>
-          <Text style={type.h2}>Add to calendar</Text>
+          <Text style={type.h2}>add to calendar</Text>
           <Text style={[type.sub, { marginBottom: space.sm }]}>
             One-hour block starting when the session does.
           </Text>
           <Button
-            title="Add to Google Calendar"
+            title="add to google calendar"
             onPress={() => {
               if (session) Linking.openURL(googleCalendarUrl(session));
               onClose();
             }}
           />
           <Button
-            title="Apple / Outlook (.ics)"
+            title="apple / outlook (.ics)"
             variant="outline"
             onPress={() => {
               if (session) downloadIcs(session);
               onClose();
             }}
           />
-          <Button title="Cancel" variant="ghost" onPress={onClose} />
+          <Button title="cancel" variant="ghost" onPress={onClose} />
         </Pressable>
       </Pressable>
     </Modal>

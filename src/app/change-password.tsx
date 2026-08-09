@@ -23,15 +23,15 @@ export default function ChangePassword() {
 
   const save = async () => {
     if (!current) {
-      setError('Enter your current password.');
+      setError('enter your current password.');
       return;
     }
     if (password.length < 8) {
-      setError('At least 8 characters.');
+      setError('at least 8 characters.');
       return;
     }
     if (password !== password2) {
-      setError('Passwords don’t match.');
+      setError('passwords don’t match.');
       return;
     }
     setBusy(true);
@@ -43,7 +43,7 @@ export default function ChangePassword() {
     });
     if (reauthErr) {
       setBusy(false);
-      setError('That’s not your current password.');
+      setError('that’s not your current password.');
       return;
     }
 
@@ -53,7 +53,7 @@ export default function ChangePassword() {
       setError(err.message);
       return;
     }
-    notify('Password saved', 'Use it next time you sign in.');
+    notify('password saved', 'Use it next time you sign in.');
     router.back();
   };
 
@@ -70,7 +70,7 @@ export default function ChangePassword() {
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
       <Text style={type.sub}>You’ll sign in with your Columbia email and this password.</Text>
       <Field
-        label="Current password"
+        label="current password"
         placeholder="Your password today"
         secureTextEntry
         value={current}
@@ -78,21 +78,21 @@ export default function ChangePassword() {
         autoFocus
       />
       <Field
-        label="New password"
+        label="new password"
         placeholder="At least 8 characters"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <Field
-        label="Repeat it"
+        label="repeat it"
         placeholder="Same thing again"
         secureTextEntry
         value={password2}
         onChangeText={setPassword2}
         onSubmitEditing={save}
       />
-      <Button title="Save password" onPress={save} loading={busy} />
+      <Button title="save password" onPress={save} loading={busy} />
       {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
       <Pressable onPress={forgotPassword}>
         <Text style={[type.sub, { color: colors.primary, textAlign: 'center' }]}>

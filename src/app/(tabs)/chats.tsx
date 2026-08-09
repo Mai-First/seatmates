@@ -40,7 +40,18 @@ export default function Chats() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
-    onError: (e) => notify('Could not update', e.message),
+    onError: (e) => notify('could not update', e.message),
+  });
+
+  const markRead = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const { error } = await supabase.rpc('mark_conversation_read', {
+        p_conversation: conversationId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
+    onError: (e) => notify('could not update', e.message),
   });
 
   useFocusEffect(
@@ -60,7 +71,7 @@ export default function Chats() {
       <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
         <Ionicons name="person-add-outline" size={22} color={colors.primary} />
       </View>
-      <Text style={[type.body, { flex: 1 }]}>Friend requests</Text>
+      <Text style={[type.body, { flex: 1 }]}>friend requests</Text>
       {requestCount > 0 ? (
         <View>
           <Badge text={String(requestCount)} />
@@ -76,7 +87,7 @@ export default function Chats() {
       onPress={() => router.push('/chats-archived')}
       style={[styles.archivedRow, { borderTopColor: colors.border }]}>
       <Ionicons name="archive-outline" size={20} color={colors.subtle} />
-      <Text style={[type.sub, { flex: 1 }]}>Archived chats</Text>
+      <Text style={[type.sub, { flex: 1 }]}>archived chats</Text>
       <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
     </Pressable>
   );
@@ -99,8 +110,8 @@ export default function Chats() {
         {requestsRow}
         <Empty
           icon="chatbubbles-outline"
-          title="No chats yet"
-          body="Add classes to join their group chats, or match with a classmate to start a DM."
+          title="no chats yet"
+          body="add classes to join their group chats, or match with a classmate to start a dm."
         />
         {archivedLink}
       </View>
@@ -120,24 +131,30 @@ export default function Chats() {
       ListFooterComponent={archivedLink}
       renderItem={({ item, index }) => (
         <>
-          {index === firstPinned && <SectionHeader label="Pinned" />}
-          {index === firstUnpinnedSection && <SectionHeader label="Class group chats" />}
-          {index === firstUnpinnedDm && <SectionHeader label="Direct messages" />}
-          <ChatRow item={item} onMarkUnread={() => markUnread.mutate(item.id)} />
+          {index === firstPinned && <SectionHeader label="pinned" />}
+          {index === firstUnpinnedSection && <SectionHeader label="class group chats" />}
+          {index === firstUnpinnedDm && <SectionHeader label="direct messages" />}
+          <ChatRow
+            item={item}
+            onToggleRead={() =>
+              item.unread ? markRead.mutate(item.id) : markUnread.mutate(item.id)
+            }
+          />
         </>
       )}
     />
   );
 }
 
-/** Swipe right to reveal "mark unread" — left as its own component so each
- * row's Swipeable ref (used to snap it shut after the action) stays local. */
+/** Swipe right to toggle read state — reads "mark as read" on an unread
+ * chat, "mark unread" on a read one. Left as its own component so each row's
+ * Swipeable ref (used to snap it shut after the action) stays local. */
 function ChatRow({
   item,
-  onMarkUnread,
+  onToggleRead,
 }: {
   item: ConversationSummary;
-  onMarkUnread: () => void;
+  onToggleRead: () => void;
 }) {
   const { colors, type } = useTheme();
   const swipeRef = useRef<Swipeable>(null);
@@ -149,12 +166,18 @@ function ChatRow({
       renderLeftActions={() => (
         <Pressable
           onPress={() => {
-            onMarkUnread();
+            onToggleRead();
             swipeRef.current?.close();
           }}
           style={[styles.unreadAction, { backgroundColor: colors.primary }]}>
-          <Ionicons name="mail-unread-outline" size={22} color={colors.onFill} />
-          <Text style={[styles.unreadActionText, { color: colors.onFill }]}>Mark unread</Text>
+          <Ionicons
+            name={item.unread ? 'mail-open-outline' : 'mail-unread-outline'}
+            size={22}
+            color={colors.onFill}
+          />
+          <Text style={[styles.unreadActionText, { color: colors.onFill }]}>
+            {item.unread ? 'mark as read' : 'mark unread'}
+          </Text>
         </Pressable>
       )}>
       <Pressable onPress={() => router.push(`/chat/${item.id}`)} style={[styles.row, { backgroundColor: colors.bg }]}>
@@ -182,7 +205,7 @@ function ChatRow({
           <Text
             style={[type.sub, item.unread && { color: colors.text, fontFamily: fontFamily.medium }]}
             numberOfLines={1}>
-            {item.last_body ?? item.subtitle ?? 'Say something first'}
+            {item.last_body ?? item.subtitle ?? 'say something first'}
           </Text>
         </View>
         {item.unread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}

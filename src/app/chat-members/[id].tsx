@@ -30,7 +30,7 @@ export default function ChatMembers() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members', id] }),
-    onError: (e) => notify('Could not send request', e.message),
+    onError: (e) => notify('could not send request', e.message),
   });
 
   if (members.isLoading) return <Loading />;
@@ -47,21 +47,21 @@ export default function ChatMembers() {
             <Pressable style={styles.info} onPress={() => router.push(`/profile/${item.id}`)}>
               <Avatar uri={item.photo_url} name={item.full_name} size={44} />
               <View>
-                <Text style={type.body}>{item.full_name ?? 'Classmate'}</Text>
+                <Text style={type.body}>{item.full_name ?? 'classmate'}</Text>
                 {item.major ? <Text style={type.sub}>{item.major}</Text> : null}
               </View>
             </Pressable>
             {item.relationship === 'none' && (
-              <Button small title="Add friend" onPress={() => request.mutate(item.id)} />
+              <Button small title="add friend" onPress={() => request.mutate(item.id)} />
             )}
             {item.relationship === 'out_pending' && (
-              <Button small title="Requested" variant="outline" disabled onPress={() => {}} />
+              <Button small title="requested" variant="outline" disabled onPress={() => {}} />
             )}
             {item.relationship === 'in_pending' && (
-              <Button small title="Respond" variant="outline" onPress={() => router.push('/inbox')} />
+              <Button small title="respond" variant="outline" onPress={() => router.push('/inbox')} />
             )}
             {item.relationship === 'friends' && (
-              <Text style={{ color: colors.success, fontWeight: '600' }}>Friends</Text>
+              <Text style={{ color: colors.success, fontWeight: '600' }}>friends</Text>
             )}
           </View>
         )}

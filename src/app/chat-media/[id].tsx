@@ -37,7 +37,7 @@ export default function ChatMedia() {
     return (
       <Empty
         icon="images-outline"
-        title="Nothing shared yet"
+        title="nothing shared yet"
         body="Photos and files sent in this chat show up here."
       />
     );
@@ -47,7 +47,7 @@ export default function ChatMedia() {
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
       {photos.length > 0 && (
         <View style={{ gap: space.sm }}>
-          <Text style={type.tiny}>Photos ({photos.length})</Text>
+          <Text style={type.tiny}>photos ({photos.length})</Text>
           <View style={styles.grid}>
             {photos.map((m) => (
               <Pressable
@@ -63,7 +63,7 @@ export default function ChatMedia() {
 
       {files.length > 0 && (
         <View style={{ gap: space.sm }}>
-          <Text style={type.tiny}>Files ({files.length})</Text>
+          <Text style={type.tiny}>files ({files.length})</Text>
           {files.map((m) => (
             <Pressable
               key={m.id}
@@ -71,7 +71,7 @@ export default function ChatMedia() {
               style={[styles.fileRow, { borderBottomColor: colors.border }]}>
               <Ionicons name="document-outline" size={22} color={colors.primary} />
               <Text style={[type.body, { flex: 1 }]} numberOfLines={1}>
-                {m.attachment_name ?? 'File'}
+                {m.attachment_name ?? 'file'}
               </Text>
               <Ionicons name="open-outline" size={18} color={colors.subtle} />
             </Pressable>

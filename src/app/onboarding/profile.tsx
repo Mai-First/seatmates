@@ -73,7 +73,7 @@ export default function OnboardingProfile() {
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
       setPhotoUrl(`${data.publicUrl}?v=${Date.now()}`); // bust image cache
     } catch (e: unknown) {
-      notify('Upload failed', e instanceof Error ? e.message : 'Try again.');
+      notify('upload failed', e instanceof Error ? e.message : 'Try again.');
     } finally {
       setBusy(false);
     }
@@ -82,19 +82,19 @@ export default function OnboardingProfile() {
   const save = async () => {
     if (!session) return;
     if (!name.trim()) {
-      notify('Name required', 'Classmates need something to call you.');
+      notify('name required', 'Classmates need something to call you.');
       return;
     }
     if (!photoUrl) {
-      notify('Photo required', 'Add a profile photo so classmates know who they’re meeting.');
+      notify('photo required', 'Add a profile photo so classmates know who they’re meeting.');
       return;
     }
     if (!studySpot.trim()) {
-      notify('Study spot required', 'Tell classmates where you like to study.');
+      notify('study spot required', 'Tell classmates where you like to study.');
       return;
     }
     if (!school || !gradYear) {
-      notify('School and year required', 'Pick your school and graduation year.');
+      notify('school and year required', 'Pick your school and graduation year.');
       return;
     }
     setBusy(true);
@@ -116,7 +116,7 @@ export default function OnboardingProfile() {
       .eq('id', session.user.id);
     setBusy(false);
     if (error) {
-      notify('Could not save', error.message);
+      notify('could not save', error.message);
       return;
     }
     await queryClient.invalidateQueries({ queryKey: ['profile'] });
@@ -139,19 +139,19 @@ export default function OnboardingProfile() {
       <Pressable onPress={pickPhoto} style={styles.photoRow}>
         <Avatar uri={photoUrl} name={name || '?'} size={84} />
         <Text style={{ color: colors.primary, fontWeight: '600' }}>
-          {photoUrl ? 'Change photo' : 'Add a photo (required)'}
+          {photoUrl ? 'change photo' : 'add a photo (required)'}
         </Text>
         {!isEdit && (
           <Text style={[type.fine, { textAlign: 'center', paddingHorizontal: space.lg }]}>
-            Be silly, be serious, show your true nerdy self — just make it you.
+            be silly, be serious, show your true nerdy self — just make it you.
           </Text>
         )}
       </Pressable>
 
-      <Field label="Name" placeholder="Alex Morgan" value={name} onChangeText={setName} />
+      <Field label="name" placeholder="Alex Morgan" value={name} onChangeText={setName} />
 
       <View style={{ gap: space.xs }}>
-        <Text style={type.sub}>School</Text>
+        <Text style={type.sub}>school</Text>
         <View style={styles.chips}>
           {SCHOOLS.map((s) => (
             <Pressable
@@ -175,7 +175,7 @@ export default function OnboardingProfile() {
       </View>
 
       <View style={{ gap: space.xs }}>
-        <Text style={type.sub}>Graduation year</Text>
+        <Text style={type.sub}>graduation year</Text>
         <View style={styles.chips}>
           {GRAD_YEARS.map((y) => (
             <Pressable
@@ -198,15 +198,15 @@ export default function OnboardingProfile() {
         </View>
       </View>
 
-      <Field label="Major" placeholder="Computer Science" value={major} onChangeText={setMajor} />
+      <Field label="major" placeholder="Computer Science" value={major} onChangeText={setMajor} />
       <Field
-        label="Where you're from"
+        label="where you're from"
         placeholder="Queens, NY"
         value={hometown}
         onChangeText={setHometown}
       />
       <Field
-        label="Bio (optional)"
+        label="bio (optional)"
         placeholder="A line or two about you"
         value={bio}
         onChangeText={setBio}
@@ -215,20 +215,20 @@ export default function OnboardingProfile() {
         style={{ minHeight: 80, textAlignVertical: 'top' }}
       />
       <Field
-        label="Favorite study spot"
+        label="favorite study spot"
         placeholder="Butler 4th floor, Milstein, a specific bench…"
         value={studySpot}
         onChangeText={setStudySpot}
       />
       <Field
-        label="Instagram (optional)"
+        label="instagram (optional)"
         placeholder="handle"
         autoCapitalize="none"
         value={instagram}
         onChangeText={setInstagram}
       />
       <Field
-        label="LinkedIn (optional)"
+        label="linkedin (optional)"
         placeholder="in/yourname"
         autoCapitalize="none"
         value={linkedin}
@@ -239,7 +239,7 @@ export default function OnboardingProfile() {
 
       <View style={styles.emailToggleRow}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={type.body}>Show my Columbia email</Text>
+          <Text style={type.body}>show my Columbia email</Text>
           <Text style={type.sub}>Visible on your profile to other signed-in students.</Text>
         </View>
         <Switch
@@ -251,7 +251,7 @@ export default function OnboardingProfile() {
       </View>
 
       <Button
-        title={isEdit ? 'Save' : 'Continue'}
+        title={isEdit ? 'save' : 'continue'}
         onPress={save}
         loading={busy}
         disabled={!name.trim() || !photoUrl || !studySpot.trim() || !school || !gradYear}

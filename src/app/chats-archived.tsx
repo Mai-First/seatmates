@@ -29,7 +29,7 @@ export default function ArchivedChats() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries(),
-    onError: (e) => notify('Could not restore', e.message),
+    onError: (e) => notify('could not restore', e.message),
   });
 
   if (archived.isLoading) return <Loading />;
@@ -39,8 +39,8 @@ export default function ArchivedChats() {
     return (
       <Empty
         icon="archive-outline"
-        title="Nothing archived"
-        body="When a semester ends, archive it from the Account tab. Class chats move here instead of disappearing."
+        title="nothing archived"
+        body="When a semester ends, archive it from the account tab. Class chats move here instead of disappearing."
       />
     );
   }
@@ -61,7 +61,7 @@ export default function ArchivedChats() {
             <Text style={type.tiny}>read-only</Text>
           </View>
           <Pressable onPress={() => restore.mutate(item.id)} disabled={restore.isPending} hitSlop={8}>
-            <Text style={{ color: colors.primary, fontWeight: '600' }}>Restore</Text>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>restore</Text>
           </Pressable>
         </Pressable>
       )}

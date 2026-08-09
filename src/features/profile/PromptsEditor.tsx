@@ -44,7 +44,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
       setAnswering(null);
       setAnswer('');
     },
-    onError: (e) => notify('Could not add', e.message),
+    onError: (e) => notify('could not add', e.message),
   });
 
   const remove = useMutation({
@@ -53,7 +53,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['profile-prompts', profileId] }),
-    onError: (e) => notify('Could not remove', e.message),
+    onError: (e) => notify('could not remove', e.message),
   });
 
   const used = new Set((prompts.data ?? []).map((p) => p.prompt));
@@ -61,7 +61,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
 
   return (
     <View style={{ gap: space.sm }}>
-      <Text style={type.sub}>Prompts (optional — add as many as you want)</Text>
+      <Text style={type.sub}>prompts (optional — add as many as you want)</Text>
       {(prompts.data ?? []).map((p) => (
         <View
           key={p.id}
@@ -81,7 +81,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
           onPress={() => setPickerOpen(true)}
           style={[styles.addRow, { borderColor: colors.primary }]}>
           <Ionicons name="add-circle-outline" size={20} color={colors.primary} />
-          <Text style={{ color: colors.primary, fontFamily: fontFamily.semibold }}>Add a prompt</Text>
+          <Text style={{ color: colors.primary, fontFamily: fontFamily.semibold }}>add a prompt</Text>
         </Pressable>
       )}
 
@@ -92,7 +92,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
         onRequestClose={() => setPickerOpen(false)}>
         <View style={[styles.modalRoot, { backgroundColor: colors.bg }]}>
           <View style={[styles.modalHeader, { borderBottomColor: colors.border }]}>
-            <Text style={type.h2}>Pick a prompt</Text>
+            <Text style={type.h2}>pick a prompt</Text>
             <Pressable onPress={() => setPickerOpen(false)} hitSlop={8}>
               <Ionicons name="close" size={26} color={colors.text} />
             </Pressable>
@@ -125,13 +125,13 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
               autoFocus
             />
             <Button
-              title="Add to profile"
+              title="add to profile"
               onPress={() => add.mutate()}
               loading={add.isPending}
               disabled={!answer.trim()}
             />
             <Button
-              title="Cancel"
+              title="cancel"
               variant="ghost"
               onPress={() => {
                 setAnswering(null);

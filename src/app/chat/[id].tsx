@@ -26,11 +26,11 @@ import { confirm, notify } from '../../lib/dialogs';
 
 // Static for now; swap for an Edge Function + Claude if Phase 4 lands early (PLAN A5).
 const ICEBREAKERS = [
-  'Rate the lecture pace so far: gentle jog or full sprint?',
-  'What are you calling this class in your notes app? Be honest.',
-  'Study spot of choice: Butler, Milstein, or somewhere secret?',
-  'What made you take this class?',
-  'PSet buddy? I bring snacks.',
+  'rate the lecture pace so far: gentle jog or full sprint?',
+  'what are you calling this class in your notes app? be honest.',
+  'study spot of choice: butler, milstein, or somewhere secret?',
+  'what made you take this class?',
+  'pset buddy? I bring snacks.',
 ];
 
 export default function ChatThread() {
@@ -80,6 +80,12 @@ export default function ChatThread() {
   // up delete-for-everyone, which is an UPDATE (soft delete), not an INSERT.
   useEffect(() => {
     if (!id) return;
+    const markRead = () =>
+      supabase.rpc('mark_conversation_read', { p_conversation: id }).then(() => {
+        // So the Chats-tab badge and unread dot drop the moment you open the
+        // chat, not just when you leave it.
+        queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      });
     const channel = supabase
       .channel(`messages-${id}`)
       .on(
@@ -87,11 +93,11 @@ export default function ChatThread() {
         { event: '*', schema: 'public', table: 'messages', filter: `conversation_id=eq.${id}` },
         () => {
           queryClient.invalidateQueries({ queryKey: ['messages', id] });
-          supabase.rpc('mark_conversation_read', { p_conversation: id });
+          markRead();
         },
       )
       .subscribe();
-    supabase.rpc('mark_conversation_read', { p_conversation: id });
+    markRead();
     return () => {
       supabase.removeChannel(channel);
       // Belt and suspenders: the Chats list's own focus-effect invalidation
@@ -113,7 +119,7 @@ export default function ChatThread() {
       queryClient.invalidateQueries({ queryKey: ['messages', id] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
-    onError: (e) => notify('Not sent', e.message),
+    onError: (e) => notify('not sent', e.message),
   });
 
   const uploadAttachment = async (kind: 'image' | 'file', uri: string, name: string, contentType: string) => {
@@ -139,7 +145,7 @@ export default function ChatThread() {
       queryClient.invalidateQueries({ queryKey: ['messages', id] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     } catch (e: unknown) {
-      notify('Could not send', e instanceof Error ? e.message : 'Try again.');
+      notify('could not send', e instanceof Error ? e.message : 'Try again.');
     } finally {
       setUploading(false);
     }
@@ -149,7 +155,7 @@ export default function ChatThread() {
     setAttachOpen(false);
     const perm = await ImagePicker.requestCameraPermissionsAsync();
     if (!perm.granted) {
-      notify('Camera access needed', 'Enable it in Settings to take a photo.');
+      notify('camera access needed', 'Enable it in Settings to take a photo.');
       return;
     }
     const result = await ImagePicker.launchCameraAsync({ mediaTypes: 'images', quality: 0.7 });
@@ -176,15 +182,15 @@ export default function ChatThread() {
 
   const deleteMessage = async (messageId: string) => {
     const ok = await confirm(
-      'Delete for everyone?',
+      'delete for everyone?',
       'This removes the message for everyone in the chat. It can’t be undone.',
-      'Delete',
+      'delete',
       true,
     );
     if (!ok) return;
     const { error } = await supabase.rpc('delete_message_for_everyone', { p_message_id: messageId });
     if (error) {
-      notify('Could not delete', error.message);
+      notify('could not delete', error.message);
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['messages', id] });
@@ -210,7 +216,7 @@ export default function ChatThread() {
       keyboardVerticalOffset={90}>
       <Stack.Screen
         options={{
-          title: info.data?.title ?? 'Chat',
+          title: info.data?.title ?? 'chat',
           headerRight: () =>
             info.data ? (
               <Pressable onPress={() => router.push(`/chat-options/${id}`)} hitSlop={8}>
@@ -230,7 +236,7 @@ export default function ChatThread() {
             <View style={styles.icebreakers}>
               {/* Inverted list flips children; flip back. */}
               <Text style={[type.sub, { textAlign: 'center' }]}>
-                Starting is the hard part. Steal one:
+                starting is the hard part. steal one:
               </Text>
               {ICEBREAKERS.map((line) => (
                 <Pressable
@@ -261,7 +267,7 @@ export default function ChatThread() {
             color={colors.subtle}
           />
           <Text style={type.sub}>
-            {info.data?.blocked ? 'This person is blocked' : 'Archived, read-only'}
+            {info.data?.blocked ? 'this person is blocked' : 'archived, read-only'}
           </Text>
         </View>
       ) : (
@@ -275,7 +281,7 @@ export default function ChatThread() {
           </Pressable>
           <TextInput
             style={[styles.input, { borderColor: colors.border, color: colors.text }]}
-            placeholder="Message…"
+            placeholder="message…"
             placeholderTextColor={colors.subtle}
             value={draft}
             onChangeText={setDraft}
@@ -335,7 +341,7 @@ function MessageBubble({
           // Tap a name to open the profile → add friend from there (PLAN D9).
           <Pressable onPress={() => router.push(`/profile/${message.sender_id}`)}>
             <Text style={[styles.senderName, { color: colors.primary }]}>
-              {message.sender?.full_name ?? 'Classmate'}
+              {message.sender?.full_name ?? 'classmate'}
             </Text>
           </Pressable>
         )}
@@ -347,7 +353,7 @@ function MessageBubble({
               fontStyle: 'italic',
               fontFamily: fontFamily.ui,
             }}>
-            This message was deleted
+            this message was deleted
           </Text>
         ) : (
           <>
@@ -375,7 +381,7 @@ function MessageBubble({
                     flex: 1,
                   }}
                   numberOfLines={1}>
-                  {message.attachment_name ?? 'File'}
+                  {message.attachment_name ?? 'file'}
                 </Text>
               </Pressable>
             ) : null}
@@ -415,11 +421,11 @@ function AttachPickerModal({
     <Modal visible={open} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.attachBackdrop} onPress={onClose}>
         <Pressable style={[styles.attachCard, { backgroundColor: colors.bg }]}>
-          <Text style={type.h2}>Add to message</Text>
-          <Button title="Take photo" onPress={onCamera} />
-          <Button title="Photo library" variant="outline" onPress={onLibrary} />
-          <Button title="File" variant="outline" onPress={onFile} />
-          <Button title="Cancel" variant="ghost" onPress={onClose} />
+          <Text style={type.h2}>add to message</Text>
+          <Button title="take photo" onPress={onCamera} />
+          <Button title="photo library" variant="outline" onPress={onLibrary} />
+          <Button title="file" variant="outline" onPress={onFile} />
+          <Button title="cancel" variant="ghost" onPress={onClose} />
         </Pressable>
       </Pressable>
     </Modal>

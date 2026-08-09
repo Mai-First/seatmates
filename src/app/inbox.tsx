@@ -51,7 +51,7 @@ export default function Inbox() {
         setCelebrate({ name: args.actorName ?? 'your classmate', conversationId });
       }
     },
-    onError: (e) => notify('Something broke', e.message),
+    onError: (e) => notify('something broke', e.message),
   });
 
   if (inbox.isLoading) return <Loading />;
@@ -70,7 +70,7 @@ export default function Inbox() {
       <>
         <Empty
           icon="notifications-outline"
-          title="Nothing yet"
+          title="nothing yet"
           body="Friend requests, matches, and announcements land here."
         />
         {overlay}
@@ -112,7 +112,7 @@ export default function Inbox() {
               <View style={{ flexDirection: 'row', gap: space.sm }}>
                 <Button
                   small
-                  title="Accept"
+                  title="accept"
                   onPress={() =>
                     respond.mutate({
                       requestId: item.entity_id!,
@@ -123,7 +123,7 @@ export default function Inbox() {
                 />
                 <Button
                   small
-                  title="Decline"
+                  title="decline"
                   variant="outline"
                   onPress={() => respond.mutate({ requestId: item.entity_id!, accept: false })}
                 />
@@ -131,13 +131,13 @@ export default function Inbox() {
             )}
             {item.kind === 'friend_request' && item.request_status === 'accepted' && (
               <Text style={[type.sub, { color: colors.success }]}>
-                Accepted
+                accepted
               </Text>
             )}
             {(item.kind === 'new_match' || item.kind === 'request_accepted') && item.entity_id && (
               <Button
                 small
-                title="Open chat"
+                title="open chat"
                 variant="outline"
                 onPress={() => router.push(`/chat/${item.entity_id}`)}
               />
@@ -145,7 +145,7 @@ export default function Inbox() {
             {item.kind === 'study_new' && (
               <Button
                 small
-                title="View"
+                title="view"
                 variant="outline"
                 onPress={() => router.push('/study')}
               />

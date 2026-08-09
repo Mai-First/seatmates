@@ -72,7 +72,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
       if (error) throw error;
     },
     onSuccess: refresh,
-    onError: (e) => notify('Could not join', e.message),
+    onError: (e) => notify('could not join', e.message),
   });
 
   const drop = useMutation({
@@ -85,14 +85,14 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
       if (error) throw error;
     },
     onSuccess: refresh,
-    onError: (e) => notify('Could not drop', e.message),
+    onError: (e) => notify('could not drop', e.message),
   });
 
   const confirmDrop = async (c: MyCourse) => {
     const ok = await confirm(
-      `Drop ${c.code} §${c.section}?`,
+      `drop ${c.code} §${c.section}?`,
       'You’ll leave its group chat too. Your DMs stay.',
-      'Drop',
+      'drop',
       true,
     );
     if (ok) drop.mutate(c.section_id);
@@ -104,7 +104,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
       if (error) throw error;
     },
     onSuccess: refresh,
-    onError: (e) => notify('Could not rejoin', e.message),
+    onError: (e) => notify('could not rejoin', e.message),
   });
 
   const results = q.trim().length >= 2 ? (search.data ?? []) : [];
@@ -112,7 +112,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <Field
-        placeholder="Course code, title, or SSOL call number"
+        placeholder="course code, title, or SSOL call number"
         value={q}
         onChangeText={setQ}
         autoCapitalize="characters"
@@ -129,7 +129,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
               <Text style={[type.sub, { padding: space.md }]}>
-                No classes match that search. Try the course code (COMS W3157), the number
+                no classes match that search. Try the course code (COMS W3157), the number
                 alone (3157), or the call number.
               </Text>
             }
@@ -154,9 +154,9 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
                   </Text>
                 </View>
                 {item.enrolled_here ? (
-                  <Badge text="Joined" />
+                  <Badge text="joined" />
                 ) : (
-                  <Text style={[styles.join, { color: colors.primary }]}>Join</Text>
+                  <Text style={[styles.join, { color: colors.primary }]}>join</Text>
                 )}
               </Pressable>
             )}
@@ -167,18 +167,18 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
           data={[
             ...(mine.data ?? []),
             ...(showDrop && past.data?.length
-              ? [{ header: 'Past classes' } as const, ...past.data]
+              ? [{ header: 'past classes' } as const, ...past.data]
               : []),
           ]}
           keyExtractor={(c) => ('header' in c ? c.header : c.section_id)}
           ListHeaderComponent={
             <Text style={[type.h2, { paddingVertical: space.sm }]}>
-              My classes {mine.data?.length ? `(${mine.data.length})` : ''}
+              my classes {mine.data?.length ? `(${mine.data.length})` : ''}
             </Text>
           }
           ListEmptyComponent={
             <Text style={type.sub}>
-              Search above to add your classes. You’ll join each section’s group chat
+              search above to add your classes. You’ll join each section’s group chat
               automatically.
             </Text>
           }
@@ -211,12 +211,12 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
                   <Pressable
                     disabled={rejoin.isPending}
                     onPress={() => rejoin.mutate(item.section_id)}>
-                    <Text style={{ color: colors.primary, fontWeight: '600' }}>Rejoin chat</Text>
+                    <Text style={{ color: colors.primary, fontWeight: '600' }}>rejoin chat</Text>
                   </Pressable>
                 )}
                 {showDrop && !isPast && (
                   <Pressable onPress={() => confirmDrop(item)}>
-                    <Text style={{ color: colors.danger, fontWeight: '600' }}>Drop</Text>
+                    <Text style={{ color: colors.danger, fontWeight: '600' }}>drop</Text>
                   </Pressable>
                 )}
               </View>

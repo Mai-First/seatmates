@@ -88,7 +88,7 @@ export default function StudySessionForm() {
       queryClient.invalidateQueries({ queryKey: ['study-feed'] });
       router.back();
     },
-    onError: (e) => notify('Could not save', e.message),
+    onError: (e) => notify('could not save', e.message),
   });
 
   if (edit && existing.isLoading) return <Loading />;
@@ -98,8 +98,8 @@ export default function StudySessionForm() {
       style={{ backgroundColor: colors.bg }}
       contentContainerStyle={styles.body}
       keyboardShouldPersistTaps="handled">
-      <Stack.Screen options={{ title: edit ? 'Edit study session' : 'New study session' }} />
-      <Text style={type.sub}>Class</Text>
+      <Stack.Screen options={{ title: edit ? 'edit study session' : 'new study session' }} />
+      <Text style={type.sub}>class</Text>
       <View style={styles.chips}>
         {courses.map((c) => (
           <Pressable
@@ -121,20 +121,20 @@ export default function StudySessionForm() {
         ))}
       </View>
 
-      <Field label="Title" placeholder="Midterm grind session" value={title} onChangeText={setTitle} />
+      <Field label="title" placeholder="Midterm grind session" value={title} onChangeText={setTitle} />
       <Field
-        label="Details (optional)"
+        label="details (optional)"
         placeholder="What are you covering? Snacks?"
         value={description}
         onChangeText={setDescription}
         multiline
         style={{ minHeight: 70, textAlignVertical: 'top' }}
       />
-      <Field label="Location" placeholder="Butler 403" value={location} onChangeText={setLocation} />
-      <DateField label="When" value={when} onChange={setWhen} />
+      <Field label="location" placeholder="Butler 403" value={location} onChangeText={setLocation} />
+      <DateField label="when" value={when} onChange={setWhen} />
 
       <Button
-        title={edit ? 'Save changes' : 'Post it'}
+        title={edit ? 'save changes' : 'post it'}
         onPress={() => save.mutate()}
         loading={save.isPending}
         disabled={!courseId || !title.trim() || !when}

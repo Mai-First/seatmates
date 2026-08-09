@@ -38,22 +38,22 @@ function Navigator() {
         }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)/sign-in" options={{ headerShown: false }} />
-        <Stack.Screen name="onboarding/profile" options={{ title: 'Your profile' }} />
-        <Stack.Screen name="onboarding/schedule" options={{ title: 'Your classes' }} />
+        <Stack.Screen name="onboarding/profile" options={{ title: 'your profile' }} />
+        <Stack.Screen name="onboarding/schedule" options={{ title: 'your classes' }} />
         <Stack.Screen name="onboarding/tutorial" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="chat/[id]" options={{ title: '' }} />
-        <Stack.Screen name="chat-options/[id]" options={{ title: 'Chat options' }} />
-        <Stack.Screen name="chat-media/[id]" options={{ title: 'Photos & files' }} />
-        <Stack.Screen name="chat-members/[id]" options={{ title: 'Members' }} />
-        <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'Profile' }} />
-        <Stack.Screen name="inbox" options={{ title: 'Notifications' }} />
-        <Stack.Screen name="friend-requests" options={{ title: 'Friend requests' }} />
-        <Stack.Screen name="notification-settings" options={{ title: 'Notification settings' }} />
-        <Stack.Screen name="chats-archived" options={{ title: 'Archived chats' }} />
-        <Stack.Screen name="change-password" options={{ title: 'Change password' }} />
-        <Stack.Screen name="study/new" options={{ title: 'New study session' }} />
-        <Stack.Screen name="courses" options={{ title: 'My classes' }} />
+        <Stack.Screen name="chat-options/[id]" options={{ title: 'chat options' }} />
+        <Stack.Screen name="chat-media/[id]" options={{ title: 'photos & files' }} />
+        <Stack.Screen name="chat-members/[id]" options={{ title: 'members' }} />
+        <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'profile' }} />
+        <Stack.Screen name="inbox" options={{ title: 'notifications' }} />
+        <Stack.Screen name="friend-requests" options={{ title: 'friend requests' }} />
+        <Stack.Screen name="notification-settings" options={{ title: 'notification settings' }} />
+        <Stack.Screen name="chats-archived" options={{ title: 'archived chats' }} />
+        <Stack.Screen name="change-password" options={{ title: 'change password' }} />
+        <Stack.Screen name="study/new" options={{ title: 'new study session' }} />
+        <Stack.Screen name="courses" options={{ title: 'my classes' }} />
       </Stack>
       <DialogHost />
     </>

@@ -60,7 +60,7 @@ export default function ProfileViewer() {
       if (error) throw error;
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['relationship', id] }),
-    onError: (e) => notify('Could not send', e.message),
+    onError: (e) => notify('could not send', e.message),
   });
 
   const openDm = async () => {
@@ -89,7 +89,7 @@ export default function ProfileViewer() {
           </Text>
         ) : null}
         <Text style={type.body}>
-          {[p.major, p.hometown].filter(Boolean).join(' · ') || 'Columbia student'}
+          {[p.major, p.hometown].filter(Boolean).join(' · ') || 'columbia student'}
         </Text>
         <View style={styles.sharedWrap}>
           {/* Every shared class, name + code (team decision) */}
@@ -100,24 +100,24 @@ export default function ProfileViewer() {
       </View>
 
       {rel === 'none' && (
-        <Button title="Add friend" onPress={() => request.mutate()} loading={request.isPending} />
+        <Button title="add friend" onPress={() => request.mutate()} loading={request.isPending} />
       )}
-      {rel === 'out_pending' && <Button title="Request sent" variant="outline" disabled onPress={() => {}} />}
+      {rel === 'out_pending' && <Button title="request sent" variant="outline" disabled onPress={() => {}} />}
       {rel === 'in_pending' && (
-        <Button title="They asked first. Respond in Inbox" variant="outline" onPress={() => router.push('/inbox')} />
+        <Button title="they asked first. respond in inbox" variant="outline" onPress={() => router.push('/inbox')} />
       )}
-      {rel === 'friends' && <Button title="Message" onPress={openDm} />}
+      {rel === 'friends' && <Button title="message" onPress={openDm} />}
 
       {p.bio ? (
         <View style={styles.section}>
-          <Text style={type.tiny}>About</Text>
+          <Text style={type.tiny}>about</Text>
           <Text style={type.body}>{p.bio}</Text>
         </View>
       ) : null}
 
       {p.study_spot ? (
         <View style={styles.section}>
-          <Text style={type.tiny}>Favorite study spot</Text>
+          <Text style={type.tiny}>favorite study spot</Text>
           <Text style={type.body}>{p.study_spot}</Text>
         </View>
       ) : null}
@@ -131,7 +131,7 @@ export default function ProfileViewer() {
 
       {p.show_email !== false || p.instagram || p.linkedin ? (
       <View style={styles.section}>
-        <Text style={type.tiny}>Contact</Text>
+        <Text style={type.tiny}>contact</Text>
         {p.show_email !== false ? (
           <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
         ) : null}
@@ -153,16 +153,16 @@ export default function ProfileViewer() {
           {rel === 'blocked' ? (
             myBlock.data ? (
               <Pressable onPress={unblock}>
-                <Text style={{ color: colors.primary }}>Unblock</Text>
+                <Text style={{ color: colors.primary }}>unblock</Text>
               </Pressable>
             ) : null
           ) : (
             <Pressable onPress={block}>
-              <Text style={{ color: colors.danger }}>Block</Text>
+              <Text style={{ color: colors.danger }}>block</Text>
             </Pressable>
           )}
           <Pressable onPress={report}>
-            <Text style={{ color: colors.danger }}>Report</Text>
+            <Text style={{ color: colors.danger }}>report</Text>
           </Pressable>
         </View>
       )}

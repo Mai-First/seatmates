@@ -41,7 +41,7 @@ export default function OnboardingTutorial() {
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       <Pressable onPress={finish} style={styles.skip} hitSlop={8}>
-        <Text style={[type.sub, { color: colors.subtle }]}>Skip</Text>
+        <Text style={[type.sub, { color: colors.subtle }]}>skip</Text>
       </Pressable>
 
       <View style={styles.center}>
@@ -65,7 +65,7 @@ export default function OnboardingTutorial() {
 
       <View style={styles.footer}>
         <Button
-          title={last ? 'Let’s go' : 'Next'}
+          title={last ? 'let’s go' : 'next'}
           onPress={() => (last ? finish() : setStep((s) => s + 1))}
         />
       </View>

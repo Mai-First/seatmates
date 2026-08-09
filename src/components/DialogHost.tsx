@@ -46,10 +46,10 @@ export default function DialogHost() {
           {state?.message ? <Text style={[type.body, styles.message]}>{state.message}</Text> : null}
           <View style={styles.row}>
             {state?.kind === 'confirm' && (
-              <Button title="Cancel" variant="ghost" onPress={() => close(false)} />
+              <Button title="cancel" variant="ghost" onPress={() => close(false)} />
             )}
             <Button
-              title={state?.kind === 'confirm' ? state.confirmLabel : 'OK'}
+              title={state?.kind === 'confirm' ? state.confirmLabel : 'ok'}
               variant={state?.kind === 'confirm' && state.destructive ? 'danger' : 'primary'}
               onPress={() => close(true)}
             />

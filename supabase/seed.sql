@@ -33,7 +33,10 @@ from (values
   (14, 'taylorswift.demo@columbia.edu'),
   (15, 'vader.demo@columbia.edu'),
   (16, 'rihanna.demo@columbia.edu'),
-  (17, 'homer.demo@columbia.edu')
+  (17, 'homer.demo@columbia.edu'),
+  (18, 'mrbeast.demo@columbia.edu'),
+  (19, 'ellewoods.demo@columbia.edu'),
+  (20, 'yoda.demo@columbia.edu')
 ) as t (n, email)
 on conflict (id) do nothing;
 
@@ -112,6 +115,18 @@ from (values
   ('d0000000-0000-0000-0000-000000000017'::uuid, 'Homer Simpson', 'Nuclear Engineering',
    'Springfield', 'D''oh! Forgot the reading again. Send donuts.',
    null, null, 'https://i.pravatar.cc/300?img=54', 'The cafeteria, obviously',
+   'GS', 2030),
+  ('d0000000-0000-0000-0000-000000000018'::uuid, 'MrBeast', 'Business',
+   'Greenville, NC', 'Subscribe or I''m not helping with the group project. Kidding. Mostly.',
+   'mrbeast', null, 'https://i.pravatar.cc/300?img=8', 'Wherever the wifi is fastest',
+   'CC', 2028),
+  ('d0000000-0000-0000-0000-000000000019'::uuid, 'Elle Woods', 'Pre-Law',
+   'Bel Air, CA', 'What, like studying is hard? (It kind of is, actually.)',
+   'ellewoods', null, 'https://i.pravatar.cc/300?img=21', 'Law Library, front row',
+   'BC', 2027),
+  ('d0000000-0000-0000-0000-000000000020'::uuid, 'Yoda', 'Philosophy',
+   'Dagobah', 'Study, or study not. There is no cram.',
+   null, null, 'https://i.pravatar.cc/300?img=34', 'Low Library steps, meditating',
    'GS', 2030)
 ) as d (id, full_name, major, hometown, bio, instagram, linkedin, photo_url, study_spot,
         school, grad_year)
@@ -160,7 +175,13 @@ from (values
   ('d0000000-0000-0000-0000-000000000015'::uuid, 'HIST UN1786', '001'),
   ('d0000000-0000-0000-0000-000000000016'::uuid, 'COMS W3157', '001'),
   ('d0000000-0000-0000-0000-000000000016'::uuid, 'BIOL UN2005', '001'),
-  ('d0000000-0000-0000-0000-000000000017'::uuid, 'COMS W3157', '001')
+  ('d0000000-0000-0000-0000-000000000017'::uuid, 'COMS W3157', '001'),
+  ('d0000000-0000-0000-0000-000000000018'::uuid, 'COMS W3157', '001'),
+  ('d0000000-0000-0000-0000-000000000018'::uuid, 'ECON UN1105', '001'),
+  ('d0000000-0000-0000-0000-000000000019'::uuid, 'COMS W3157', '001'),
+  ('d0000000-0000-0000-0000-000000000019'::uuid, 'PSYC UN1001', '001'),
+  ('d0000000-0000-0000-0000-000000000020'::uuid, 'COMS W3157', '001'),
+  ('d0000000-0000-0000-0000-000000000020'::uuid, 'HIST UN1786', '001')
 ) as t (id, code, sec)
 join public.courses c on c.code = t.code
 join public.sections s on s.course_id = c.id and s.section = t.sec

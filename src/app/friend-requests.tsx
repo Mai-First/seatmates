@@ -44,7 +44,7 @@ export default function FriendRequests() {
         setCelebrate({ name: args.name ?? 'your classmate', conversationId });
       }
     },
-    onError: (e) => notify('Could not respond', e.message),
+    onError: (e) => notify('could not respond', e.message),
   });
 
   if (requests.isLoading) return <Loading />;
@@ -63,7 +63,7 @@ export default function FriendRequests() {
       <>
         <Empty
           icon="people-outline"
-          title="No requests"
+          title="no requests"
           body="When someone wants to connect, they'll show up here."
         />
         {overlay}
@@ -83,21 +83,21 @@ export default function FriendRequests() {
             <Pressable style={styles.info} onPress={() => router.push(`/profile/${item.from_id}`)}>
               <Avatar uri={item.photo_url} name={item.full_name} size={48} />
               <View style={{ flex: 1, gap: 2 }}>
-                <Text style={type.body}>{item.full_name ?? 'Classmate'}</Text>
+                <Text style={type.body}>{item.full_name ?? 'classmate'}</Text>
                 {item.major ? <Text style={type.sub}>{item.major}</Text> : null}
               </View>
             </Pressable>
             <View style={{ flexDirection: 'row', gap: space.sm }}>
               <Button
                 small
-                title="Accept"
+                title="accept"
                 onPress={() =>
                   respond.mutate({ requestId: item.id, accept: true, name: item.full_name })
                 }
               />
               <Button
                 small
-                title="Decline"
+                title="decline"
                 variant="outline"
                 onPress={() =>
                   respond.mutate({ requestId: item.id, accept: false, name: item.full_name })

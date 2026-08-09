@@ -13,13 +13,13 @@ import { schoolYearLabel } from '../../lib/types';
 function Appearance() {
   const { colors, type, override, setOverride } = useTheme();
   const options: { label: string; value: Scheme | null }[] = [
-    { label: 'System', value: null },
-    { label: 'Light', value: 'light' },
-    { label: 'Dark', value: 'dark' },
+    { label: 'system', value: null },
+    { label: 'light', value: 'light' },
+    { label: 'dark', value: 'dark' },
   ];
   return (
     <View style={{ gap: space.sm }}>
-      <Text style={type.tiny}>Appearance</Text>
+      <Text style={type.tiny}>appearance</Text>
       <View style={[styles.segment, { backgroundColor: colors.surface }]}>
         {options.map((o) => {
           const active = override === o.value;
@@ -55,21 +55,21 @@ export default function Account() {
 
   const archiveSemester = async () => {
     const ok = await confirm(
-      'Are you sure the semester is over?',
-      'All your class group chats move to Archived (readable, not deleted), your classes are cleared, and your swipe deck resets for next semester. DMs and friends are untouched.',
-      'Archive semester',
+      'are you sure the semester is over?',
+      'All your class group chats move to archived (readable, not deleted), your classes are cleared, and your swipe deck resets for next semester. DMs and friends are untouched.',
+      'archive semester',
       true,
     );
     if (!ok) return;
     const { data, error } = await supabase.rpc('archive_semester');
     if (error) {
-      notify('Could not archive', error.message);
+      notify('could not archive', error.message);
       return;
     }
     queryClient.invalidateQueries();
     notify(
-      'Semester archived',
-      `${data} class${data === 1 ? '' : 'es'} moved to Archived. See you next term.`,
+      'semester archived',
+      `${data} class${data === 1 ? '' : 'es'} moved to archived. See you next term.`,
     );
   };
 
@@ -79,32 +79,32 @@ export default function Account() {
   const rows = [
     {
       icon: 'create-outline' as const,
-      label: 'Edit profile',
+      label: 'edit profile',
       onPress: () => router.push('/onboarding/profile?edit=1'),
     },
     {
       icon: 'school-outline' as const,
-      label: 'My classes (add / drop)',
+      label: 'my classes (add / drop)',
       onPress: () => router.push('/courses'),
     },
     {
       icon: 'options-outline' as const,
-      label: 'Notification settings',
+      label: 'notification settings',
       onPress: () => router.push('/notification-settings'),
     },
     {
       icon: 'archive-outline' as const,
-      label: 'Archive this semester',
+      label: 'archive this semester',
       onPress: archiveSemester,
     },
     {
       icon: 'key-outline' as const,
-      label: 'Change password',
+      label: 'change password',
       onPress: () => router.push('/change-password'),
     },
     {
       icon: 'log-out-outline' as const,
-      label: 'Sign out',
+      label: 'sign out',
       danger: true,
       onPress: async () => {
         // scope:'local' clears this device's session without needing the
@@ -119,20 +119,20 @@ export default function Account() {
     },
     {
       icon: 'trash-outline' as const,
-      label: 'Delete account',
+      label: 'delete account',
       danger: true,
       onPress: async () => {
         const ok = await confirm(
-          'Delete your account?',
+          'delete your account?',
           'This permanently removes your profile, matches, messages, RSVPs, and study sessions. It cannot be undone.',
-          'Delete forever',
+          'delete forever',
           true,
         );
         if (!ok) return;
         const really = await confirm(
-          'Last check',
+          'last check',
           'There is no recovery after this. Delete the account?',
-          'Yes, delete it',
+          'yes, delete it',
           true,
         );
         if (!really) return;
@@ -143,7 +143,7 @@ export default function Account() {
           .catch(() => {});
         const { error } = await supabase.rpc('delete_my_account');
         if (error) {
-          notify('Could not delete', error.message);
+          notify('could not delete', error.message);
           return;
         }
         try {
@@ -161,7 +161,7 @@ export default function Account() {
       <View style={[styles.card, { backgroundColor: colors.surface }]}>
         <Avatar uri={p?.photo_url} name={p?.full_name} size={72} />
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={type.h2}>{p?.full_name ?? 'Unnamed'}</Text>
+          <Text style={type.h2}>{p?.full_name ?? 'unnamed'}</Text>
           {schoolYearLabel(p?.school, p?.grad_year) ? (
             <Text style={[type.sub, { color: colors.primary }]}>
               {schoolYearLabel(p?.school, p?.grad_year)}

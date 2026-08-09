@@ -72,7 +72,7 @@ export default function DateField({ label, value, onChange }: DateFieldProps) {
                 onChange={(_e, d) => d && setDraft(d)}
               />
               <Button
-                title="Done"
+                title="done"
                 onPress={() => {
                   onChange(draft);
                   setIosOpen(false);

@@ -9,12 +9,12 @@ import { space, useTheme } from '../lib/theme';
 import type { NotificationKind, NotificationPrefs } from '../lib/types';
 
 const ROWS: { key: NotificationKind; label: string; body: string }[] = [
-  { key: 'friend_request', label: 'Friend requests', body: 'Someone wants to connect with you.' },
-  { key: 'request_accepted', label: 'Request accepted', body: 'Someone accepted your request.' },
-  { key: 'new_match', label: 'New matches', body: 'You and someone are now connected.' },
-  { key: 'study_new', label: 'New study sessions', body: 'A classmate posts one for your course.' },
-  { key: 'announcement', label: 'Announcements', body: 'Messages from the Seatmates team.' },
-  { key: 'message', label: 'Messages', body: 'New DMs and group chat messages (per-chat mute still applies).' },
+  { key: 'friend_request', label: 'friend requests', body: 'Someone wants to connect with you.' },
+  { key: 'request_accepted', label: 'request accepted', body: 'Someone accepted your request.' },
+  { key: 'new_match', label: 'new matches', body: 'You and someone are now connected.' },
+  { key: 'study_new', label: 'new study sessions', body: 'A classmate posts one for your course.' },
+  { key: 'announcement', label: 'announcements', body: 'Messages from the seatmates team.' },
+  { key: 'message', label: 'messages', body: 'New DMs and group chat messages (per-chat mute still applies).' },
 ];
 
 const DEFAULTS: NotificationPrefs = {
@@ -48,7 +48,7 @@ export default function NotificationSettings() {
       .eq('id', session!.user.id);
     if (error) {
       setPrefs(prefs); // revert
-      notify('Could not save', error.message);
+      notify('could not save', error.message);
       return;
     }
     queryClient.invalidateQueries({ queryKey: ['profile', session?.user.id] });

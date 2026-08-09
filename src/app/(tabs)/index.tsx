@@ -121,11 +121,11 @@ export default function Swipe() {
         <View style={[styles.emptyIcon, { backgroundColor: colors.accentSoft }]}>
           <Ionicons name="school-outline" size={26} color={colors.primary} />
         </View>
-        <Text style={[type.h2, { textAlign: 'center' }]}>That’s everyone for now</Text>
+        <Text style={[type.h2, { textAlign: 'center' }]}>that’s everyone for now</Text>
         <Text style={[type.sub, { textAlign: 'center', maxWidth: 300 }]}>
           You’ve seen every classmate in your sections. Check back as more people join.
         </Text>
-        <Button title="Say hi to your new friends" onPress={() => router.push('/chats')} />
+        <Button title="say hi to your new friends" onPress={() => router.push('/chats')} />
       </View>
     );
   }
@@ -245,7 +245,7 @@ function CardFace({ card }: { card: DeckCard }) {
             </Text>
           ) : null}
           <Text style={[type.body, { color: colors.white, opacity: 0.92 }]} numberOfLines={1}>
-            {[card.major, card.hometown].filter(Boolean).join(' · ') || 'Columbia student'}
+            {[card.major, card.hometown].filter(Boolean).join(' · ') || 'columbia student'}
           </Text>
         </View>
       </View>
@@ -277,11 +277,11 @@ function CardFace({ card }: { card: DeckCard }) {
           <View style={styles.sharedRow}>
             <Ionicons name="location-outline" size={16} color={colors.primary} />
             <Text style={[type.sub, { flex: 1 }]} numberOfLines={1}>
-              Studies at {card.study_spot}
+              studies at {card.study_spot}
             </Text>
           </View>
         ) : null}
-        <Text style={[type.tiny, { marginTop: 'auto' }]}>Tap for full profile</Text>
+        <Text style={[type.tiny, { marginTop: 'auto' }]}>tap for full profile</Text>
       </View>
     </View>
   );

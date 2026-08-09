@@ -67,7 +67,7 @@ export default function ChatOptions() {
       queryClient.invalidateQueries({ queryKey: ['conversation', id] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
-    onError: (e) => notify('Could not update', e.message),
+    onError: (e) => notify('could not update', e.message),
   });
 
   const togglePin = useMutation({
@@ -82,7 +82,7 @@ export default function ChatOptions() {
       queryClient.invalidateQueries({ queryKey: ['conversation', id] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
-    onError: (e) => notify('Could not update', e.message),
+    onError: (e) => notify('could not update', e.message),
   });
 
   const setIcon = useMutation({
@@ -97,7 +97,7 @@ export default function ChatOptions() {
       queryClient.invalidateQueries({ queryKey: ['conversation', id] });
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
     },
-    onError: (e) => notify('Could not update', e.message),
+    onError: (e) => notify('could not update', e.message),
   });
 
   const block = async () => {
@@ -106,9 +106,9 @@ export default function ChatOptions() {
 
   const leave = async () => {
     const ok = await confirm(
-      'Leave this group chat?',
+      'leave this group chat?',
       'You stay enrolled in the class and keep your DMs. Re-adding the class won’t re-add the chat.',
-      'Leave',
+      'leave',
       true,
     );
     if (!ok) return;
@@ -129,8 +129,8 @@ export default function ChatOptions() {
           onPress={() => otherId && router.push(`/profile/${otherId}`)}>
           <Avatar uri={other.data.photo_url} name={other.data.full_name} size={56} />
           <View style={{ flex: 1, gap: 2 }}>
-            <Text style={type.h2}>{other.data.full_name ?? 'Classmate'}</Text>
-            <Text style={type.sub}>View full profile</Text>
+            <Text style={type.h2}>{other.data.full_name ?? 'classmate'}</Text>
+            <Text style={type.sub}>view full profile</Text>
           </View>
           <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
         </Pressable>
@@ -138,7 +138,7 @@ export default function ChatOptions() {
 
       <View style={[styles.row, { borderBottomColor: colors.border }]}>
         <Ionicons name="pin-outline" size={22} color={colors.primary} />
-        <Text style={[type.body, { flex: 1 }]}>Pin chat</Text>
+        <Text style={[type.body, { flex: 1 }]}>pin chat</Text>
         <Switch
           value={info.data?.pinned ?? false}
           disabled={togglePin.isPending}
@@ -149,7 +149,7 @@ export default function ChatOptions() {
       </View>
       <View style={[styles.row, { borderBottomColor: colors.border }]}>
         <Ionicons name="notifications-off-outline" size={22} color={colors.primary} />
-        <Text style={[type.body, { flex: 1 }]}>Mute chat</Text>
+        <Text style={[type.body, { flex: 1 }]}>mute chat</Text>
         <Switch
           value={info.data?.muted ?? false}
           disabled={toggleMute.isPending}
@@ -161,7 +161,7 @@ export default function ChatOptions() {
 
       <ActionRow
         icon="images-outline"
-        label="Photos & files"
+        label="photos & files"
         onPress={() => router.push(`/chat-media/${id}`)}
       />
 
@@ -169,11 +169,11 @@ export default function ChatOptions() {
         <>
           <ActionRow
             icon="people-outline"
-            label="Members"
+            label="members"
             onPress={() => router.push(`/chat-members/${id}`)}
           />
           <View style={[styles.iconSection, { borderBottomColor: colors.border }]}>
-            <Text style={type.body}>Chat icon</Text>
+            <Text style={type.body}>chat icon</Text>
             <View style={styles.iconGrid}>
               {CHAT_ICONS.map((icon) => {
                 const active = info.data?.icon_name === icon;
@@ -192,21 +192,21 @@ export default function ChatOptions() {
               })}
             </View>
           </View>
-          <ActionRow icon="exit-outline" label="Leave group chat" danger onPress={leave} />
+          <ActionRow icon="exit-outline" label="leave group chat" danger onPress={leave} />
         </>
       ) : null}
 
       {isDm && other.data?.instagram ? (
         <ActionRow
           icon="logo-instagram"
-          label="Add on Instagram"
+          label="add on instagram"
           onPress={() => Linking.openURL(`https://instagram.com/${other.data!.instagram}`)}
         />
       ) : null}
       {isDm && other.data?.linkedin ? (
         <ActionRow
           icon="logo-linkedin"
-          label="Add on LinkedIn"
+          label="add on linkedin"
           onPress={() =>
             Linking.openURL(`https://linkedin.com/${other.data!.linkedin!.replace(/^\/+/, '')}`)
           }
@@ -217,12 +217,12 @@ export default function ChatOptions() {
         <>
           {rel === 'blocked' ? (
             myBlock.data ? (
-              <ActionRow icon="lock-open-outline" label="Unblock" onPress={unblock} />
+              <ActionRow icon="lock-open-outline" label="unblock" onPress={unblock} />
             ) : null
           ) : (
-            <ActionRow icon="ban-outline" label="Block" danger onPress={block} />
+            <ActionRow icon="ban-outline" label="block" danger onPress={block} />
           )}
-          <ActionRow icon="flag-outline" label="Report" danger onPress={doReport} />
+          <ActionRow icon="flag-outline" label="report" danger onPress={doReport} />
         </>
       ) : null}
     </ScrollView>

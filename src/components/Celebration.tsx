@@ -19,20 +19,20 @@ export default function Celebration({
     <Modal visible transparent animationType="fade" onRequestClose={onClose}>
       <View style={[styles.overlay, { backgroundColor: colors.bg }]}>
         <Text style={{ fontSize: 52 }}>🎉</Text>
-        <Text style={type.title}>You’re connected!</Text>
+        <Text style={type.title}>you’re connected!</Text>
         {/* the serif accent's second home, per the type scale */}
         <Text style={[type.accent, { color: colors.primary, textAlign: 'center' }]}>
           You and {name} are now friends.
         </Text>
         <View style={{ gap: space.sm, alignSelf: 'stretch' }}>
           <Button
-            title="Say hi"
+            title="say hi"
             onPress={() => {
               onClose();
               if (conversationId) router.push(`/chat/${conversationId}`);
             }}
           />
-          <Button title="Later" variant="ghost" onPress={onClose} />
+          <Button title="later" variant="ghost" onPress={onClose} />
         </View>
       </View>
     </Modal>
