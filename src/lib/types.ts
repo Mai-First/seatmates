@@ -15,7 +15,18 @@ export type Profile = {
   instagram: string | null;
   linkedin: string | null;
   photo_url: string | null;
+  notification_prefs: NotificationPrefs;
 };
+
+export type NotificationKind =
+  | 'friend_request'
+  | 'request_accepted'
+  | 'new_match'
+  | 'study_new'
+  | 'announcement'
+  | 'message';
+
+export type NotificationPrefs = Record<NotificationKind, boolean>;
 
 /** "SEAS '29" — null unless both parts are set. */
 export function schoolYearLabel(
@@ -41,8 +52,6 @@ export type DeckCard = {
   email: string;
   shared: SharedSection[];
   shared_count: number;
-  /** Set when THEY sent a pending request to me — the card offers accept/decline. */
-  request_id: string | null;
 };
 
 export type CatalogResult = {
@@ -78,6 +87,17 @@ export type ConversationSummary = {
   last_body: string | null;
   last_at: string;
   unread: boolean;
+  muted: boolean;
+};
+
+export type PendingFriendRequest = {
+  id: string;
+  from_id: string;
+  full_name: string | null;
+  major: string | null;
+  photo_url: string | null;
+  created_at: string;
+  source: 'swipe' | 'group_chat' | 'profile';
 };
 
 export type Message = {
@@ -121,6 +141,7 @@ export type InboxItem = {
     | 'announcement'
     | 'study_rsvp'
     | 'study_update'
+    | 'study_new'
     | 'report';
   body: string;
   created_at: string;

@@ -51,6 +51,7 @@ export default function ChatThread() {
             member: boolean;
             can_post: boolean;
             blocked: boolean;
+            muted: boolean;
           }
         | undefined;
     },
@@ -118,6 +119,21 @@ export default function ChatThread() {
     router.back();
   };
 
+  const toggleMute = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('set_conversation_muted', {
+        p_conversation: id,
+        p_muted: !info.data?.muted,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['conversation', id] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    },
+    onError: (e) => notify('Could not update', e.message),
+  });
+
   const isSection = info.data?.kind === 'section';
   const readOnly = info.data ? !info.data.can_post : false;
   const showIcebreakers =
@@ -139,14 +155,25 @@ export default function ChatThread() {
         options={{
           title: info.data?.title ?? 'Chat',
           headerRight: () =>
-            isSection && !readOnly ? (
+            info.data ? (
               <View style={{ flexDirection: 'row', gap: 18 }}>
-                <Pressable onPress={() => setMembersOpen(true)} hitSlop={8}>
-                  <Ionicons name="people-outline" size={24} color={colors.primary} />
+                {isSection && !readOnly && (
+                  <Pressable onPress={() => setMembersOpen(true)} hitSlop={8}>
+                    <Ionicons name="people-outline" size={24} color={colors.primary} />
+                  </Pressable>
+                )}
+                <Pressable onPress={() => toggleMute.mutate()} disabled={toggleMute.isPending} hitSlop={8}>
+                  <Ionicons
+                    name={info.data.muted ? 'notifications-off' : 'notifications-outline'}
+                    size={24}
+                    color={info.data.muted ? colors.subtle : colors.primary}
+                  />
                 </Pressable>
-                <Pressable onPress={leave} hitSlop={8}>
-                  <Ionicons name="exit-outline" size={24} color={colors.danger} />
-                </Pressable>
+                {isSection && !readOnly && (
+                  <Pressable onPress={leave} hitSlop={8}>
+                    <Ionicons name="exit-outline" size={24} color={colors.danger} />
+                  </Pressable>
+                )}
               </View>
             ) : undefined,
         }}

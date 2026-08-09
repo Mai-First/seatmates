@@ -93,6 +93,11 @@ export default function Account() {
       onPress: () => router.push('/inbox'),
     },
     {
+      icon: 'options-outline' as const,
+      label: 'Notification settings',
+      onPress: () => router.push('/notification-settings'),
+    },
+    {
       icon: 'archive-outline' as const,
       label: 'Archive this semester',
       onPress: archiveSemester,

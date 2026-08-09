@@ -3,10 +3,10 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Avatar, Empty, Loading } from '../../components/ui';
+import { Badge, Empty, Avatar, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, space, useTheme } from '../../lib/theme';
-import type { ConversationSummary } from '../../lib/types';
+import type { ConversationSummary, PendingFriendRequest } from '../../lib/types';
 
 export default function Chats() {
   const { colors, type } = useTheme();
@@ -20,10 +20,36 @@ export default function Chats() {
     },
   });
 
+  const requests = useQuery({
+    queryKey: ['pending-requests'],
+    queryFn: async (): Promise<PendingFriendRequest[]> => {
+      const { data, error } = await supabase.rpc('get_pending_friend_requests');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   useFocusEffect(
     useCallback(() => {
       queryClient.invalidateQueries({ queryKey: ['conversations'] });
+      queryClient.invalidateQueries({ queryKey: ['pending-requests'] });
     }, [queryClient]),
+  );
+
+  const requestCount = requests.data?.length ?? 0;
+  // Instagram-requests-tab vibes: a persistent entry point, badge only when
+  // there's something waiting.
+  const requestsRow = (
+    <Pressable
+      onPress={() => router.push('/friend-requests')}
+      style={[styles.requestsRow, { borderBottomColor: colors.border }]}>
+      <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
+        <Ionicons name="person-add-outline" size={22} color={colors.primary} />
+      </View>
+      <Text style={[type.body, { flex: 1 }]}>Friend requests</Text>
+      {requestCount > 0 ? <Badge text={String(requestCount)} /> : null}
+      <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
+    </Pressable>
   );
 
   // Reads as a list row like the Account tab, not a link floating mid-screen.
@@ -50,6 +76,7 @@ export default function Chats() {
   if (rows.length === 0) {
     return (
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
+        {requestsRow}
         <Empty
           icon="chatbubbles-outline"
           title="No chats yet"
@@ -67,6 +94,7 @@ export default function Chats() {
       style={{ backgroundColor: colors.bg }}
       data={rows}
       keyExtractor={(c) => c.id}
+      ListHeaderComponent={requestsRow}
       ListFooterComponent={archivedLink}
       renderItem={({ item, index }) => (
         <>
@@ -81,11 +109,14 @@ export default function Chats() {
               </View>
             )}
             <View style={{ flex: 1, gap: 2 }}>
-              <Text
-                style={[type.body, item.unread && { fontFamily: fontFamily.bold }]}
-                numberOfLines={1}>
-                {item.title}
-              </Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.xs }}>
+                <Text
+                  style={[type.body, item.unread && { fontFamily: fontFamily.bold }]}
+                  numberOfLines={1}>
+                  {item.title}
+                </Text>
+                {item.muted && <Ionicons name="notifications-off-outline" size={14} color={colors.subtle} />}
+              </View>
               <Text
                 style={[
                   type.sub,
@@ -129,6 +160,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   unreadDot: { width: 10, height: 10, borderRadius: 5 },
+  requestsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: space.md,
+    paddingHorizontal: space.lg,
+    paddingVertical: 12,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+  },
   archivedRow: {
     flexDirection: 'row',
     alignItems: 'center',

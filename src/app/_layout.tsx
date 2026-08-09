@@ -38,6 +38,8 @@ function Navigator() {
         <Stack.Screen name="chat/[id]" options={{ title: '' }} />
         <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'Profile' }} />
         <Stack.Screen name="inbox" options={{ title: 'Notifications' }} />
+        <Stack.Screen name="friend-requests" options={{ title: 'Friend requests' }} />
+        <Stack.Screen name="notification-settings" options={{ title: 'Notification settings' }} />
         <Stack.Screen name="chats-archived" options={{ title: 'Archived chats' }} />
         <Stack.Screen name="change-password" options={{ title: 'Change password' }} />
         <Stack.Screen name="study/new" options={{ title: 'New study session' }} />

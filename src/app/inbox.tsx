@@ -142,6 +142,14 @@ export default function Inbox() {
                 onPress={() => router.push(`/chat/${item.entity_id}`)}
               />
             )}
+            {item.kind === 'study_new' && (
+              <Button
+                small
+                title="View"
+                variant="outline"
+                onPress={() => router.push('/study')}
+              />
+            )}
           </View>
         </View>
       )}
