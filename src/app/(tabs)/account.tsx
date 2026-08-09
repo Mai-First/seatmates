@@ -88,11 +88,6 @@ export default function Account() {
       onPress: () => router.push('/courses'),
     },
     {
-      icon: 'notifications-outline' as const,
-      label: 'Notifications',
-      onPress: () => router.push('/inbox'),
-    },
-    {
       icon: 'options-outline' as const,
       label: 'Notification settings',
       onPress: () => router.push('/notification-settings'),

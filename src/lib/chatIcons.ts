@@ -1,0 +1,28 @@
+// Must exactly match the conversation_members.icon_name CHECK constraint in
+// supabase/migrations/20260812100000_lowercase_prompts_icons_unread.sql.
+export const CHAT_ICONS = [
+  'school-outline',
+  'book-outline',
+  'library-outline',
+  'bulb-outline',
+  'rocket-outline',
+  'planet-outline',
+  'flask-outline',
+  'calculator-outline',
+  'color-palette-outline',
+  'musical-notes-outline',
+  'football-outline',
+  'basketball-outline',
+  'game-controller-outline',
+  'cafe-outline',
+  'pizza-outline',
+  'heart-outline',
+  'star-outline',
+  'flame-outline',
+  'trophy-outline',
+  'paw-outline',
+  'leaf-outline',
+  'globe-outline',
+  'camera-outline',
+  'headset-outline',
+];

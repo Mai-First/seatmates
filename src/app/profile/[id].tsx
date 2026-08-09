@@ -27,6 +27,19 @@ export default function ProfileViewer() {
 
   const relationship = useRelationship(id);
 
+  const prompts = useQuery({
+    queryKey: ['profile-prompts', id],
+    queryFn: async (): Promise<{ id: string; prompt: string; answer: string }[]> => {
+      const { data, error } = await supabase
+        .from('profile_prompts')
+        .select('id, prompt, answer')
+        .eq('profile_id', id)
+        .order('created_at');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const shared = useQuery({
     queryKey: ['shared-sections', id],
     queryFn: async (): Promise<SharedSection[]> => {
@@ -109,6 +122,13 @@ export default function ProfileViewer() {
         </View>
       ) : null}
 
+      {(prompts.data ?? []).map((pr) => (
+        <View key={pr.id} style={[styles.promptCard, { borderColor: colors.border, backgroundColor: colors.card }]}>
+          <Text style={type.tiny}>{pr.prompt}</Text>
+          <Text style={type.body}>{pr.answer}</Text>
+        </View>
+      ))}
+
       {p.show_email !== false || p.instagram || p.linkedin ? (
       <View style={styles.section}>
         <Text style={type.tiny}>Contact</Text>
@@ -181,4 +201,5 @@ const styles = StyleSheet.create({
   },
   section: { gap: space.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: space.sm, paddingVertical: 4 },
+  promptCard: { gap: 4, borderWidth: 1, borderRadius: 16, padding: space.md },
 });

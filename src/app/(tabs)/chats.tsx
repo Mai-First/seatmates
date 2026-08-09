@@ -1,12 +1,14 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Swipeable } from 'react-native-gesture-handler';
 import { Badge, Empty, Avatar, Loading } from '../../components/ui';
+import { notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { subjectIcon } from '../../lib/subjectIcon';
-import { fontFamily, space, useTheme } from '../../lib/theme';
+import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import type { ConversationSummary, PendingFriendRequest } from '../../lib/types';
 
 export default function Chats() {
@@ -28,6 +30,17 @@ export default function Chats() {
       if (error) throw error;
       return data;
     },
+  });
+
+  const markUnread = useMutation({
+    mutationFn: async (conversationId: string) => {
+      const { error } = await supabase.rpc('mark_conversation_unread', {
+        p_conversation: conversationId,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
+    onError: (e) => notify('Could not update', e.message),
   });
 
   useFocusEffect(
@@ -110,38 +123,71 @@ export default function Chats() {
           {index === firstPinned && <SectionHeader label="Pinned" />}
           {index === firstUnpinnedSection && <SectionHeader label="Class group chats" />}
           {index === firstUnpinnedDm && <SectionHeader label="Direct messages" />}
-          <Pressable onPress={() => router.push(`/chat/${item.id}`)} style={styles.row}>
-            {item.kind === 'dm' ? (
-              <Avatar uri={item.photo_url} name={item.title} size={48} />
-            ) : (
-              <View style={[styles.sectionIcon, { backgroundColor: item.icon_color ?? colors.accentSoft }]}>
-                <Ionicons name={subjectIcon(item.title) as never} size={22} color={colors.primary} />
-              </View>
-            )}
-            <View style={{ flex: 1, gap: 2 }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.xs }}>
-                <Text
-                  style={[type.body, item.unread && { fontFamily: fontFamily.bold }]}
-                  numberOfLines={1}>
-                  {item.title}
-                </Text>
-                {item.pinned && <Ionicons name="pin" size={13} color={colors.subtle} />}
-                {item.muted && <Ionicons name="notifications-off-outline" size={14} color={colors.subtle} />}
-              </View>
-              <Text
-                style={[
-                  type.sub,
-                  item.unread && { color: colors.text, fontFamily: fontFamily.medium },
-                ]}
-                numberOfLines={1}>
-                {item.last_body ?? item.subtitle ?? 'Say something first'}
-              </Text>
-            </View>
-            {item.unread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
-          </Pressable>
+          <ChatRow item={item} onMarkUnread={() => markUnread.mutate(item.id)} />
         </>
       )}
     />
+  );
+}
+
+/** Swipe right to reveal "mark unread" — left as its own component so each
+ * row's Swipeable ref (used to snap it shut after the action) stays local. */
+function ChatRow({
+  item,
+  onMarkUnread,
+}: {
+  item: ConversationSummary;
+  onMarkUnread: () => void;
+}) {
+  const { colors, type } = useTheme();
+  const swipeRef = useRef<Swipeable>(null);
+
+  return (
+    <Swipeable
+      ref={swipeRef}
+      overshootLeft={false}
+      renderLeftActions={() => (
+        <Pressable
+          onPress={() => {
+            onMarkUnread();
+            swipeRef.current?.close();
+          }}
+          style={[styles.unreadAction, { backgroundColor: colors.primary }]}>
+          <Ionicons name="mail-unread-outline" size={22} color={colors.onFill} />
+          <Text style={[styles.unreadActionText, { color: colors.onFill }]}>Mark unread</Text>
+        </Pressable>
+      )}>
+      <Pressable onPress={() => router.push(`/chat/${item.id}`)} style={[styles.row, { backgroundColor: colors.bg }]}>
+        {item.kind === 'dm' ? (
+          <Avatar uri={item.photo_url} name={item.title} size={48} />
+        ) : (
+          <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
+            <Ionicons
+              name={(item.icon_name ?? subjectIcon(item.title)) as never}
+              size={22}
+              color={colors.primary}
+            />
+          </View>
+        )}
+        <View style={{ flex: 1, gap: 2 }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.xs }}>
+            <Text
+              style={[type.body, item.unread && { fontFamily: fontFamily.bold }]}
+              numberOfLines={1}>
+              {item.title}
+            </Text>
+            {item.pinned && <Ionicons name="pin" size={13} color={colors.subtle} />}
+            {item.muted && <Ionicons name="notifications-off-outline" size={14} color={colors.subtle} />}
+          </View>
+          <Text
+            style={[type.sub, item.unread && { color: colors.text, fontFamily: fontFamily.medium }]}
+            numberOfLines={1}>
+            {item.last_body ?? item.subtitle ?? 'Say something first'}
+          </Text>
+        </View>
+        {item.unread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
+      </Pressable>
+    </Swipeable>
   );
 }
 
@@ -171,6 +217,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   unreadDot: { width: 10, height: 10, borderRadius: 5 },
+  unreadAction: {
+    width: 88,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    borderRadius: radius.sm,
+    marginVertical: 4,
+    marginLeft: space.lg,
+  },
+  unreadActionText: { fontSize: 11, fontFamily: fontFamily.semibold },
   requestsRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -15,7 +15,7 @@ export default function OnboardingSchedule() {
         <Button
           title={count > 0 ? `Done, ${count} class${count === 1 ? '' : 'es'} added` : 'Add at least one class'}
           disabled={count === 0}
-          onPress={() => router.replace('/(tabs)')}
+          onPress={() => router.replace('/onboarding/tutorial')}
         />
       </View>
     </View>

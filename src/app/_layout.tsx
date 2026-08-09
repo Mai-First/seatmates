@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import DialogHost from '../components/DialogHost';
 import { AuthProvider } from '../lib/auth';
 import { ThemeProvider, useTheme } from '../lib/theme';
@@ -39,10 +40,12 @@ function Navigator() {
         <Stack.Screen name="(auth)/sign-in" options={{ headerShown: false }} />
         <Stack.Screen name="onboarding/profile" options={{ title: 'Your profile' }} />
         <Stack.Screen name="onboarding/schedule" options={{ title: 'Your classes' }} />
+        <Stack.Screen name="onboarding/tutorial" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="chat/[id]" options={{ title: '' }} />
         <Stack.Screen name="chat-options/[id]" options={{ title: 'Chat options' }} />
         <Stack.Screen name="chat-media/[id]" options={{ title: 'Photos & files' }} />
+        <Stack.Screen name="chat-members/[id]" options={{ title: 'Members' }} />
         <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'Profile' }} />
         <Stack.Screen name="inbox" options={{ title: 'Notifications' }} />
         <Stack.Screen name="friend-requests" options={{ title: 'Friend requests' }} />
@@ -71,12 +74,14 @@ export default function RootLayout() {
   if (!fontsLoaded) return null;
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <AuthProvider>
-        <ThemeProvider>
-          <Navigator />
-        </ThemeProvider>
-      </AuthProvider>
-    </QueryClientProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <ThemeProvider>
+            <Navigator />
+          </ThemeProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </GestureHandlerRootView>
   );
 }

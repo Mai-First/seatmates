@@ -4,9 +4,9 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { Linking, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Avatar, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
-import { notify } from '../../lib/dialogs';
+import { CHAT_ICONS } from '../../lib/chatIcons';
+import { confirm, notify } from '../../lib/dialogs';
 import { useModeration, useRelationship } from '../../lib/moderation';
-import { PASTEL_COLORS } from '../../lib/pastelColors';
 import { supabase } from '../../lib/supabase';
 import { radius, space, useTheme } from '../../lib/theme';
 import type { Profile } from '../../lib/types';
@@ -19,7 +19,7 @@ type ConversationInfo = {
   muted: boolean;
   pinned: boolean;
   other_id: string | null;
-  icon_color: string | null;
+  icon_name: string | null;
 };
 
 export default function ChatOptions() {
@@ -85,15 +85,11 @@ export default function ChatOptions() {
     onError: (e) => notify('Could not update', e.message),
   });
 
-  const block = async () => {
-    if (await doBlock()) router.back();
-  };
-
-  const setColor = useMutation({
-    mutationFn: async (color: string) => {
-      const { error } = await supabase.rpc('set_conversation_color', {
+  const setIcon = useMutation({
+    mutationFn: async (icon: string) => {
+      const { error } = await supabase.rpc('set_conversation_icon', {
         p_conversation: id,
-        p_color: color,
+        p_icon: icon,
       });
       if (error) throw error;
     },
@@ -103,6 +99,23 @@ export default function ChatOptions() {
     },
     onError: (e) => notify('Could not update', e.message),
   });
+
+  const block = async () => {
+    if (await doBlock()) router.back();
+  };
+
+  const leave = async () => {
+    const ok = await confirm(
+      'Leave this group chat?',
+      'You stay enrolled in the class and keep your DMs. Re-adding the class won’t re-add the chat.',
+      'Leave',
+      true,
+    );
+    if (!ok) return;
+    await supabase.rpc('leave_conversation', { p_conversation: id });
+    queryClient.invalidateQueries({ queryKey: ['conversations'] });
+    router.replace('/chats');
+  };
 
   if (info.isLoading) return <Loading />;
   const isDm = info.data?.kind === 'dm';
@@ -153,22 +166,34 @@ export default function ChatOptions() {
       />
 
       {!isDm ? (
-        <View style={[styles.colorSection, { borderBottomColor: colors.border }]}>
-          <Text style={type.body}>Chat color</Text>
-          <View style={styles.swatchRow}>
-            {PASTEL_COLORS.map((c) => (
-              <Pressable
-                key={c}
-                onPress={() => setColor.mutate(c)}
-                style={[
-                  styles.swatch,
-                  { backgroundColor: c },
-                  info.data?.icon_color === c && { borderColor: colors.text, borderWidth: 3 },
-                ]}
-              />
-            ))}
+        <>
+          <ActionRow
+            icon="people-outline"
+            label="Members"
+            onPress={() => router.push(`/chat-members/${id}`)}
+          />
+          <View style={[styles.iconSection, { borderBottomColor: colors.border }]}>
+            <Text style={type.body}>Chat icon</Text>
+            <View style={styles.iconGrid}>
+              {CHAT_ICONS.map((icon) => {
+                const active = info.data?.icon_name === icon;
+                return (
+                  <Pressable
+                    key={icon}
+                    onPress={() => setIcon.mutate(icon)}
+                    style={[
+                      styles.iconSwatch,
+                      { backgroundColor: colors.accentSoft },
+                      active && { borderColor: colors.primary, borderWidth: 2 },
+                    ]}>
+                    <Ionicons name={icon as never} size={20} color={colors.primary} />
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
-        </View>
+          <ActionRow icon="exit-outline" label="Leave group chat" danger onPress={leave} />
+        </>
       ) : null}
 
       {isDm && other.data?.instagram ? (
@@ -240,7 +265,15 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     borderBottomWidth: 1,
   },
-  colorSection: { paddingVertical: 14, gap: space.sm, borderBottomWidth: 1 },
-  swatchRow: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
-  swatch: { width: 36, height: 36, borderRadius: radius.full },
+  iconSection: { paddingVertical: 14, gap: space.sm, borderBottomWidth: 1 },
+  iconGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: space.sm },
+  iconSwatch: {
+    width: 40,
+    height: 40,
+    borderRadius: radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: 'transparent',
+  },
 });

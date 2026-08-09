@@ -90,7 +90,7 @@ export type ConversationSummary = {
   unread: boolean;
   muted: boolean;
   pinned: boolean;
-  icon_color: string | null;
+  icon_name: string | null;
 };
 
 export type PendingFriendRequest = {

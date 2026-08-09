@@ -4,6 +4,7 @@ import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Avatar, Button, Field } from '../../components/ui';
+import PromptsEditor from '../../features/profile/PromptsEditor';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
@@ -140,6 +141,11 @@ export default function OnboardingProfile() {
         <Text style={{ color: colors.primary, fontWeight: '600' }}>
           {photoUrl ? 'Change photo' : 'Add a photo (required)'}
         </Text>
+        {!isEdit && (
+          <Text style={[type.fine, { textAlign: 'center', paddingHorizontal: space.lg }]}>
+            Be silly, be serious, show your true nerdy self — just make it you.
+          </Text>
+        )}
       </Pressable>
 
       <Field label="Name" placeholder="Alex Morgan" value={name} onChangeText={setName} />
@@ -228,6 +234,8 @@ export default function OnboardingProfile() {
         value={linkedin}
         onChangeText={setLinkedin}
       />
+
+      {isEdit && session ? <PromptsEditor profileId={session.user.id} /> : null}
 
       <View style={styles.emailToggleRow}>
         <View style={{ flex: 1, gap: 2 }}>

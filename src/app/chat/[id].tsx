@@ -21,7 +21,7 @@ import { Avatar, Button, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
-import type { Member, Message } from '../../lib/types';
+import type { Message } from '../../lib/types';
 import { confirm, notify } from '../../lib/dialogs';
 
 // Static for now; swap for an Edge Function + Claude if Phase 4 lands early (PLAN A5).
@@ -39,7 +39,6 @@ export default function ChatThread() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [draft, setDraft] = useState('');
-  const [membersOpen, setMembersOpen] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
 
@@ -95,6 +94,10 @@ export default function ChatThread() {
     supabase.rpc('mark_conversation_read', { p_conversation: id });
     return () => {
       supabase.removeChannel(channel);
+      // Belt and suspenders: the Chats list's own focus-effect invalidation
+      // should already catch this, but leaving the screen is the one moment
+      // we know for sure the unread state just changed underneath it.
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
     };
   }, [id, queryClient]);
 
@@ -188,19 +191,6 @@ export default function ChatThread() {
     queryClient.invalidateQueries({ queryKey: ['conversations'] });
   };
 
-  const leave = async () => {
-    const ok = await confirm(
-      'Leave this group chat?',
-      'You stay enrolled in the class and keep your DMs. Re-adding the class won’t re-add the chat.',
-      'Leave',
-      true,
-    );
-    if (!ok) return;
-    await supabase.rpc('leave_conversation', { p_conversation: id });
-    queryClient.invalidateQueries({ queryKey: ['conversations'] });
-    router.back();
-  };
-
   const isSection = info.data?.kind === 'section';
   const readOnly = info.data ? !info.data.can_post : false;
   const showIcebreakers =
@@ -223,21 +213,9 @@ export default function ChatThread() {
           title: info.data?.title ?? 'Chat',
           headerRight: () =>
             info.data ? (
-              <View style={{ flexDirection: 'row', gap: 18 }}>
-                {isSection && !readOnly && (
-                  <Pressable onPress={() => setMembersOpen(true)} hitSlop={8}>
-                    <Ionicons name="people-outline" size={24} color={colors.primary} />
-                  </Pressable>
-                )}
-                {isSection && !readOnly && (
-                  <Pressable onPress={leave} hitSlop={8}>
-                    <Ionicons name="exit-outline" size={24} color={colors.danger} />
-                  </Pressable>
-                )}
-                <Pressable onPress={() => router.push(`/chat-options/${id}`)} hitSlop={8}>
-                  <Ionicons name="ellipsis-vertical" size={22} color={colors.primary} />
-                </Pressable>
-              </View>
+              <Pressable onPress={() => router.push(`/chat-options/${id}`)} hitSlop={8}>
+                <Ionicons name="ellipsis-vertical" size={22} color={colors.primary} />
+              </Pressable>
             ) : undefined,
         }}
       />
@@ -315,7 +293,6 @@ export default function ChatThread() {
         </View>
       )}
 
-      <MembersModal open={membersOpen} onClose={() => setMembersOpen(false)} conversationId={id!} />
       <AttachPickerModal
         open={attachOpen}
         onClose={() => setAttachOpen(false)}
@@ -449,97 +426,6 @@ function AttachPickerModal({
   );
 }
 
-function MembersModal({
-  open,
-  onClose,
-  conversationId,
-}: {
-  open: boolean;
-  onClose: () => void;
-  conversationId: string;
-}) {
-  const { colors, type } = useTheme();
-  const queryClient = useQueryClient();
-  const members = useQuery({
-    queryKey: ['members', conversationId],
-    enabled: open,
-    queryFn: async (): Promise<Member[]> => {
-      const { data, error } = await supabase.rpc('get_members', {
-        p_conversation: conversationId,
-      });
-      if (error) throw error;
-      return data;
-    },
-  });
-
-  const request = useMutation({
-    mutationFn: async (to: string) => {
-      const { error } = await supabase.rpc('send_friend_request', {
-        p_to: to,
-        p_source: 'group_chat',
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members', conversationId] }),
-    onError: (e) => notify('Could not send request', e.message),
-  });
-
-  return (
-    <Modal visible={open} animationType="slide" presentationStyle="pageSheet" onRequestClose={onClose}>
-      <View style={[styles.membersRoot, { backgroundColor: colors.bg }]}>
-        <View style={[styles.membersHeader, { borderBottomColor: colors.border }]}>
-          <Text style={type.h2}>Members</Text>
-          <Pressable onPress={onClose} hitSlop={8}>
-            <Ionicons name="close" size={26} color={colors.text} />
-          </Pressable>
-        </View>
-        {/* Individually add people — deliberately no "add all" (PLAN D9). */}
-        <FlatList
-          data={members.data ?? []}
-          keyExtractor={(m) => m.id}
-          contentContainerStyle={{ padding: space.lg, gap: space.md }}
-          renderItem={({ item }) => (
-            <View style={styles.memberRow}>
-              <Pressable
-                style={styles.memberInfo}
-                onPress={() => {
-                  onClose();
-                  router.push(`/profile/${item.id}`);
-                }}>
-                <Avatar uri={item.photo_url} name={item.full_name} size={44} />
-                <View>
-                  <Text style={type.body}>{item.full_name ?? 'Classmate'}</Text>
-                  {item.major ? <Text style={type.sub}>{item.major}</Text> : null}
-                </View>
-              </Pressable>
-              {item.relationship === 'none' && (
-                <Button small title="Add friend" onPress={() => request.mutate(item.id)} />
-              )}
-              {item.relationship === 'out_pending' && (
-                <Button small title="Requested" variant="outline" disabled onPress={() => {}} />
-              )}
-              {item.relationship === 'in_pending' && (
-                <Button
-                  small
-                  title="Respond"
-                  variant="outline"
-                  onPress={() => {
-                    onClose();
-                    router.push('/inbox');
-                  }}
-                />
-              )}
-              {item.relationship === 'friends' && (
-                <Text style={{ color: colors.success, fontWeight: '600' }}>Friends</Text>
-              )}
-            </View>
-          )}
-        />
-      </View>
-    </Modal>
-  );
-}
-
 // Structural only — colour comes from useTheme() at the usage site.
 const styles = StyleSheet.create({
   root: { flex: 1 },
@@ -598,14 +484,4 @@ const styles = StyleSheet.create({
     padding: space.xl,
   },
   attachCard: { width: '100%', maxWidth: 420, borderRadius: 20, padding: space.lg, gap: space.sm },
-  membersRoot: { flex: 1 },
-  membersHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: space.lg,
-    borderBottomWidth: 1,
-  },
-  memberRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  memberInfo: { flexDirection: 'row', alignItems: 'center', gap: space.md, flex: 1 },
 });

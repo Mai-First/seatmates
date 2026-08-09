@@ -14,7 +14,7 @@ import {
   View,
 } from 'react-native';
 import Celebration from '../../components/Celebration';
-import { Button, Empty, Loading } from '../../components/ui';
+import { Button, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import { schoolYearLabel, type DeckCard } from '../../lib/types';
@@ -22,7 +22,7 @@ import { schoolYearLabel, type DeckCard } from '../../lib/types';
 const SWIPE_THRESHOLD = 110;
 
 export default function Swipe() {
-  const { colors } = useTheme();
+  const { colors, type } = useTheme();
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
   const [cursor, setCursor] = useState(0);
@@ -117,18 +117,15 @@ export default function Swipe() {
 
   if (!card) {
     return (
-      <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <Empty
-          icon="school-outline"
-          title="That’s everyone for now"
-          body="You’ve seen every classmate in your sections. Check back as more people join."
-        />
-        <View style={{ padding: space.lg }}>
-          <Button
-            title="Say hi to your new friends"
-            onPress={() => router.push('/chats')}
-          />
+      <View style={[styles.emptyDeck, { backgroundColor: colors.bg }]}>
+        <View style={[styles.emptyIcon, { backgroundColor: colors.accentSoft }]}>
+          <Ionicons name="school-outline" size={26} color={colors.primary} />
         </View>
+        <Text style={[type.h2, { textAlign: 'center' }]}>That’s everyone for now</Text>
+        <Text style={[type.sub, { textAlign: 'center', maxWidth: 300 }]}>
+          You’ve seen every classmate in your sections. Check back as more people join.
+        </Text>
+        <Button title="Say hi to your new friends" onPress={() => router.push('/chats')} />
       </View>
     );
   }
@@ -292,6 +289,8 @@ function CardFace({ card }: { card: DeckCard }) {
 
 const styles = StyleSheet.create({
   root: { flex: 1, padding: space.lg },
+  emptyDeck: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.sm, padding: space.lg },
+  emptyIcon: { width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center' },
   card: {
     position: 'absolute',
     top: space.lg,
