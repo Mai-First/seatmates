@@ -4,11 +4,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
-import { Badge, Field, Loading } from '../../components/ui';
+import { Button, Field, Loading } from '../../components/ui';
 import { useAuth } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
-import { fontFamily, radius, space, useTheme } from '../../lib/theme';
+import { radius, space, useTheme } from '../../lib/theme';
 import type { CatalogResult, MyCourse } from '../../lib/types';
 
 export function useMyCourses() {
@@ -88,7 +88,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
     onError: (e) => notify('could not drop', e.message),
   });
 
-  const confirmDrop = async (c: MyCourse) => {
+  const confirmDrop = async (c: Pick<MyCourse, 'code' | 'section' | 'section_id'>) => {
     const ok = await confirm(
       `drop ${c.code} §${c.section}?`,
       'You’ll leave its group chat too. Your DMs stay.',
@@ -134,10 +134,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
               </Text>
             }
             renderItem={({ item }) => (
-              <Pressable
-                disabled={item.enrolled_here || enroll.isPending}
-                onPress={() => enroll.mutate(item.section_id)}
-                style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}>
+              <View style={[styles.row, { borderColor: colors.border, backgroundColor: colors.card }]}>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={type.body}>
                     {item.code} §{item.section}
@@ -154,11 +151,24 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
                   </Text>
                 </View>
                 {item.enrolled_here ? (
-                  <Badge text="joined" />
+                  <Button
+                    small
+                    title="drop"
+                    variant="danger"
+                    loading={drop.isPending && drop.variables === item.section_id}
+                    disabled={drop.isPending}
+                    onPress={() => confirmDrop(item)}
+                  />
                 ) : (
-                  <Text style={[styles.join, { color: colors.primary }]}>join</Text>
+                  <Button
+                    small
+                    title="join"
+                    loading={enroll.isPending && enroll.variables === item.section_id}
+                    disabled={enroll.isPending}
+                    onPress={() => enroll.mutate(item.section_id)}
+                  />
                 )}
-              </Pressable>
+              </View>
             )}
           />
         )
@@ -240,5 +250,4 @@ const styles = StyleSheet.create({
     borderRadius: radius.md,
     marginBottom: space.sm,
   },
-  join: { fontFamily: fontFamily.bold },
 });

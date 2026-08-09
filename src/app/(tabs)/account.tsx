@@ -6,39 +6,31 @@ import { Avatar, Loading } from '../../components/ui';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
-import { fontFamily, radius, space, useTheme, type Scheme } from '../../lib/theme';
+import { radius, space, useTheme, type Scheme } from '../../lib/theme';
 import { schoolYearLabel } from '../../lib/types';
 
-/** System / Light / Dark, per the redesign brief. Defaults to System. */
-function Appearance() {
+/** System / Light / Dark, per the redesign brief. Defaults to System. Renders
+ * as one row among the settings rows, not a standalone block. */
+function AppearanceRow() {
   const { colors, type, override, setOverride } = useTheme();
-  const options: { label: string; value: Scheme | null }[] = [
-    { label: 'system', value: null },
-    { label: 'light', value: 'light' },
-    { label: 'dark', value: 'dark' },
+  const options: { icon: keyof typeof Ionicons.glyphMap; value: Scheme | null }[] = [
+    { icon: 'phone-portrait-outline', value: null },
+    { icon: 'sunny-outline', value: 'light' },
+    { icon: 'moon-outline', value: 'dark' },
   ];
   return (
-    <View style={{ gap: space.sm }}>
-      <Text style={type.tiny}>appearance</Text>
-      <View style={[styles.segment, { backgroundColor: colors.surface }]}>
+    <View style={[styles.row, { borderBottomWidth: 1, borderBottomColor: colors.border }]}>
+      <Ionicons name="contrast-outline" size={22} color={colors.primary} />
+      <Text style={[type.body, { flex: 1 }]}>appearance</Text>
+      <View style={[styles.segment, { backgroundColor: colors.card }]}>
         {options.map((o) => {
           const active = override === o.value;
           return (
             <Pressable
-              key={o.label}
+              key={o.icon}
               onPress={() => setOverride(o.value)}
-              style={[
-                styles.segmentItem,
-                active && { backgroundColor: colors.card, borderColor: colors.border },
-              ]}>
-              <Text
-                style={{
-                  color: active ? colors.text : colors.subtle,
-                  fontFamily: active ? fontFamily.semibold : fontFamily.ui,
-                  fontSize: 14,
-                }}>
-                {o.label}
-              </Text>
+              style={[styles.segmentItem, active && { backgroundColor: colors.accentSoft }]}>
+              <Ionicons name={o.icon} size={16} color={active ? colors.primary : colors.subtle} />
             </Pressable>
           );
         })}
@@ -76,7 +68,14 @@ export default function Account() {
   if (profile.isLoading) return <Loading />;
   const p = profile.data;
 
-  const rows = [
+  type Row = {
+    icon: keyof typeof Ionicons.glyphMap;
+    label: string;
+    onPress: () => void | Promise<void>;
+    danger?: boolean;
+  };
+
+  const profileRows: Row[] = [
     {
       icon: 'create-outline' as const,
       label: 'edit profile',
@@ -88,20 +87,26 @@ export default function Account() {
       onPress: () => router.push('/courses'),
     },
     {
-      icon: 'options-outline' as const,
-      label: 'notification settings',
-      onPress: () => router.push('/notification-settings'),
-    },
-    {
       icon: 'archive-outline' as const,
       label: 'archive this semester',
       onPress: archiveSemester,
+    },
+  ];
+
+  const settingsRows: Row[] = [
+    {
+      icon: 'options-outline' as const,
+      label: 'notification settings',
+      onPress: () => router.push('/notification-settings'),
     },
     {
       icon: 'key-outline' as const,
       label: 'change password',
       onPress: () => router.push('/change-password'),
     },
+  ];
+
+  const dangerRows: Row[] = [
     {
       icon: 'log-out-outline' as const,
       label: 'sign out',
@@ -131,7 +136,7 @@ export default function Account() {
         if (!ok) return;
         const really = await confirm(
           'last check',
-          'There is no recovery after this. Delete the account?',
+          'there is no recovery after this. delete the account?',
           'yes, delete it',
           true,
         );
@@ -156,6 +161,22 @@ export default function Account() {
     },
   ];
 
+  const renderRow = (row: Row, index: number, all: Row[]) => (
+    <Pressable
+      key={row.label}
+      onPress={row.onPress}
+      style={[
+        styles.row,
+        index < all.length - 1 && { borderBottomWidth: 1, borderBottomColor: colors.border },
+      ]}>
+      <Ionicons name={row.icon} size={22} color={row.danger ? colors.danger : colors.primary} />
+      <Text style={[type.body, { flex: 1 }, row.danger && { color: colors.danger }]}>
+        {row.label}
+      </Text>
+      <Ionicons name="chevron-forward" size={18} color={colors.subtle} />
+    </Pressable>
+  );
+
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
       <View style={[styles.card, { backgroundColor: colors.surface }]}>
@@ -172,25 +193,20 @@ export default function Account() {
         </View>
       </View>
 
-      <Appearance />
+      <Text style={[type.tiny, styles.sectionHeader]}>profile & classes</Text>
+      <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+        {profileRows.map(renderRow)}
+      </View>
 
-      <View style={{ height: space.sm }} />
+      <Text style={[type.tiny, styles.sectionHeader]}>settings & password</Text>
+      <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+        <AppearanceRow />
+        {settingsRows.map(renderRow)}
+      </View>
 
-      {rows.map((row) => (
-        <Pressable
-          key={row.label}
-          onPress={row.onPress}
-          style={[styles.row, { borderBottomColor: colors.border }]}>
-          <Ionicons name={row.icon} size={22} color={row.danger ? colors.danger : colors.primary} />
-          <Text style={[type.body, row.danger && { color: colors.danger }]}>{row.label}</Text>
-          <Ionicons
-            name="chevron-forward"
-            size={18}
-            color={colors.subtle}
-            style={{ marginLeft: 'auto' }}
-          />
-        </Pressable>
-      ))}
+      <View style={[styles.sectionCard, { backgroundColor: colors.surface, marginTop: space.xs }]}>
+        {dangerRows.map(renderRow)}
+      </View>
     </ScrollView>
   );
 }
@@ -203,23 +219,21 @@ const styles = StyleSheet.create({
     gap: space.md,
     borderRadius: radius.lg,
     padding: space.md,
-    marginBottom: space.md,
+    marginBottom: space.sm,
   },
-  segment: { flexDirection: 'row', borderRadius: radius.md, padding: 3, gap: 3 },
+  sectionHeader: { paddingTop: space.md, paddingBottom: space.xs, paddingHorizontal: space.xs },
+  sectionCard: { borderRadius: radius.lg, overflow: 'hidden' },
+  segment: { flexDirection: 'row', borderRadius: radius.sm, padding: 2, gap: 2 },
   segmentItem: {
-    flex: 1,
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderRadius: radius.sm,
-    borderWidth: 1,
-    borderColor: 'transparent',
+    paddingVertical: 6,
+    paddingHorizontal: 9,
+    borderRadius: radius.sm - 2,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: space.md,
     paddingVertical: 14,
-    paddingHorizontal: space.xs,
-    borderBottomWidth: 1,
+    paddingHorizontal: space.md,
   },
 });

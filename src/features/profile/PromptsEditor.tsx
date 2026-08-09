@@ -118,7 +118,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
           <View style={[styles.answerCard, { backgroundColor: colors.bg }]}>
             <Text style={type.h2}>{answering}</Text>
             <Field
-              placeholder="Your answer"
+              placeholder="your answer"
               value={answer}
               onChangeText={setAnswer}
               multiline

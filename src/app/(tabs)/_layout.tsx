@@ -81,9 +81,7 @@ export default function TabsLayout() {
         options={{
           title: 'swipe',
           headerRight: () => <InboxButton />,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="albums-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Ionicons name="albums-outline" size={27} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -92,9 +90,7 @@ export default function TabsLayout() {
           title: 'chats',
           tabBarBadge: unreadChats > 0 ? unreadChats : undefined,
           tabBarBadgeStyle: badgeStyle,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="chatbubbles-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Ionicons name="chatbubbles-outline" size={27} color={color} />,
         }}
       />
       <Tabs.Screen
@@ -103,17 +99,15 @@ export default function TabsLayout() {
           title: 'study dates',
           tabBarBadge: unreadStudy && unreadStudy > 0 ? unreadStudy : undefined,
           tabBarBadgeStyle: badgeStyle,
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book-outline" size={size} color={color} />
-          ),
+          tabBarIcon: ({ color }) => <Ionicons name="book-outline" size={27} color={color} />,
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'account',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-circle-outline" size={size} color={color} />
+          tabBarIcon: ({ color }) => (
+            <Ionicons name="person-circle-outline" size={27} color={color} />
           ),
         }}
       />

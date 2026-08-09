@@ -50,15 +50,15 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
   const block = async (): Promise<boolean> => {
     if (!otherId || !myId) return false;
     const ok = await confirm(
-      'Block this person?',
-      'They disappear from your deck and can’t message you. They won’t be told.',
-      'Block',
+      'block this person?',
+      'they disappear from your deck and can’t message you. They won’t be told.',
+      'block',
       true,
     );
     if (!ok) return false;
     const { error } = await supabase.from('blocks').insert({ blocker_id: myId, blocked_id: otherId });
     if (error) {
-      notify('Could not block', error.message);
+      notify('could not block', error.message);
       return false;
     }
     invalidateBlockState();
@@ -68,9 +68,9 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
   const unblock = async (): Promise<boolean> => {
     if (!otherId || !myId) return false;
     const ok = await confirm(
-      'Unblock this person?',
-      'They’ll be able to message you and reappear in your deck and study feed.',
-      'Unblock',
+      'unblock this person?',
+      'they’ll be able to message you and reappear in your deck and study feed.',
+      'unblock',
       false,
     );
     if (!ok) return false;
@@ -80,7 +80,7 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
       .eq('blocker_id', myId)
       .eq('blocked_id', otherId);
     if (error) {
-      notify('Could not unblock', error.message);
+      notify('could not unblock', error.message);
       return false;
     }
     invalidateBlockState();
@@ -90,9 +90,9 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
   const report = async (): Promise<boolean> => {
     if (!otherId || !myId) return false;
     const ok = await confirm(
-      'Report this person?',
-      'Tell us what happened; the team reviews every report.',
-      'Report',
+      'report this person?',
+      'tell us what happened; the team reviews every report.',
+      'report',
       true,
     );
     if (!ok) return false;
@@ -100,10 +100,10 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
       .from('reports')
       .insert({ reporter_id: myId, reported_id: otherId, reason: 'in-app report' });
     if (error) {
-      notify('Could not report', error.message);
+      notify('could not report', error.message);
       return false;
     }
-    notify('Thanks', 'We got it.');
+    notify('thanks', 'we got it.');
     return true;
   };
 

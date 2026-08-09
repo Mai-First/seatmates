@@ -135,13 +135,15 @@ export default function Study() {
               </View>
               <Text style={type.h2}>{item.title}</Text>
               <Text style={type.sub}>
-                {when.toLocaleDateString(undefined, {
-                  weekday: 'short',
-                  month: 'short',
-                  day: 'numeric',
-                })}
+                {when
+                  .toLocaleDateString(undefined, {
+                    weekday: 'short',
+                    month: 'short',
+                    day: 'numeric',
+                  })
+                  .toLowerCase()}
                 {' · '}
-                {when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
+                {when.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }).toLowerCase()}
                 {item.location ? ` · ${item.location}` : ''}
               </Text>
               {item.description ? <Text style={type.body}>{item.description}</Text> : null}

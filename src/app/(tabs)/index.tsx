@@ -123,9 +123,11 @@ export default function Swipe() {
         </View>
         <Text style={[type.h2, { textAlign: 'center' }]}>that’s everyone for now</Text>
         <Text style={[type.sub, { textAlign: 'center', maxWidth: 300 }]}>
-          You’ve seen every classmate in your sections. Check back as more people join.
+          you’ve seen every classmate in your sections. check back as more people join.
         </Text>
-        <Button title="say hi to your new friends" onPress={() => router.push('/chats')} />
+        <View style={{ marginTop: space.xs }}>
+          <Button title="say hi to your new friends" onPress={() => router.push('/chats')} />
+        </View>
       </View>
     );
   }

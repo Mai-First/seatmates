@@ -71,7 +71,7 @@ export default function Inbox() {
         <Empty
           icon="notifications-outline"
           title="nothing yet"
-          body="Friend requests, matches, and announcements land here."
+          body="friend requests, matches, and announcements land here."
         />
         {overlay}
       </>
@@ -100,13 +100,17 @@ export default function Inbox() {
           )}
           <View style={{ flex: 1, gap: space.sm }}>
             <Text style={type.body}>{item.body}</Text>
-            <Text style={type.tiny}>
-              {new Date(item.created_at).toLocaleString(undefined, {
-                month: 'short',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-              })}
+            {/* type.fine, not type.tiny — tiny is uppercase-transformed and
+                fights a lowercase timestamp. */}
+            <Text style={type.fine}>
+              {new Date(item.created_at)
+                .toLocaleString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  hour: 'numeric',
+                  minute: '2-digit',
+                })
+                .toLowerCase()}
             </Text>
             {item.kind === 'friend_request' && item.request_status === 'pending' && (
               <View style={{ flexDirection: 'row', gap: space.sm }}>

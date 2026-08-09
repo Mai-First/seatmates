@@ -59,7 +59,7 @@ export default function StudySessionForm() {
 
   const save = useMutation({
     mutationFn: async () => {
-      if (!when) throw new Error('Pick a date and time.');
+      if (!when) throw new Error('pick a date and time.');
       const row = {
         course_id: courseId,
         title: title.trim(),
@@ -121,16 +121,16 @@ export default function StudySessionForm() {
         ))}
       </View>
 
-      <Field label="title" placeholder="Midterm grind session" value={title} onChangeText={setTitle} />
+      <Field label="title" placeholder="midterm grind session" value={title} onChangeText={setTitle} />
       <Field
         label="details (optional)"
-        placeholder="What are you covering? Snacks?"
+        placeholder="what are you covering? snacks?"
         value={description}
         onChangeText={setDescription}
         multiline
         style={{ minHeight: 70, textAlignVertical: 'top' }}
       />
-      <Field label="location" placeholder="Butler 403" value={location} onChangeText={setLocation} />
+      <Field label="location" placeholder="butler 403" value={location} onChangeText={setLocation} />
       <DateField label="when" value={when} onChange={setWhen} />
 
       <Button
@@ -141,8 +141,8 @@ export default function StudySessionForm() {
       />
       <Text style={type.fine}>
         {edit
-          ? 'Everyone who RSVP’d gets a notification about the change.'
-          : 'Anyone taking this course can see it and RSVP, whatever section they’re in.'}
+          ? 'everyone who RSVP’d gets a notification about the change.'
+          : 'anyone taking this course can see it and RSVP, whatever section they’re in.'}
       </Text>
     </ScrollView>
   );

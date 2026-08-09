@@ -9,22 +9,22 @@ const SLIDES = [
   {
     icon: 'albums-outline',
     title: 'swipe',
-    body: 'Meet classmates who share your actual sections. Right swipe to connect, left to pass.',
+    body: 'meet classmates who share your actual sections. Right swipe to connect, left to pass.',
   },
   {
     icon: 'chatbubbles-outline',
     title: 'chats',
-    body: 'Every section gets a group chat automatically. Connect with someone and you get a DM too.',
+    body: 'every section gets a group chat automatically. Connect with someone and you get a DM too.',
   },
   {
     icon: 'book-outline',
     title: 'study dates',
-    body: 'Post a study session for any of your classes. Everyone enrolled can see it and RSVP.',
+    body: 'post a study session for any of your classes. Everyone enrolled can see it and RSVP.',
   },
   {
     icon: 'person-circle-outline',
     title: 'account',
-    body: 'Edit your profile, manage your classes, and control notifications, all from here.',
+    body: 'edit your profile, manage your classes, and control notifications, all from here.',
   },
 ] as const;
 

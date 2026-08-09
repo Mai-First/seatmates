@@ -93,13 +93,13 @@ export async function downloadIcs(s: StudySession) {
   if (await Sharing.isAvailableAsync()) {
     await Sharing.shareAsync(file.uri, {
       mimeType: 'text/calendar',
-      dialogTitle: 'Add to calendar',
+      dialogTitle: 'add to calendar',
       UTI: 'com.apple.ical.ics',
     });
   } else {
     notify(
-      'No share sheet available',
-      'This device can’t hand the file off to a calendar app.',
+      'no share sheet available',
+      'this device can’t hand the file off to a calendar app.',
     );
   }
 }

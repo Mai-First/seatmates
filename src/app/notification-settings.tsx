@@ -9,12 +9,12 @@ import { space, useTheme } from '../lib/theme';
 import type { NotificationKind, NotificationPrefs } from '../lib/types';
 
 const ROWS: { key: NotificationKind; label: string; body: string }[] = [
-  { key: 'friend_request', label: 'friend requests', body: 'Someone wants to connect with you.' },
-  { key: 'request_accepted', label: 'request accepted', body: 'Someone accepted your request.' },
-  { key: 'new_match', label: 'new matches', body: 'You and someone are now connected.' },
-  { key: 'study_new', label: 'new study sessions', body: 'A classmate posts one for your course.' },
-  { key: 'announcement', label: 'announcements', body: 'Messages from the seatmates team.' },
-  { key: 'message', label: 'messages', body: 'New DMs and group chat messages (per-chat mute still applies).' },
+  { key: 'friend_request', label: 'friend requests', body: 'someone wants to connect with you.' },
+  { key: 'request_accepted', label: 'request accepted', body: 'someone accepted your request.' },
+  { key: 'new_match', label: 'new matches', body: 'you and someone are now connected.' },
+  { key: 'study_new', label: 'new study sessions', body: 'a classmate posts one for your course.' },
+  { key: 'announcement', label: 'announcements', body: 'messages from the seatmates team.' },
+  { key: 'message', label: 'messages', body: 'new DMs and group chat messages (per-chat mute still applies).' },
 ];
 
 const DEFAULTS: NotificationPrefs = {
@@ -59,8 +59,8 @@ export default function NotificationSettings() {
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
       <Text style={type.sub}>
-        Choose what you hear about — in the app and as a push notification. A muted chat stays
-        quiet regardless of the Messages setting below.
+        choose what you hear about — in the app and as a push notification. A muted chat stays
+        quiet regardless of the messages setting below.
       </Text>
       {ROWS.map((row) => (
         <View key={row.key} style={[styles.row, { borderBottomColor: colors.border }]}>

@@ -53,7 +53,7 @@ export default function ChangePassword() {
       setError(err.message);
       return;
     }
-    notify('password saved', 'Use it next time you sign in.');
+    notify('password saved', 'use it next time you sign in.');
     router.back();
   };
 
@@ -68,10 +68,10 @@ export default function ChangePassword() {
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
-      <Text style={type.sub}>You’ll sign in with your Columbia email and this password.</Text>
+      <Text style={type.sub}>you’ll sign in with your columbia email and this password.</Text>
       <Field
         label="current password"
-        placeholder="Your password today"
+        placeholder="your password today"
         secureTextEntry
         value={current}
         onChangeText={setCurrent}
@@ -79,14 +79,14 @@ export default function ChangePassword() {
       />
       <Field
         label="new password"
-        placeholder="At least 8 characters"
+        placeholder="at least 8 characters"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <Field
         label="repeat it"
-        placeholder="Same thing again"
+        placeholder="same thing again"
         secureTextEntry
         value={password2}
         onChangeText={setPassword2}
@@ -96,7 +96,7 @@ export default function ChangePassword() {
       {error ? <Text style={{ color: colors.danger }}>{error}</Text> : null}
       <Pressable onPress={forgotPassword}>
         <Text style={[type.sub, { color: colors.primary, textAlign: 'center' }]}>
-          Don’t know your current password? Sign out and use “email me a code”
+          don’t know your current password? sign out and use “email me a code”
         </Text>
       </Pressable>
     </ScrollView>

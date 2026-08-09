@@ -8,6 +8,7 @@ import { Badge, Empty, Avatar, Loading } from '../../components/ui';
 import { notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { subjectIcon } from '../../lib/subjectIcon';
+import { relativeShort } from '../../lib/time';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import type { ConversationSummary, PendingFriendRequest } from '../../lib/types';
 
@@ -32,6 +33,18 @@ export default function Chats() {
     },
   });
 
+  // Optimistic: flip the row in the shared ['conversations'] cache the
+  // instant you swipe, instead of waiting on a round trip. That cache entry
+  // is what both this list AND the tab bar's unread badge read from, so
+  // both update in the same tick. Roll back on error, reconcile on settle.
+  const setUnreadFlag = (conversationId: string, unread: boolean) => {
+    const previous = queryClient.getQueryData<ConversationSummary[]>(['conversations']);
+    queryClient.setQueryData<ConversationSummary[]>(['conversations'], (old) =>
+      old?.map((c) => (c.id === conversationId ? { ...c, unread } : c)),
+    );
+    return previous;
+  };
+
   const markUnread = useMutation({
     mutationFn: async (conversationId: string) => {
       const { error } = await supabase.rpc('mark_conversation_unread', {
@@ -39,8 +52,15 @@ export default function Chats() {
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
-    onError: (e) => notify('could not update', e.message),
+    onMutate: async (conversationId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['conversations'] });
+      return { previous: setUnreadFlag(conversationId, true) };
+    },
+    onError: (e, _id, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['conversations'], ctx.previous);
+      notify('could not update', e.message);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
   });
 
   const markRead = useMutation({
@@ -50,8 +70,15 @@ export default function Chats() {
       });
       if (error) throw error;
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
-    onError: (e) => notify('could not update', e.message),
+    onMutate: async (conversationId: string) => {
+      await queryClient.cancelQueries({ queryKey: ['conversations'] });
+      return { previous: setUnreadFlag(conversationId, false) };
+    },
+    onError: (e, _id, ctx) => {
+      if (ctx?.previous) queryClient.setQueryData(['conversations'], ctx.previous);
+      notify('could not update', e.message);
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['conversations'] }),
   });
 
   useFocusEffect(
@@ -208,7 +235,14 @@ function ChatRow({
             {item.last_body ?? item.subtitle ?? 'say something first'}
           </Text>
         </View>
-        {item.unread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
+        <View style={styles.trailing}>
+          {/* type.fine, not type.tiny — tiny is uppercase-transformed, which
+              turns "2m" into "2M" and reads as months, not minutes. */}
+          <Text style={[type.fine, item.unread && { color: colors.primary, fontFamily: fontFamily.bold }]}>
+            {relativeShort(item.last_at)}
+          </Text>
+          {item.unread && <View style={[styles.unreadDot, { backgroundColor: colors.primary }]} />}
+        </View>
       </Pressable>
     </Swipeable>
   );
@@ -239,6 +273,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  trailing: { alignItems: 'flex-end', gap: 6 },
   unreadDot: { width: 10, height: 10, borderRadius: 5 },
   unreadAction: {
     width: 88,

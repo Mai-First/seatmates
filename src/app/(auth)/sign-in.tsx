@@ -39,7 +39,7 @@ export default function SignIn() {
 
   const validEmail = () => {
     if (!/@columbia\.edu$/.test(cleanEmail())) {
-      setError('Seatmates is Columbia only. Use your @columbia.edu address.');
+      setError('seatmates is columbia only. use your @columbia.edu address.');
       return false;
     }
     return true;
@@ -53,7 +53,7 @@ export default function SignIn() {
     const { data: exists } = await supabase.rpc('email_exists', { p_email: cleanEmail() });
     if (exists) {
       setBusy(false);
-      go('signin', 'That email already has an account. Sign in below.');
+      go('signin', 'that email already has an account. Sign in below.');
       return;
     }
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -78,7 +78,7 @@ export default function SignIn() {
     if (err) {
       setError(
         /signup|not allowed|not found/i.test(err.message)
-          ? 'No account with that email yet. Create one instead.'
+          ? 'no account with that email yet. Create one instead.'
           : err.message,
       );
     } else {
@@ -99,17 +99,17 @@ export default function SignIn() {
       setError(err.message);
       return;
     }
-    if (next === 'set-password') go('set-password', 'Email verified. One step left.');
+    if (next === 'set-password') go('set-password', 'email verified. One step left.');
     else router.replace('/');
   };
 
   const savePassword = async () => {
     if (password.length < 8) {
-      setError('Passwords need at least 8 characters.');
+      setError('passwords need at least 8 characters.');
       return;
     }
     if (password !== password2) {
-      setError('Those two passwords don’t match.');
+      setError('those two passwords don’t match.');
       return;
     }
     setBusy(true);
@@ -132,7 +132,7 @@ export default function SignIn() {
     if (err) {
       setError(
         /invalid/i.test(err.message)
-          ? 'That email and password don’t match. Forgot it? Use “email me a code” below.'
+          ? 'that email and password don’t match. Forgot it? Use “email me a code” below.'
           : err.message,
       );
     } else {
@@ -148,7 +148,7 @@ export default function SignIn() {
         <Text style={[styles.logo, { color: colors.primary }]}>seatmates</Text>
         {/* the serif accent as the app's voice on first contact */}
         <Text style={[type.accent, { color: colors.subtle }]}>
-          Make friends with the people already in the room.
+          make friends with the people already in the room.
         </Text>
 
         {notice ? <Text style={[type.sub, { color: colors.success }]}>{notice}</Text> : null}
@@ -158,7 +158,7 @@ export default function SignIn() {
             <Button title="create account" onPress={() => go('create-email')} />
             <Button title="sign in" variant="outline" onPress={() => go('signin')} />
             <Text style={[type.fine, { textAlign: 'center' }]}>
-              Columbia students only. You’ll verify with your @columbia.edu address.
+              columbia students only. you’ll verify with your @columbia.edu address.
             </Text>
           </>
         )}
@@ -166,7 +166,7 @@ export default function SignIn() {
         {stage === 'create-email' && (
           <>
             <Field
-              label="your Columbia email"
+              label="your columbia email"
               placeholder="you@columbia.edu"
               autoCapitalize="none"
               autoComplete="email"
@@ -207,7 +207,7 @@ export default function SignIn() {
           <>
             <Field
               label="create a password"
-              placeholder="At least 8 characters"
+              placeholder="at least 8 characters"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
@@ -215,7 +215,7 @@ export default function SignIn() {
             />
             <Field
               label="confirm password"
-              placeholder="Type it once more"
+              placeholder="type it once more"
               secureTextEntry
               value={password2}
               onChangeText={setPassword2}
@@ -228,7 +228,7 @@ export default function SignIn() {
         {stage === 'signin' && (
           <>
             <Field
-              label="Columbia email"
+              label="columbia email"
               placeholder="you@columbia.edu"
               autoCapitalize="none"
               autoComplete="email"
@@ -238,7 +238,7 @@ export default function SignIn() {
             />
             <Field
               label="password"
-              placeholder="Your password"
+              placeholder="your password"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
@@ -273,7 +273,7 @@ export default function SignIn() {
               disabled={code.length < 6}
             />
             <Text style={type.tiny}>
-              You can set a password later in Account, under Change password.
+              you can set a password later in account, under change password.
             </Text>
             <Button title="back" variant="ghost" onPress={() => go('signin')} />
           </>

@@ -38,7 +38,7 @@ export default function ChatMedia() {
       <Empty
         icon="images-outline"
         title="nothing shared yet"
-        body="Photos and files sent in this chat show up here."
+        body="photos and files sent in this chat show up here."
       />
     );
   }

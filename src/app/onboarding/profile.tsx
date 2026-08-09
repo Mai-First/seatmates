@@ -73,7 +73,7 @@ export default function OnboardingProfile() {
       const { data } = supabase.storage.from('avatars').getPublicUrl(path);
       setPhotoUrl(`${data.publicUrl}?v=${Date.now()}`); // bust image cache
     } catch (e: unknown) {
-      notify('upload failed', e instanceof Error ? e.message : 'Try again.');
+      notify('upload failed', e instanceof Error ? e.message : 'try again.');
     } finally {
       setBusy(false);
     }
@@ -82,19 +82,19 @@ export default function OnboardingProfile() {
   const save = async () => {
     if (!session) return;
     if (!name.trim()) {
-      notify('name required', 'Classmates need something to call you.');
+      notify('name required', 'classmates need something to call you.');
       return;
     }
     if (!photoUrl) {
-      notify('photo required', 'Add a profile photo so classmates know who they’re meeting.');
+      notify('photo required', 'add a profile photo so classmates know who they’re meeting.');
       return;
     }
     if (!studySpot.trim()) {
-      notify('study spot required', 'Tell classmates where you like to study.');
+      notify('study spot required', 'tell classmates where you like to study.');
       return;
     }
     if (!school || !gradYear) {
-      notify('school and year required', 'Pick your school and graduation year.');
+      notify('school and year required', 'pick your school and graduation year.');
       return;
     }
     setBusy(true);
@@ -131,7 +131,7 @@ export default function OnboardingProfile() {
       keyboardShouldPersistTaps="handled">
       {!isEdit && (
         <Text style={type.sub}>
-          This is what classmates see before they swipe. Photo, name, study spot, school, and
+          this is what classmates see before they swipe. Photo, name, study spot, school, and
           graduation year are required.
         </Text>
       )}
@@ -148,7 +148,7 @@ export default function OnboardingProfile() {
         )}
       </Pressable>
 
-      <Field label="name" placeholder="Alex Morgan" value={name} onChangeText={setName} />
+      <Field label="name" placeholder="alex morgan" value={name} onChangeText={setName} />
 
       <View style={{ gap: space.xs }}>
         <Text style={type.sub}>school</Text>
@@ -198,16 +198,16 @@ export default function OnboardingProfile() {
         </View>
       </View>
 
-      <Field label="major" placeholder="Computer Science" value={major} onChangeText={setMajor} />
+      <Field label="major" placeholder="computer science" value={major} onChangeText={setMajor} />
       <Field
         label="where you're from"
-        placeholder="Queens, NY"
+        placeholder="queens, ny"
         value={hometown}
         onChangeText={setHometown}
       />
       <Field
         label="bio (optional)"
-        placeholder="A line or two about you"
+        placeholder="a line or two about you"
         value={bio}
         onChangeText={setBio}
         multiline
@@ -216,7 +216,7 @@ export default function OnboardingProfile() {
       />
       <Field
         label="favorite study spot"
-        placeholder="Butler 4th floor, Milstein, a specific bench…"
+        placeholder="butler 4th floor, milstein, a specific bench…"
         value={studySpot}
         onChangeText={setStudySpot}
       />
@@ -239,7 +239,7 @@ export default function OnboardingProfile() {
 
       <View style={styles.emailToggleRow}>
         <View style={{ flex: 1, gap: 2 }}>
-          <Text style={type.body}>show my Columbia email</Text>
+          <Text style={type.body}>show my columbia email</Text>
           <Text style={type.sub}>Visible on your profile to other signed-in students.</Text>
         </View>
         <Switch

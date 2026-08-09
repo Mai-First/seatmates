@@ -64,7 +64,7 @@ export default function FriendRequests() {
         <Empty
           icon="people-outline"
           title="no requests"
-          body="When someone wants to connect, they'll show up here."
+          body="when someone wants to connect, they'll show up here."
         />
         {overlay}
       </>

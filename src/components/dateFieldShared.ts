@@ -9,10 +9,10 @@ export type DateFieldProps = {
 };
 
 export function formatWhen(d: Date | null): string {
-  if (!d) return 'Pick a date & time';
+  if (!d) return 'pick a date & time';
   return (
     d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) +
     ' · ' +
     d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
-  );
+  ).toLowerCase();
 }
