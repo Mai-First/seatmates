@@ -1,9 +1,10 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useState } from 'react';
-import { FlatList, Linking, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useMemo, useState } from 'react';
+import { FlatList, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Badge, Button, Empty, Loading } from '../../components/ui';
+import { useMyCourses } from '../../features/schedule/CourseManager';
 import { useAuth } from '../../lib/auth';
 import { downloadIcs, googleCalendarUrl } from '../../lib/calendar';
 import { confirm, notify } from '../../lib/dialogs';
@@ -16,6 +17,7 @@ export default function Study() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [calendarSession, setCalendarSession] = useState<StudySession | null>(null);
+  const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
 
   const feed = useQuery({
     queryKey: ['study-feed'],
@@ -25,6 +27,30 @@ export default function Study() {
       return data;
     },
   });
+
+  // Sessions scope to the course, not the section — dedupe the same way
+  // study/new.tsx does, so "COMS W3157" appears once even across sections.
+  const myCourses = useMyCourses();
+  const filterOptions = useMemo(() => {
+    const seen = new Set<string>();
+    const list: string[] = [];
+    for (const c of myCourses.data ?? []) {
+      if (!seen.has(c.code)) {
+        seen.add(c.code);
+        list.push(c.code);
+      }
+    }
+    return list;
+  }, [myCourses.data]);
+
+  const toggleCode = (code: string) => {
+    setSelectedCodes((prev) => {
+      const next = new Set(prev);
+      if (next.has(code)) next.delete(code);
+      else next.add(code);
+      return next;
+    });
+  };
 
   useFocusEffect(
     useCallback(() => {
@@ -69,7 +95,7 @@ export default function Study() {
   const confirmDelete = async (s: StudySession) => {
     const ok = await confirm(
       `delete "${s.title}"?`,
-      'Everyone who RSVP’d gets told it was cancelled.',
+      'everyone who RSVP’d gets told it was cancelled.',
       'delete',
       true,
     );
@@ -78,9 +104,14 @@ export default function Study() {
 
   if (feed.isLoading) return <Loading />;
 
+  const filtered =
+    selectedCodes.size > 0
+      ? (feed.data ?? []).filter((s) => selectedCodes.has(s.course_code))
+      : (feed.data ?? []);
+
   // Upcoming first (soonest on top), past below under their own header.
-  const upcoming = (feed.data ?? []).filter((s) => +new Date(s.starts_at) >= Date.now());
-  const past = (feed.data ?? []).filter((s) => +new Date(s.starts_at) < Date.now()).reverse();
+  const upcoming = filtered.filter((s) => +new Date(s.starts_at) >= Date.now());
+  const past = filtered.filter((s) => +new Date(s.starts_at) < Date.now()).reverse();
   const rows: (StudySession | { header: string })[] = [
     ...upcoming,
     ...(past.length ? [{ header: 'past sessions' }, ...past] : []),
@@ -88,6 +119,36 @@ export default function Study() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      {filterOptions.length > 0 && (
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={[styles.filterRow, { borderBottomColor: colors.border }]}
+          contentContainerStyle={{ gap: space.sm, paddingHorizontal: space.lg }}>
+          {filterOptions.map((code) => {
+            const active = selectedCodes.has(code);
+            return (
+              <Pressable
+                key={code}
+                onPress={() => toggleCode(code)}
+                style={[
+                  styles.filterChip,
+                  { borderColor: colors.primary },
+                  active && { backgroundColor: colors.primary },
+                ]}>
+                <Text
+                  style={{
+                    color: active ? colors.onFill : colors.primary,
+                    fontFamily: fontFamily.semibold,
+                    fontSize: 13,
+                  }}>
+                  {code}
+                </Text>
+              </Pressable>
+            );
+          })}
+        </ScrollView>
+      )}
       <FlatList
         data={rows}
         keyExtractor={(s) => ('header' in s ? s.header : s.id)}
@@ -96,7 +157,7 @@ export default function Study() {
           <Empty
             icon="book-outline"
             title="no study sessions yet"
-            body="Post one for any of your classes. Everyone taking that course will see it and can RSVP."
+            body="post one for any of your classes. everyone taking that course will see it and can RSVP."
           />
         }
         renderItem={({ item }) => {
@@ -243,6 +304,13 @@ function AddToCalendarModal({
 }
 
 const styles = StyleSheet.create({
+  filterRow: { flexGrow: 0, borderBottomWidth: StyleSheet.hairlineWidth, paddingVertical: space.sm },
+  filterChip: {
+    borderWidth: 1,
+    borderRadius: radius.full,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+  },
   card: {
     borderWidth: 1,
     borderRadius: radius.lg,

@@ -9,6 +9,7 @@ import {
   View,
 } from 'react-native';
 import { Button, Field } from '../../components/ui';
+import { passwordError } from '../../lib/password';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, space, useTheme } from '../../lib/theme';
 
@@ -104,8 +105,9 @@ export default function SignIn() {
   };
 
   const savePassword = async () => {
-    if (password.length < 8) {
-      setError('passwords need at least 8 characters.');
+    const pwError = passwordError(password);
+    if (pwError) {
+      setError(pwError);
       return;
     }
     if (password !== password2) {
@@ -207,7 +209,7 @@ export default function SignIn() {
           <>
             <Field
               label="create a password"
-              placeholder="at least 8 characters"
+              placeholder="8+ chars, upper, lower, number"
               secureTextEntry
               value={password}
               onChangeText={setPassword}

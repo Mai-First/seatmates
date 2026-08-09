@@ -9,17 +9,17 @@ const SLIDES = [
   {
     icon: 'albums-outline',
     title: 'swipe',
-    body: 'meet classmates who share your actual sections. Right swipe to connect, left to pass.',
+    body: 'meet classmates who share your actual sections. right swipe to connect, left to pass.',
   },
   {
     icon: 'chatbubbles-outline',
     title: 'chats',
-    body: 'every section gets a group chat automatically. Connect with someone and you get a DM too.',
+    body: 'every section gets a group chat automatically. connect with someone and you get a DM too.',
   },
   {
     icon: 'book-outline',
     title: 'study dates',
-    body: 'post a study session for any of your classes. Everyone enrolled can see it and RSVP.',
+    body: 'post a study session for any of your classes. everyone enrolled can see it and RSVP.',
   },
   {
     icon: 'person-circle-outline',

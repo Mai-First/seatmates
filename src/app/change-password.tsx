@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text } from 'react-native';
 import { Button, Field } from '../components/ui';
 import { useAuth } from '../lib/auth';
 import { notify } from '../lib/dialogs';
+import { passwordError } from '../lib/password';
 import { supabase } from '../lib/supabase';
 import { space, useTheme } from '../lib/theme';
 
@@ -26,8 +27,9 @@ export default function ChangePassword() {
       setError('enter your current password.');
       return;
     }
-    if (password.length < 8) {
-      setError('at least 8 characters.');
+    const pwError = passwordError(password);
+    if (pwError) {
+      setError(pwError);
       return;
     }
     if (password !== password2) {
@@ -79,7 +81,7 @@ export default function ChangePassword() {
       />
       <Field
         label="new password"
-        placeholder="at least 8 characters"
+        placeholder="8+ chars, upper, lower, number"
         secureTextEntry
         value={password}
         onChangeText={setPassword}

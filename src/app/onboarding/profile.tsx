@@ -6,9 +6,9 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { Avatar, Button, Field } from '../../components/ui';
 import PromptsEditor from '../../features/profile/PromptsEditor';
 import { useAuth, useMyProfile } from '../../lib/auth';
+import { notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
-import { confirm, notify } from '../../lib/dialogs';
 import type { School } from '../../lib/types';
 
 const SCHOOLS: School[] = ['CC', 'SEAS', 'BC', 'GS'];
@@ -131,7 +131,7 @@ export default function OnboardingProfile() {
       keyboardShouldPersistTaps="handled">
       {!isEdit && (
         <Text style={type.sub}>
-          this is what classmates see before they swipe. Photo, name, study spot, school, and
+          this is what classmates see before they swipe. photo, name, study spot, school, and
           graduation year are required.
         </Text>
       )}
@@ -143,7 +143,7 @@ export default function OnboardingProfile() {
         </Text>
         {!isEdit && (
           <Text style={[type.fine, { textAlign: 'center', paddingHorizontal: space.lg }]}>
-            be silly, be serious, show your true nerdy self — just make it you.
+            be silly and show your true nerdy self. no judgement here.
           </Text>
         )}
       </Pressable>
