@@ -1,0 +1,84 @@
+# Runs automatically on every pull request and every push to main.
+# Green tick = the change is safe to merge. Red X = something is broken.
+#
+# The job installs the app the way a brand-new teammate would, from a clean
+# checkout, then proves the toolchain actually runs. That combination is what
+# catches "works on my machine" before it costs somebody an evening.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# A new push to the same branch cancels the previous run, so we are not
+# paying for checks on code nobody is looking at any more.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Install, config, types
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # `npm ci` installs strictly from package-lock.json, exactly as a fresh
+      # clone would. Deliberately not `npm install`, which is allowed to repair
+      # the tree on the fly and would hide a genuinely broken lockfile.
+      - name: Install from the lockfile
+        run: npm ci
+
+      # Runs the Expo CLI for real rather than checking for a file path.
+      # npm is free to place @expo/cli either at the top level or nested under
+      # node_modules/expo, and both are healthy, so only executing it proves
+      # anything. This fails if the install is incomplete for any reason:
+      # a broken lockfile, a truncated download, or a full disk.
+      # Offline so the run never hangs waiting on Expo's servers.
+      - name: The Expo CLI actually runs
+        env:
+          EXPO_OFFLINE: '1'
+          EXPO_NO_TELEMETRY: '1'
+        run: npx expo config --type public > /dev/null
+
+      # TypeScript. Catches typos, renamed fields, and calls to functions that
+      # no longer exist, without anyone opening the app.
+      - name: Typecheck
+        run: npm run typecheck
+
+# ---------------------------------------------------------------------------
+# Database tests, for whoever adds the first pgTAP test.
+#
+# GitHub's runners ship with Docker, so the full Supabase stack works here even
+# for teammates who cannot run Docker on their own laptop.
+#
+# To turn this on: write tests in supabase/tests/*.sql, then delete the "#" from
+# the start of each line below.
+#
+#  db-tests:
+#    name: Database policy tests
+#    runs-on: ubuntu-latest
+#    steps:
+#      - uses: actions/checkout@v4
+#      - uses: supabase/setup-cli@v1
+#        with:
+#          version: latest
+#      # Boots Postgres, applies every migration, runs both seed files.
+#      - run: supabase db start
+#      # Runs every pgTAP test in supabase/tests/.
+#      - run: supabase test db
+#
+# Good first tests, each one a bug that has already happened:
+#   - a blocked person never appears in the blocker's deck
+#   - a blocked person cannot insert into the existing DM
+#   - a non-columbia.edu address is rejected by the database, not just the UI
+#   - dropping a section removes chat membership but leaves DMs intact
+#   - deleting an account frees the email and removes the other side's thread
+#   - a pending friend request does not silently drop that person from the deck
+# ---------------------------------------------------------------------------
