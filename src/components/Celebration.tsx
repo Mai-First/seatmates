@@ -22,7 +22,7 @@ export default function Celebration({
         <Text style={type.title}>you’re connected!</Text>
         {/* the serif accent's second home, per the type scale */}
         <Text style={[type.accent, { color: colors.primary, textAlign: 'center' }]}>
-          You and {name} are now friends.
+          you and {name} are now friends.
         </Text>
         <View style={{ gap: space.sm, alignSelf: 'stretch' }}>
           <Button

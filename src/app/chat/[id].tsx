@@ -549,15 +549,25 @@ function MessageBubble({
               </Pressable>
             )}
             {deleted ? (
-              <Text
-                style={{
-                  color: mine ? colors.onFill : colors.subtle,
-                  fontSize: 15,
-                  fontStyle: 'italic',
-                  fontFamily: fontFamily.ui,
-                }}>
-                this message was deleted
-              </Text>
+              // fontStyle: 'italic' is a no-op here — the custom font has no
+              // italic weight loaded — so an icon carries the distinction
+              // from a real message instead.
+              <View style={styles.deletedRow}>
+                <Ionicons
+                  name="trash-outline"
+                  size={14}
+                  color={mine ? colors.onFill : colors.subtle}
+                />
+                <Text
+                  style={{
+                    color: mine ? colors.onFill : colors.subtle,
+                    fontSize: 15,
+                    fontFamily: fontFamily.ui,
+                    opacity: 0.8,
+                  }}>
+                  this message was deleted
+                </Text>
+              </View>
             ) : (
               <>
                 {message.attachment_type === 'image' && message.attachment_url ? (
@@ -724,6 +734,7 @@ const styles = StyleSheet.create({
   likerRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
   dateDivider: { alignItems: 'center', paddingVertical: space.sm },
   senderName: { fontSize: 12, fontFamily: fontFamily.bold, marginBottom: 2 },
+  deletedRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   attachmentImage: { width: 200, height: 200, borderRadius: radius.md },
   fileRow: { flexDirection: 'row', alignItems: 'center', gap: space.xs, paddingVertical: 4 },
   composer: {

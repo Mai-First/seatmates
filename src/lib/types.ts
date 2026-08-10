@@ -149,6 +149,7 @@ export type InboxItem = {
     | 'study_rsvp'
     | 'study_update'
     | 'study_new'
+    | 'study_announcement'
     | 'report';
   body: string;
   created_at: string;

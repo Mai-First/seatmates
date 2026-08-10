@@ -229,11 +229,20 @@ function ChatRow({
             {item.pinned && <Ionicons name="pin" size={13} color={colors.subtle} />}
             {item.muted && <Ionicons name="notifications-off-outline" size={14} color={colors.subtle} />}
           </View>
-          <Text
-            style={[type.sub, item.unread && { color: colors.text, fontFamily: fontFamily.medium }]}
-            numberOfLines={1}>
-            {item.last_body ?? item.subtitle ?? 'say something first'}
-          </Text>
+          <View style={styles.previewRow}>
+            {item.last_body === 'this message was deleted' && (
+              <Ionicons name="trash-outline" size={13} color={colors.subtle} />
+            )}
+            <Text
+              style={[
+                type.sub,
+                { flexShrink: 1 },
+                item.unread && { color: colors.text, fontFamily: fontFamily.medium },
+              ]}
+              numberOfLines={1}>
+              {item.last_body ?? item.subtitle ?? 'say something first'}
+            </Text>
+          </View>
         </View>
         <View style={styles.trailing}>
           {/* type.fine, not type.tiny — tiny is uppercase-transformed, which
@@ -254,6 +263,7 @@ function SectionHeader({ label }: { label: string }) {
 }
 
 const styles = StyleSheet.create({
+  previewRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   header: {
     paddingHorizontal: space.lg,
     paddingTop: space.md,

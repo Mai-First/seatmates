@@ -146,7 +146,7 @@ export default function Inbox() {
                 onPress={() => router.push(`/chat/${item.entity_id}`)}
               />
             )}
-            {item.kind === 'study_new' && (
+            {(item.kind === 'study_new' || item.kind === 'study_announcement') && (
               <Button
                 small
                 title="view"

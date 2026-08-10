@@ -2,8 +2,18 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { FlatList, Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Badge, Button, Empty, Loading } from '../../components/ui';
+import {
+  FlatList,
+  Linking,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
+} from 'react-native';
+import { Avatar, Badge, Button, Empty, Loading } from '../../components/ui';
 import { useMyCourses } from '../../features/schedule/CourseManager';
 import { useAuth } from '../../lib/auth';
 import { downloadIcs, googleCalendarUrl } from '../../lib/calendar';
@@ -17,6 +27,8 @@ export default function Study() {
   const { session } = useAuth();
   const queryClient = useQueryClient();
   const [calendarSession, setCalendarSession] = useState<StudySession | null>(null);
+  const [rsvpListFor, setRsvpListFor] = useState<StudySession | null>(null);
+  const [announceFor, setAnnounceFor] = useState<StudySession | null>(null);
   const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
 
   const feed = useQuery({
@@ -79,7 +91,13 @@ export default function Study() {
         if (error) throw error;
       }
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['study-feed'] }),
+    onSuccess: (_data, s) => {
+      queryClient.invalidateQueries({ queryKey: ['study-feed'] });
+      // The "who's going" modal is its own query, keyed by session — an
+      // RSVP here otherwise leaves that list stale until something else
+      // happens to refetch it.
+      queryClient.invalidateQueries({ queryKey: ['study-rsvps', s.id] });
+    },
     onError: (e) => notify('rsvp failed', e.message),
   });
 
@@ -90,6 +108,21 @@ export default function Study() {
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['study-feed'] }),
     onError: (e) => notify('could not delete', e.message),
+  });
+
+  const announce = useMutation({
+    mutationFn: async ({ sessionId, body }: { sessionId: string; body: string }) => {
+      const { error } = await supabase.rpc('send_study_announcement', {
+        p_session_id: sessionId,
+        p_body: body,
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      setAnnounceFor(null);
+      notify('sent', 'everyone going got your announcement.');
+    },
+    onError: (e) => notify('could not send', e.message),
   });
 
   const confirmDelete = async (s: StudySession) => {
@@ -177,11 +210,17 @@ export default function Study() {
               <View style={styles.cardTop}>
                 <Badge text={item.course_code} />
                 <View style={{ flexDirection: 'row', gap: space.md }}>
+                  <Pressable onPress={() => setRsvpListFor(item)} hitSlop={8}>
+                    <Ionicons name="people-outline" size={20} color={colors.primary} />
+                  </Pressable>
                   <Pressable onPress={() => setCalendarSession(item)} hitSlop={8}>
                     <Ionicons name="calendar-outline" size={20} color={colors.primary} />
                   </Pressable>
                   {mine && (
                     <>
+                      <Pressable onPress={() => setAnnounceFor(item)} hitSlop={8}>
+                        <Ionicons name="megaphone-outline" size={20} color={colors.primary} />
+                      </Pressable>
                       <Pressable
                         onPress={() => router.push(`/study/new?edit=${item.id}`)}
                         hitSlop={8}>
@@ -255,6 +294,13 @@ export default function Study() {
       </Pressable>
 
       <AddToCalendarModal session={calendarSession} onClose={() => setCalendarSession(null)} />
+      <RsvpListModal session={rsvpListFor} onClose={() => setRsvpListFor(null)} />
+      <AnnounceModal
+        session={announceFor}
+        sending={announce.isPending}
+        onSend={(body) => announceFor && announce.mutate({ sessionId: announceFor.id, body })}
+        onClose={() => setAnnounceFor(null)}
+      />
     </View>
   );
 }
@@ -279,7 +325,7 @@ function AddToCalendarModal({
         <Pressable style={[styles.calendarCard, { backgroundColor: colors.bg }]}>
           <Text style={type.h2}>add to calendar</Text>
           <Text style={[type.sub, { marginBottom: space.sm }]}>
-            One-hour block starting when the session does.
+            one-hour block starting when the session does.
           </Text>
           <Button
             title="add to google calendar"
@@ -297,6 +343,96 @@ function AddToCalendarModal({
             }}
           />
           <Button title="cancel" variant="ghost" onPress={onClose} />
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+/** Who's RSVP'd 'going' — fetched on demand, only while the modal is open. */
+function RsvpListModal({ session, onClose }: { session: StudySession | null; onClose: () => void }) {
+  const { colors, type } = useTheme();
+  const rsvps = useQuery({
+    queryKey: ['study-rsvps', session?.id],
+    enabled: !!session,
+    queryFn: async (): Promise<{ profile_id: string; full_name: string | null; photo_url: string | null }[]> => {
+      const { data, error } = await supabase.rpc('get_study_rsvps', { p_session_id: session!.id });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  return (
+    <Modal visible={!!session} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.calendarBackdrop} onPress={onClose}>
+        <Pressable style={[styles.calendarCard, { backgroundColor: colors.bg }]}>
+          <Text style={type.h2}>who's going</Text>
+          {rsvps.isLoading ? (
+            <Loading />
+          ) : rsvps.data?.length ? (
+            rsvps.data.map((r) => (
+              <View key={r.profile_id} style={styles.likerRow}>
+                <Avatar uri={r.photo_url} name={r.full_name} size={36} />
+                <Text style={type.body}>{r.full_name ?? 'classmate'}</Text>
+              </View>
+            ))
+          ) : (
+            <Text style={type.sub}>no one yet.</Text>
+          )}
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+/** Host-only: a free-text note that fans out as a notification + push to
+ * everyone RSVP'd 'going' — deliberately not a chat message. */
+function AnnounceModal({
+  session,
+  sending,
+  onSend,
+  onClose,
+}: {
+  session: StudySession | null;
+  sending: boolean;
+  onSend: (body: string) => void;
+  onClose: () => void;
+}) {
+  const { colors, type } = useTheme();
+  const [body, setBody] = useState('');
+
+  const close = () => {
+    setBody('');
+    onClose();
+  };
+
+  return (
+    <Modal visible={!!session} transparent animationType="fade" onRequestClose={close}>
+      <Pressable style={styles.calendarBackdrop} onPress={close}>
+        <Pressable style={[styles.calendarCard, { backgroundColor: colors.bg }]}>
+          <Text style={type.h2}>announce</Text>
+          <Text style={[type.sub, { marginBottom: space.sm }]}>
+            sent as a notification to everyone going — not a chat message.
+          </Text>
+          <TextInput
+            style={[styles.announceInput, { borderColor: colors.border, color: colors.text }]}
+            placeholder="e.g. moved to the 3rd floor study room"
+            placeholderTextColor={colors.subtle}
+            value={body}
+            onChangeText={setBody}
+            multiline
+            autoFocus
+          />
+          <Button
+            title="send"
+            loading={sending}
+            disabled={!body.trim()}
+            onPress={() => {
+              onSend(body.trim());
+              setBody('');
+            }}
+          />
+          <Button title="cancel" variant="ghost" onPress={close} />
         </Pressable>
       </Pressable>
     </Modal>
@@ -353,4 +489,13 @@ const styles = StyleSheet.create({
     padding: space.xl,
   },
   calendarCard: { width: '100%', maxWidth: 420, borderRadius: 20, padding: space.lg, gap: space.sm },
+  likerRow: { flexDirection: 'row', alignItems: 'center', gap: space.sm },
+  announceInput: {
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: space.md,
+    minHeight: 80,
+    fontSize: 16,
+    textAlignVertical: 'top',
+  },
 });
