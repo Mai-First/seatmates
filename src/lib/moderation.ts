@@ -51,7 +51,7 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
     if (!otherId || !myId) return false;
     const ok = await confirm(
       'block this person?',
-      'they disappear from your deck and can’t message you. They won’t be told.',
+      'they disappear from your deck and can’t message you. they won’t be told.',
       'block',
       true,
     );

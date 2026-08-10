@@ -91,7 +91,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
   const confirmDrop = async (c: Pick<MyCourse, 'code' | 'section' | 'section_id'>) => {
     const ok = await confirm(
       `drop ${c.code} §${c.section}?`,
-      'You’ll leave its group chat too. Your DMs stay.',
+      'you’ll leave its group chat too. your DMs stay.',
       'drop',
       true,
     );
@@ -129,7 +129,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
             keyboardShouldPersistTaps="handled"
             ListEmptyComponent={
               <Text style={[type.sub, { padding: space.md }]}>
-                no classes match that search. Try the course code (COMS W3157), the number
+                no classes match that search. try the course code (COMS W3157), the number
                 alone (3157), or the call number.
               </Text>
             }
@@ -188,7 +188,7 @@ export default function CourseManager({ showDrop }: { showDrop: boolean }) {
           }
           ListEmptyComponent={
             <Text style={type.sub}>
-              search above to add your classes. You’ll join each section’s group chat
+              search above to add your classes. you’ll join each section’s group chat
               automatically.
             </Text>
           }

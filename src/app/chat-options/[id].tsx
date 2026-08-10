@@ -107,7 +107,7 @@ export default function ChatOptions() {
   const leave = async () => {
     const ok = await confirm(
       'leave this group chat?',
-      'You stay enrolled in the class and keep your DMs. Re-adding the class won’t re-add the chat.',
+      'you stay enrolled in the class and keep your DMs. re-adding the class won’t re-add the chat.',
       'leave',
       true,
     );
