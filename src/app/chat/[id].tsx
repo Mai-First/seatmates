@@ -281,7 +281,7 @@ export default function ChatThread() {
   const deleteMessage = async (messageId: string) => {
     const ok = await confirm(
       'delete for everyone?',
-      'This removes the message for everyone in the chat. It can’t be undone.',
+      'this removes the message for everyone in the chat. it can’t be undone.',
       'delete',
       true,
     );

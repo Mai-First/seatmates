@@ -54,7 +54,7 @@ export default function SignIn() {
     const { data: exists } = await supabase.rpc('email_exists', { p_email: cleanEmail() });
     if (exists) {
       setBusy(false);
-      go('signin', 'that email already has an account. Sign in below.');
+      go('signin', 'that email already has an account. sign in below.');
       return;
     }
     const { error: err } = await supabase.auth.signInWithOtp({
@@ -79,7 +79,7 @@ export default function SignIn() {
     if (err) {
       setError(
         /signup|not allowed|not found/i.test(err.message)
-          ? 'no account with that email yet. Create one instead.'
+          ? 'no account with that email yet. create one instead.'
           : err.message,
       );
     } else {
@@ -100,7 +100,7 @@ export default function SignIn() {
       setError(err.message);
       return;
     }
-    if (next === 'set-password') go('set-password', 'email verified. One step left.');
+    if (next === 'set-password') go('set-password', 'email verified. one step left.');
     else router.replace('/');
   };
 
@@ -134,7 +134,7 @@ export default function SignIn() {
     if (err) {
       setError(
         /invalid/i.test(err.message)
-          ? 'that email and password don’t match. Forgot it? Use “email me a code” below.'
+          ? 'that email and password don’t match. forgot it? use “email me a code” below.'
           : err.message,
       );
     } else {
@@ -186,7 +186,7 @@ export default function SignIn() {
         {stage === 'code' && (
           <>
             <Field
-              label={`We sent a 6-digit code to ${email.trim()}`}
+              label={`we sent a 6-digit code to ${email.trim()}`}
               placeholder="123456"
               inputMode="numeric"
               maxLength={6}
@@ -259,7 +259,7 @@ export default function SignIn() {
         {stage === 'signin-code' && (
           <>
             <Field
-              label={`We sent a 6-digit code to ${email.trim()}`}
+              label={`we sent a 6-digit code to ${email.trim()}`}
               placeholder="123456"
               inputMode="numeric"
               maxLength={6}
