@@ -129,23 +129,24 @@ export default function ProfileViewer() {
         </View>
       ))}
 
-      {p.show_email !== false || p.instagram || p.linkedin ? (
-      <View style={styles.section}>
-        <Text style={type.tiny}>contact</Text>
-        {p.show_email !== false ? (
-          <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
-        ) : null}
-        {p.instagram ? (
-          <Row
-            icon="logo-instagram"
-            text={`@${p.instagram}`}
-            onPress={() => Linking.openURL(`https://instagram.com/${p.instagram}`)}
-          />
-        ) : null}
-        {p.linkedin ? (
-          <LinkedinRow handle={p.linkedin} />
-        ) : null}
-      </View>
+      {/* Contact details are for people you actually know — not visible
+          just from browsing/swiping past someone. */}
+      {(rel === 'friends' || rel === 'self') &&
+      (p.show_email !== false || p.instagram || p.linkedin) ? (
+        <View style={styles.section}>
+          <Text style={type.tiny}>contact</Text>
+          {p.show_email !== false ? (
+            <Row icon="mail-outline" text={p.email} onPress={() => Linking.openURL(`mailto:${p.email}`)} />
+          ) : null}
+          {p.instagram ? (
+            <Row
+              icon="logo-instagram"
+              text={`@${p.instagram}`}
+              onPress={() => Linking.openURL(`https://instagram.com/${p.instagram}`)}
+            />
+          ) : null}
+          {p.linkedin ? <LinkedinRow handle={p.linkedin} /> : null}
+        </View>
       ) : null}
 
       {rel !== 'self' && (
