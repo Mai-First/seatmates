@@ -40,7 +40,7 @@ export default function ArchivedChats() {
       <Empty
         icon="archive-outline"
         title="nothing archived"
-        body="When a semester ends, archive it from the account tab. Class chats move here instead of disappearing."
+        body="when a semester ends, archive it from the account tab. class chats move here instead of disappearing."
       />
     );
   }

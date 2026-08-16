@@ -61,7 +61,7 @@ export default function Account() {
     queryClient.invalidateQueries();
     notify(
       'semester archived',
-      `${data} class${data === 1 ? '' : 'es'} moved to archived. See you next term.`,
+      `${data} class${data === 1 ? '' : 'es'} moved to archived. see you next term.`,
     );
   };
 
@@ -129,7 +129,7 @@ export default function Account() {
       onPress: async () => {
         const ok = await confirm(
           'delete your account?',
-          'This permanently removes your profile, matches, messages, RSVPs, and study sessions. It cannot be undone.',
+          'this permanently removes your profile, matches, messages, RSVPs, and study sessions. it cannot be undone.',
           'delete forever',
           true,
         );
