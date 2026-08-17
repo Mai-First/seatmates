@@ -1,6 +1,7 @@
 // Block/unblock/report against another profile — shared by the profile
 // viewer and the chat options screen so the two surfaces can't drift apart.
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { router } from 'expo-router';
 import { confirm, notify } from './dialogs';
 import { supabase } from './supabase';
 import type { Relationship } from './types';
@@ -87,24 +88,12 @@ export function useModeration(otherId: string | undefined, myId: string | undefi
     return true;
   };
 
-  const report = async (): Promise<boolean> => {
-    if (!otherId || !myId) return false;
-    const ok = await confirm(
-      'report this person?',
-      'tell us what happened; the team reviews every report.',
-      'report',
-      true,
-    );
-    if (!ok) return false;
-    const { error } = await supabase
-      .from('reports')
-      .insert({ reporter_id: myId, reported_id: otherId, reason: 'in-app report' });
-    if (error) {
-      notify('could not report', error.message);
-      return false;
-    }
-    notify('thanks', 'we got it.');
-    return true;
+  // Opens the report form (reason + optional screenshot/file) rather than
+  // filing instantly — screenshots/files are real evidence, worth a beat to
+  // attach rather than an instant fire-and-forget confirm.
+  const report = () => {
+    if (!otherId) return;
+    router.push(`/report/${otherId}`);
   };
 
   return { myBlock, block, unblock, report };

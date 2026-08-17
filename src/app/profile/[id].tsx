@@ -11,7 +11,7 @@ import { space, useTheme } from '../../lib/theme';
 import { schoolYearLabel, type Profile, type SharedSection } from '../../lib/types';
 
 export default function ProfileViewer() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, from } = useLocalSearchParams<{ id: string; from?: string }>();
   const { colors, type } = useTheme();
   const { session } = useAuth();
   const queryClient = useQueryClient();
@@ -99,7 +99,15 @@ export default function ProfileViewer() {
         </View>
       </View>
 
-      {rel === 'none' && (
+      {/* Swiping is the only way to express interest from the swipe tab —
+          an "add friend" button here would let people skip the swipe (and
+          its daily limit) entirely. */}
+      {rel === 'none' && from === 'swipe' && (
+        <Text style={[type.sub, { textAlign: 'center' }]}>
+          swipe right on their card to add them as a friend
+        </Text>
+      )}
+      {rel === 'none' && from !== 'swipe' && (
         <Button title="add friend" onPress={() => request.mutate()} loading={request.isPending} />
       )}
       {rel === 'out_pending' && <Button title="request sent" variant="outline" disabled onPress={() => {}} />}

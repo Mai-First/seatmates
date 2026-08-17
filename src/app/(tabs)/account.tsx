@@ -1,5 +1,5 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
@@ -54,6 +54,36 @@ function HideProfileRow() {
         thumbColor={colors.white}
       />
     </View>
+  );
+}
+
+/** Admin-only (profiles.is_admin) — lets testers clear their own daily
+ * swipe count without waiting for the midnight ET reset. Doesn't touch
+ * swipe history, so already-decided people don't reappear in the deck. */
+function ResetSwipeLimitRow() {
+  const { colors, type } = useTheme();
+  const queryClient = useQueryClient();
+  const reset = useMutation({
+    mutationFn: async () => {
+      const { error } = await supabase.rpc('reset_my_swipe_limit');
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['swipe-limit'] });
+      notify('done', 'your swipe limit is reset for today.');
+    },
+    onError: (e) => notify('could not reset', e.message),
+  });
+
+  return (
+    <Pressable
+      onPress={() => reset.mutate()}
+      disabled={reset.isPending}
+      style={[styles.row, { borderTopWidth: 1, borderTopColor: colors.border }]}>
+      <Ionicons name="refresh-outline" size={22} color={colors.primary} />
+      <Text style={[type.body, { flex: 1 }]}>reset swipe limit</Text>
+      <Text style={type.sub}>admin</Text>
+    </Pressable>
   );
 }
 
@@ -152,6 +182,24 @@ export default function Account() {
       label: 'change password',
       onPress: () => router.push('/change-password'),
     },
+    {
+      icon: 'hand-left-outline' as const,
+      label: 'blocked profiles',
+      onPress: () => router.push('/blocked'),
+    },
+  ];
+
+  const adminRows: Row[] = [
+    {
+      icon: 'megaphone-outline' as const,
+      label: 'send announcement',
+      onPress: () => router.push('/admin/announce'),
+    },
+    {
+      icon: 'shield-outline' as const,
+      label: 'review reports',
+      onPress: () => router.push('/admin/reports'),
+    },
   ];
 
   const dangerRows: Row[] = [
@@ -240,6 +288,16 @@ export default function Account() {
           <Text style={type.sub}>{[p?.major, p?.hometown].filter(Boolean).join(' · ')}</Text>
         </View>
       </View>
+
+      {p?.is_admin && (
+        <>
+          <Text style={[type.tiny, styles.sectionHeader]}>admin</Text>
+          <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+            {adminRows.map(renderRow)}
+            <ResetSwipeLimitRow />
+          </View>
+        </>
+      )}
 
       <Text style={[type.tiny, styles.sectionHeader]}>profile & classes</Text>
       <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>

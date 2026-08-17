@@ -17,7 +17,15 @@ export type Profile = {
   photo_url: string | null;
   show_email: boolean;
   hidden: boolean;
+  is_admin: boolean;
   notification_prefs: NotificationPrefs;
+};
+
+export type SwipeLimitStatus = {
+  remaining: number;
+  limit: number;
+  resets_at: string;
+  is_admin: boolean;
 };
 
 export type NotificationKind =
@@ -102,6 +110,7 @@ export type PendingFriendRequest = {
   photo_url: string | null;
   created_at: string;
   source: 'swipe' | 'group_chat' | 'profile';
+  note: string | null;
 };
 
 export type Message = {
@@ -178,3 +187,24 @@ export type StudySession = {
 };
 
 export type SharedSection = { code: string; section: string; title: string };
+
+export type BlockedProfile = {
+  id: string;
+  full_name: string | null;
+  major: string | null;
+  photo_url: string | null;
+};
+
+export type AdminReport = {
+  id: string;
+  reason: string | null;
+  created_at: string;
+  reporter_id: string;
+  reporter_name: string | null;
+  reported_id: string;
+  reported_name: string | null;
+  reported_photo: string | null;
+  attachment_path: string | null;
+  attachment_type: 'image' | 'file' | null;
+  attachment_name: string | null;
+};

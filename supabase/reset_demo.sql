@@ -6,10 +6,10 @@
 --   npx supabase db query --linked --file supabase/reset_demo.sql
 --
 -- Scope: only rows involving a demo persona (id like 'd0000000-...') are
--- touched for swipes/friend_requests/matches/DMs. The two seeded section
--- chats (COMS W3157 §001, MATH UN1101 §001) are reset for everyone in them,
--- since they're the app's showcase group chats — that includes real
--- students enrolled in those same sections.
+-- touched for swipes/friend_requests/matches/DMs/reports. The two seeded
+-- section chats (COMS W3157 §001, MATH UN1101 §001) are reset for everyone
+-- in them, since they're the app's showcase group chats — that includes
+-- real students enrolled in those same sections.
 
 -- 1. Study sessions + RSVPs + their notifications
 delete from notifications where kind in ('study_new','study_update','study_rsvp','study_announcement');
@@ -63,6 +63,12 @@ where user_a::text like 'd0000000-0000-0000-0000-%'
 -- 3. DM conversations involving a demo persona (cascades to members/messages/likes)
 delete from conversations
 where kind = 'dm' and match_key like '%d0000000-0000-0000-0000-%';
+
+-- 3b. Reports involving a demo persona (e.g. test reports made while trying
+-- out the admin review screen)
+delete from reports
+where reporter_id::text like 'd0000000-0000-0000-0000-%'
+   or reported_id::text like 'd0000000-0000-0000-0000-%';
 
 -- 4. Stale relationship notifications pointing at now-deleted requests/matches
 delete from notifications

@@ -46,7 +46,13 @@ function Navigator() {
         <Stack.Screen name="chat-options/[id]" options={{ title: 'chat options' }} />
         <Stack.Screen name="chat-media/[id]" options={{ title: 'photos & files' }} />
         <Stack.Screen name="chat-members/[id]" options={{ title: 'members' }} />
-        <Stack.Screen name="profile/[id]" options={{ presentation: 'modal', title: 'profile' }} />
+        {/* Was presentation: 'modal' -- but block/report both open a
+            confirm() dialog, and DialogHost's own <Modal> stacked inside an
+            already-modal-presented screen is a known way to break iOS's
+            touch routing entirely (looks exactly like an app freeze, tab
+            bar included). Every other pushed screen already behaves this
+            way; profile/[id] wasn't a special case worth the risk. */}
+        <Stack.Screen name="profile/[id]" options={{ title: 'profile' }} />
         <Stack.Screen name="inbox" options={{ title: 'notifications' }} />
         <Stack.Screen name="friend-requests" options={{ title: 'friend requests' }} />
         <Stack.Screen name="notification-settings" options={{ title: 'notification settings' }} />
@@ -54,6 +60,11 @@ function Navigator() {
         <Stack.Screen name="change-password" options={{ title: 'change password' }} />
         <Stack.Screen name="study/new" options={{ title: 'new study session' }} />
         <Stack.Screen name="courses" options={{ title: 'my classes' }} />
+        <Stack.Screen name="admin/announce" options={{ title: 'send announcement' }} />
+        <Stack.Screen name="admin/reports" options={{ title: 'reports' }} />
+        <Stack.Screen name="report/[id]" options={{ title: 'report' }} />
+        <Stack.Screen name="add-friend/[id]" options={{ title: 'add friend' }} />
+        <Stack.Screen name="blocked" options={{ title: 'blocked profiles' }} />
       </Stack>
       <DialogHost />
     </>

@@ -1,8 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Avatar, Button, Loading } from '../../components/ui';
-import { notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { space, useTheme } from '../../lib/theme';
 import type { Member } from '../../lib/types';
@@ -10,7 +9,6 @@ import type { Member } from '../../lib/types';
 export default function ChatMembers() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, type } = useTheme();
-  const queryClient = useQueryClient();
 
   const members = useQuery({
     queryKey: ['members', id],
@@ -19,18 +17,6 @@ export default function ChatMembers() {
       if (error) throw error;
       return data;
     },
-  });
-
-  const request = useMutation({
-    mutationFn: async (to: string) => {
-      const { error } = await supabase.rpc('send_friend_request', {
-        p_to: to,
-        p_source: 'group_chat',
-      });
-      if (error) throw error;
-    },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['members', id] }),
-    onError: (e) => notify('could not send request', e.message),
   });
 
   if (members.isLoading) return <Loading />;
@@ -52,7 +38,7 @@ export default function ChatMembers() {
               </View>
             </Pressable>
             {item.relationship === 'none' && (
-              <Button small title="add friend" onPress={() => request.mutate(item.id)} />
+              <Button small title="add friend" onPress={() => router.push(`/add-friend/${item.id}`)} />
             )}
             {item.relationship === 'out_pending' && (
               <Button small title="requested" variant="outline" disabled onPress={() => {}} />

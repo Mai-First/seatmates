@@ -85,6 +85,7 @@ export default function FriendRequests() {
               <View style={{ flex: 1, gap: 2 }}>
                 <Text style={type.body}>{item.full_name ?? 'classmate'}</Text>
                 {item.major ? <Text style={type.sub}>{item.major}</Text> : null}
+                {item.note ? <Text style={type.sub}>“{item.note}”</Text> : null}
               </View>
             </Pressable>
             <View style={{ flexDirection: 'row', gap: space.sm }}>

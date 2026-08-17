@@ -16,9 +16,10 @@ import {
 import Celebration from '../../components/Celebration';
 import { Button, Loading } from '../../components/ui';
 import { useMyProfile } from '../../lib/auth';
+import { notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
-import { schoolYearLabel, type DeckCard } from '../../lib/types';
+import { schoolYearLabel, type DeckCard, type SwipeLimitStatus } from '../../lib/types';
 
 const SWIPE_THRESHOLD = 110;
 
@@ -62,6 +63,17 @@ export default function Swipe() {
     }, [queryClient]),
   );
 
+  // 10 swipes/day, resets at midnight ET — enforced server-side in
+  // record_swipe(); this is just what lets the UI show/gate ahead of that.
+  const swipeLimit = useQuery({
+    queryKey: ['swipe-limit'],
+    queryFn: async (): Promise<SwipeLimitStatus> => {
+      const { data, error } = await supabase.rpc('get_swipe_limit_status');
+      if (error) throw error;
+      return data;
+    },
+  });
+
   const swipe = useMutation({
     mutationFn: async (args: { swipee: string; direction: 'left' | 'right' }) => {
       const { data, error } = await supabase.rpc('record_swipe', {
@@ -96,23 +108,37 @@ export default function Swipe() {
     (direction: 'left' | 'right') => {
       if (!card) return;
       const current = card;
+      setSwipedIds((prev) => {
+        const next = new Set(prev);
+        next.add(current.id);
+        return next;
+      });
       swipe.mutate(
         { swipee: current.id, direction },
         {
           onSuccess: (res) => {
+            queryClient.invalidateQueries({ queryKey: ['swipe-limit'] });
             if (res.matched) {
               setMatch({ name: current.full_name, conversationId: res.conversation_id });
               queryClient.invalidateQueries({ queryKey: ['conversations'] });
               queryClient.invalidateQueries({ queryKey: ['unread-count'] });
             }
           },
+          // The UI already hides swiping once the limit hits 0, but a race
+          // (two taps before the query catches up) can still get rejected
+          // server-side — put the card back rather than stranding it as
+          // "swiped" when nothing was actually recorded.
+          onError: (e) => {
+            notify('could not record swipe', e.message);
+            setSwipedIds((prev) => {
+              const next = new Set(prev);
+              next.delete(current.id);
+              return next;
+            });
+            queryClient.invalidateQueries({ queryKey: ['swipe-limit'] });
+          },
         },
       );
-      setSwipedIds((prev) => {
-        const next = new Set(prev);
-        next.add(current.id);
-        return next;
-      });
     },
     [card, swipe, queryClient],
   );
@@ -181,6 +207,28 @@ export default function Swipe() {
     );
   }
 
+  if (swipeLimit.isLoading) return <Loading />;
+
+  const remaining = swipeLimit.data?.remaining ?? 1;
+  if (remaining <= 0) {
+    return (
+      <View style={[styles.emptyDeck, { backgroundColor: colors.bg }]}>
+        <View style={[styles.emptyIcon, { backgroundColor: colors.accentSoft }]}>
+          <Ionicons name="hourglass-outline" size={26} color={colors.primary} />
+        </View>
+        <Text style={[type.h2, { textAlign: 'center' }]}>that’s your 10 for today</Text>
+        <Text style={[type.sub, { textAlign: 'center', maxWidth: 300 }]}>
+          swiping resets at midnight ET — come back tomorrow for a fresh set of classmates.
+        </Text>
+        {swipeLimit.data?.is_admin ? (
+          <View style={{ marginTop: space.xs }}>
+            <Button title="reset in account" onPress={() => router.push('/account')} />
+          </View>
+        ) : null}
+      </View>
+    );
+  }
+
   if (deck.isLoading) return <Loading />;
 
   if (!card) {
@@ -231,7 +279,7 @@ export default function Swipe() {
           { backgroundColor: colors.card },
           { transform: [{ translateX: pan.x }, { translateY: pan.y }, { rotate }] },
         ]}>
-        <Pressable style={{ flex: 1 }} onPress={() => router.push(`/profile/${card.id}`)}>
+        <Pressable style={{ flex: 1 }} onPress={() => router.push(`/profile/${card.id}?from=swipe`)}>
           <CardFace card={card} />
         </Pressable>
         <Animated.View
