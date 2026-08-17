@@ -131,7 +131,7 @@ account is otherwise disposable — no requirement to clean it up afterward.
 
 Prefer to explore a fully populated account instead of onboarding from
 scratch? Any of the 20 demo personas below works the same way once you know
-its email (`select email from profiles where full_name = 'Elowen Marsh';` from the
+its email (`select email from profiles where full_name = 'Claire Marsh';` from the
 SQL editor) — they don't have set passwords, so that route needs an admin
 password reset first.
 
@@ -142,9 +142,9 @@ The shared project comes pre-loaded with a Fall 2026 catalog (9 subjects,
 not existing fictional characters either, so there's no name/likeness
 question of any kind: Priya Chandrasekaran, Liam O'Brien, Jonah Fitzgerald,
 Dante Reyes, Adrian Voss, Miles Okafor, Charlie Kowalski, Wei Lin, Ada
-Nakamura, Sage Whitfield, Marcus Reid, Owen Bramble, Desmond Ortiz, Nyx
-Castellan, Silas Kade, Josephine Park, Bartholomew Higgins, Percival
-Lockhart, Freya Lindqvist, and Elowen Marsh — enrolled across **COMS W3157,
+Nakamura, Sage Whitfield, Marcus Reid, Owen Bramble, Desmond Ortiz, Vivian
+Cole, Ethan Brooks, Josephine Park, Tommy Reeves, Derek Sanders, Freya
+Lindqvist, and Claire Marsh — each with a real-US hometown — enrolled across **COMS W3157,
 COMS W3134, MATH UN1101, ECON UN1105, PSYC UN1001, HIST UN1786, ENGL BC1068,
 BIOL UN2005**. Each one has a full profile: photo (DiceBear-generated
 cartoon avatars, MIT-licensed), bio, study spot, and three in-character

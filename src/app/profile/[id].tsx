@@ -73,7 +73,10 @@ export default function ProfileViewer() {
       <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
         <View style={{ alignItems: 'center', gap: space.sm }}>
           <Avatar uri={p.photo_url} name={p.full_name} size={120} />
-          <Text style={type.title}>{p.full_name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: space.xs }}>
+            <Text style={type.title}>{p.full_name}</Text>
+            {p.pronouns ? <Text style={type.sub}>{p.pronouns}</Text> : null}
+          </View>
           {schoolYearLabel(p.school, p.grad_year) ? (
             <Text style={[type.sub, { color: colors.primary }]}>
               {schoolYearLabel(p.school, p.grad_year)}

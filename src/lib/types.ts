@@ -6,6 +6,7 @@ export type Profile = {
   id: string;
   email: string;
   full_name: string | null;
+  pronouns: string | null;
   major: string | null;
   hometown: string | null;
   bio: string | null;

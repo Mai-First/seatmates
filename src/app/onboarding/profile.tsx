@@ -23,6 +23,7 @@ export default function OnboardingProfile() {
   const queryClient = useQueryClient();
 
   const [name, setName] = useState('');
+  const [pronouns, setPronouns] = useState('');
   const [school, setSchool] = useState<School | null>(null);
   const [gradYear, setGradYear] = useState<number | null>(null);
   const [major, setMajor] = useState('');
@@ -41,6 +42,7 @@ export default function OnboardingProfile() {
     const p = profile.data;
     if (!p) return;
     setName((v) => v || (p.full_name ?? ''));
+    setPronouns((v) => v || (p.pronouns ?? ''));
     setSchool((v) => v ?? p.school);
     setGradYear((v) => v ?? p.grad_year);
     setMajor((v) => v || (p.major ?? ''));
@@ -102,6 +104,7 @@ export default function OnboardingProfile() {
       .from('profiles')
       .update({
         full_name: name.trim(),
+        pronouns: pronouns.trim() || null,
         school,
         grad_year: gradYear,
         major: major.trim() || null,
@@ -149,6 +152,12 @@ export default function OnboardingProfile() {
       </Pressable>
 
       <Field label="name" placeholder="alex morgan" value={name} onChangeText={setName} />
+      <Field
+        label="pronouns (optional)"
+        placeholder="she/her, he/him, they/them..."
+        value={pronouns}
+        onChangeText={setPronouns}
+      />
 
       <View style={{ gap: space.xs }}>
         <Text style={type.sub}>school</Text>
