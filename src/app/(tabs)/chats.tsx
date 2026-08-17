@@ -209,7 +209,7 @@ function ChatRow({
       )}>
       <Pressable onPress={() => router.push(`/chat/${item.id}`)} style={[styles.row, { backgroundColor: colors.bg }]}>
         {item.kind === 'dm' ? (
-          <Avatar uri={item.photo_url} name={item.title} size={48} />
+          <Avatar uri={item.photo_url} name={item.title} deleted={item.deleted} size={48} />
         ) : (
           <View style={[styles.sectionIcon, { backgroundColor: colors.accentSoft }]}>
             <Ionicons

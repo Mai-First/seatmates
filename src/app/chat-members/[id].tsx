@@ -1,6 +1,8 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import AddFriendPopup from '../../components/AddFriendPopup';
 import { Avatar, Button, Loading } from '../../components/ui';
 import { supabase } from '../../lib/supabase';
 import { space, useTheme } from '../../lib/theme';
@@ -9,6 +11,8 @@ import type { Member } from '../../lib/types';
 export default function ChatMembers() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { colors, type } = useTheme();
+  const queryClient = useQueryClient();
+  const [addTarget, setAddTarget] = useState<{ id: string; name: string | null } | null>(null);
 
   const members = useQuery({
     queryKey: ['members', id],
@@ -38,7 +42,11 @@ export default function ChatMembers() {
               </View>
             </Pressable>
             {item.relationship === 'none' && (
-              <Button small title="add friend" onPress={() => router.push(`/add-friend/${item.id}`)} />
+              <Button
+                small
+                title="add friend"
+                onPress={() => setAddTarget({ id: item.id, name: item.full_name })}
+              />
             )}
             {item.relationship === 'out_pending' && (
               <Button small title="requested" variant="outline" disabled onPress={() => {}} />
@@ -52,6 +60,15 @@ export default function ChatMembers() {
           </View>
         )}
       />
+      {addTarget && (
+        <AddFriendPopup
+          personId={addTarget.id}
+          personName={addTarget.name}
+          source="group_chat"
+          onClose={() => setAddTarget(null)}
+          onSent={() => queryClient.invalidateQueries({ queryKey: ['members', id] })}
+        />
+      )}
     </View>
   );
 }

@@ -63,7 +63,6 @@ function Navigator() {
         <Stack.Screen name="admin/announce" options={{ title: 'send announcement' }} />
         <Stack.Screen name="admin/reports" options={{ title: 'reports' }} />
         <Stack.Screen name="report/[id]" options={{ title: 'report' }} />
-        <Stack.Screen name="add-friend/[id]" options={{ title: 'add friend' }} />
         <Stack.Screen name="blocked" options={{ title: 'blocked profiles' }} />
       </Stack>
       <DialogHost />

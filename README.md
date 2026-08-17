@@ -199,8 +199,11 @@ npx supabase db query --linked --file supabase/reset_demo.sql
    stop. Contact info (email/Instagram/LinkedIn) only ever shows once you're
    friends with someone — never while just browsing.
 9. **Delete account** (Account tab, double confirm): removes the profile,
-   matches, messages, and hosted sessions, frees the email for re-signup, and
-   kills the other side's DM thread. Required by App Store guideline 5.1.1(v).
+   matches, swipes, friend requests, RSVPs, and hosted sessions, and frees
+   the email for re-signup. Required by App Store guideline 5.1.1(v).
+   Messages they sent stay put for whoever they were chatting with (group
+   chats and DMs alike) — the sender just shows as "deleted user," a grey
+   placeholder avatar, and (for DMs) a read-only banner on the thread.
 
 ### Realtime across two accounts
 

@@ -64,6 +64,7 @@ export default function ChatThread() {
             member: boolean;
             can_post: boolean;
             blocked: boolean;
+            deleted: boolean;
             muted: boolean;
           }
         | undefined;
@@ -401,12 +402,22 @@ export default function ChatThread() {
       {readOnly ? (
         <View style={[styles.readOnlyBar, { borderTopColor: colors.border, backgroundColor: colors.surface }]}>
           <Ionicons
-            name={info.data?.blocked ? 'ban-outline' : 'archive-outline'}
+            name={
+              info.data?.blocked
+                ? 'ban-outline'
+                : info.data?.deleted
+                  ? 'person-remove-outline'
+                  : 'archive-outline'
+            }
             size={16}
             color={colors.subtle}
           />
           <Text style={type.sub}>
-            {info.data?.blocked ? 'this person is blocked' : 'archived, read-only'}
+            {info.data?.blocked
+              ? 'this person is blocked'
+              : info.data?.deleted
+                ? 'this account has been deleted'
+                : 'archived, read-only'}
           </Text>
         </View>
       ) : (
@@ -486,6 +497,10 @@ function MessageBubble({
 }) {
   const { colors, type } = useTheme();
   const deleted = !!message.deleted_at;
+  const senderDeleted = !message.sender_id;
+  const goToSender = () => {
+    if (message.sender_id) router.push(`/profile/${message.sender_id}`);
+  };
   const likedByMe = !!myId && likes.some((l) => l.profile_id === myId);
   const likeCount = likes.length;
 
@@ -527,8 +542,13 @@ function MessageBubble({
     <View>
       <View style={[styles.bubbleRow, mine && { flexDirection: 'row-reverse' }]}>
         {!mine && showSender && (
-          <Pressable onPress={() => router.push(`/profile/${message.sender_id}`)}>
-            <Avatar uri={message.sender?.photo_url} name={message.sender?.full_name} size={32} />
+          <Pressable onPress={goToSender}>
+            <Avatar
+              uri={message.sender?.photo_url}
+              name={message.sender?.full_name}
+              deleted={senderDeleted}
+              size={32}
+            />
           </Pressable>
         )}
         <View style={styles.bubbleStack}>
@@ -542,9 +562,9 @@ function MessageBubble({
             ]}>
             {!mine && showSender && (
               // Tap a name to open the profile → add friend from there (PLAN D9).
-              <Pressable onPress={() => router.push(`/profile/${message.sender_id}`)}>
+              <Pressable onPress={goToSender}>
                 <Text style={[styles.senderName, { color: colors.primary }]}>
-                  {message.sender?.full_name ?? 'classmate'}
+                  {senderDeleted ? 'deleted user' : (message.sender?.full_name ?? 'classmate')}
                 </Text>
               </Pressable>
             )}

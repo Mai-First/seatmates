@@ -19,6 +19,7 @@ type ConversationInfo = {
   muted: boolean;
   pinned: boolean;
   other_id: string | null;
+  deleted: boolean;
   icon_name: string | null;
 };
 
@@ -123,7 +124,15 @@ export default function ChatOptions() {
 
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
-      {isDm && other.data ? (
+      {isDm && info.data?.deleted ? (
+        <View style={styles.profileRow}>
+          <Avatar deleted size={56} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <Text style={type.h2}>deleted user</Text>
+            <Text style={type.sub}>this account no longer exists</Text>
+          </View>
+        </View>
+      ) : isDm && other.data ? (
         <Pressable
           style={styles.profileRow}
           onPress={() => otherId && router.push(`/profile/${otherId}`)}>
@@ -213,7 +222,7 @@ export default function ChatOptions() {
         />
       ) : null}
 
-      {isDm && rel !== 'self' ? (
+      {isDm && otherId && rel !== 'self' ? (
         <>
           {rel === 'blocked' ? (
             myBlock.data ? (

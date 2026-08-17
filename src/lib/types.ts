@@ -21,13 +21,6 @@ export type Profile = {
   notification_prefs: NotificationPrefs;
 };
 
-export type SwipeLimitStatus = {
-  remaining: number;
-  limit: number;
-  resets_at: string;
-  is_admin: boolean;
-};
-
 export type NotificationKind =
   | 'friend_request'
   | 'request_accepted'
@@ -94,6 +87,7 @@ export type ConversationSummary = {
   subtitle: string | null;
   photo_url: string | null;
   other_id: string | null;
+  deleted: boolean;
   last_body: string | null;
   last_at: string;
   unread: boolean;
@@ -116,14 +110,16 @@ export type PendingFriendRequest = {
 export type Message = {
   id: string;
   conversation_id: string;
-  sender_id: string;
+  // Null when the sender's account has since been deleted — the message
+  // itself is kept, only the reference to who sent it goes null.
+  sender_id: string | null;
   body: string | null;
   attachment_url: string | null;
   attachment_type: 'image' | 'file' | null;
   attachment_name: string | null;
   deleted_at: string | null;
   created_at: string;
-  sender?: Pick<Profile, 'id' | 'full_name' | 'photo_url'>;
+  sender?: Pick<Profile, 'id' | 'full_name' | 'photo_url'> | null;
 };
 
 export type Member = {

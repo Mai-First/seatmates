@@ -74,10 +74,15 @@ export function Avatar({
   uri,
   name,
   size = 44,
+  deleted,
 }: {
   uri?: string | null;
   name?: string | null;
   size?: number;
+  /** Account no longer exists — a flat grey circle + generic person icon,
+   * deliberately not the normal colored-initials fallback, so it reads as
+   * "gone" rather than "no photo yet". */
+  deleted?: boolean;
 }) {
   const { colors } = useTheme();
   const [failed, setFailed] = useState(false);
@@ -87,6 +92,17 @@ export function Avatar({
     .slice(0, 2)
     .join('')
     .toUpperCase();
+  if (deleted) {
+    return (
+      <View
+        style={[
+          styles.avatarFallback,
+          { width: size, height: size, borderRadius: size / 2, backgroundColor: colors.border },
+        ]}>
+        <Ionicons name="person" size={size * 0.5} color={colors.subtle} />
+      </View>
+    );
+  }
   if (!uri || failed) {
     return (
       <View
