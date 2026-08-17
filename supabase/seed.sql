@@ -40,97 +40,187 @@ from (values
 ) as t (n, email)
 on conflict (id) do nothing;
 
--- Celebrity-and-fictional-character personas (team decision — memorable demo
--- data beats realistic demo data). Avatars stay generic placeholder headshots
--- throughout, not real photos of real people.
+-- Wholly made-up personas — not real people, not existing fictional
+-- characters either, so there's no name/likeness question of any kind.
+-- Avatars are DiceBear-generated (MIT-licensed, api.dicebear.com) except
+-- Liam, whose original pravatar placeholder predates the persona rewrites
+-- and stays as-is.
 update public.profiles p set
   full_name = d.full_name, major = d.major, hometown = d.hometown, bio = d.bio,
   instagram = d.instagram, linkedin = d.linkedin, photo_url = d.photo_url,
   study_spot = d.study_spot, school = d.school, grad_year = d.grad_year, is_demo = true
 from (values
-  ('d0000000-0000-0000-0000-000000000001'::uuid, 'Kim Kardashian', 'Business',
-   'Calabasas, CA', 'Keeping up with problem sets. Ask me about the group chat business plan.',
-   'kimkardashian', null, 'https://i.pravatar.cc/300?img=47', 'Butler, 3rd floor by the windows',
+  ('d0000000-0000-0000-0000-000000000001'::uuid, 'Priya Chandrasekaran', 'Chemistry',
+   'Mumbai, India', 'color-codes everything, including her feelings.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=priya-chandrasekaran&size=300', 'Butler stacks, highlighters out',
    'SEAS', 2027),
   ('d0000000-0000-0000-0000-000000000002'::uuid, 'Liam O''Brien', 'Economics',
    'Chicago, IL', 'Problem sets are better with company. Butler 4th floor regular.',
    'liam.obrien', 'in/liamobrien', 'https://i.pravatar.cc/300?img=12', 'Butler 4th floor',
    'CC', 2028),
-  ('d0000000-0000-0000-0000-000000000003'::uuid, 'Michael B. Jordan', 'Theatre',
-   'Newark, NJ', 'Killmonger energy, Wakanda focus. Down for a gym sesh between classes.',
-   'michaelbjordan', null, 'https://i.pravatar.cc/300?img=32', 'Everett reading room',
+  ('d0000000-0000-0000-0000-000000000003'::uuid, 'Jonah Fitzgerald', 'Mechanical Engineering',
+   'Detroit, MI', 'built a functioning espresso machine out of dorm supplies.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=jonah-fitzgerald&size=300', 'Mudd basement, near the outlets',
    'CC', 2029),
-  ('d0000000-0000-0000-0000-000000000004'::uuid, 'Timothée Chalamet', 'Film Studies',
-   'NYC by way of Paris', 'Method-acting my way through office hours. Beanie non-negotiable.',
-   'tchalamet', null, 'https://i.pravatar.cc/300?img=68', 'Milstein basement',
+  ('d0000000-0000-0000-0000-000000000004'::uuid, 'Dante Reyes', 'Undeclared',
+   'Miami, FL', 'still hasn''t picked a major. has picked several personalities.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=dante-reyes&size=300', 'wherever the vibe is',
    'SEAS', 2028),
-  ('d0000000-0000-0000-0000-000000000005'::uuid, 'President Snow', 'Political Science',
-   'The Capitol, Panem', 'May the odds be ever in your favor on this problem set.',
-   null, null, 'https://i.pravatar.cc/300?img=25', 'Math Library',
+  ('d0000000-0000-0000-0000-000000000005'::uuid, 'Adrian Voss', 'Political Science',
+   'Washington, DC', 'already practicing his victory speech.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=adrian-voss&size=300', 'Math Library',
    'CC', 2027),
-  ('d0000000-0000-0000-0000-000000000006'::uuid, 'Spider-Man', 'Photojournalism',
-   'Queens, NY', 'With great problem sets comes great responsibility.',
-   'spidey.swings', null, 'https://i.pravatar.cc/300?img=59', 'Butler 301',
+  ('d0000000-0000-0000-0000-000000000006'::uuid, 'Miles Okafor', 'Photojournalism',
+   'Queens, NY', 'has a camera in hand at all times, even in the dining hall.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=miles-okafor&size=300', 'Butler 301',
    'SEAS', 2030),
-  ('d0000000-0000-0000-0000-000000000007'::uuid, 'SpongeBob SquarePants', 'Culinary Arts',
-   'Bikini Bottom', 'I''m ready, I''m ready, I''m ready! For the midterm, that is.',
-   'spongebob', null, 'https://i.pravatar.cc/300?img=44', 'Avery reading room',
+  ('d0000000-0000-0000-0000-000000000007'::uuid, 'Charlie Kowalski', 'Culinary Arts',
+   'Chicago, IL', 'brings snacks to every study session, unprompted.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=charlie-kowalski&size=300', 'Avery reading room',
    'GS', 2028),
-  ('d0000000-0000-0000-0000-000000000008'::uuid, 'Beyoncé', 'Music',
-   'Houston, TX', 'Slaying lectures and problem sets. Beyhive study group welcome.',
-   'beyonce', null, 'https://i.pravatar.cc/300?img=15', 'Uris Library',
+  ('d0000000-0000-0000-0000-000000000008'::uuid, 'Wei Lin', 'Kinesiology',
+   'Shanghai, China', 'wakes up at 5am to train, lovingly judges everyone else''s sleep schedule.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=wei-lin&size=300', 'Uris Library',
    'BC', 2027),
-  ('d0000000-0000-0000-0000-000000000009'::uuid, 'Dwayne Johnson', 'Kinesiology',
-   'Hayward, CA', 'Can you smell what the midterm is cooking? Gym before every study session.',
-   'therock', null, 'https://i.pravatar.cc/300?img=51', 'Dodge gym lobby',
+  ('d0000000-0000-0000-0000-000000000009'::uuid, 'Ada Nakamura', 'Computer Science',
+   'Tokyo, Japan', 'built an app to optimize her own procrastination.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=ada-nakamura&size=300', 'Mudd, 4th floor',
    'CC', 2029),
-  ('d0000000-0000-0000-0000-000000000010'::uuid, 'Zendaya', 'Theatre',
-   'Oakland, CA', 'Euphoria on the outside, panicking about the reading on the inside.',
-   'zendaya', null, 'https://i.pravatar.cc/300?img=45', 'Lerner ramps',
+  ('d0000000-0000-0000-0000-000000000010'::uuid, 'Sage Whitfield', 'Environmental Science',
+   'Asheville, NC', 'can identify every plant on campus, forgets human names instantly.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=sage-whitfield&size=300', 'Lerner ramps',
    'BC', 2028),
-  ('d0000000-0000-0000-0000-000000000011'::uuid, 'Batman', 'Criminal Justice',
-   'Gotham City', 'I am vengeance. I am the night. I am also very behind on this reading.',
-   null, null, 'https://i.pravatar.cc/300?img=53', 'Butler stacks, after dark',
+  ('d0000000-0000-0000-0000-000000000011'::uuid, 'Marcus Reid', 'Criminal Justice',
+   'Baltimore, MD', 'broods in the library. is actually just tired.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=marcus-reid&size=300', 'Butler stacks, after dark',
    'SEAS', 2027),
-  ('d0000000-0000-0000-0000-000000000012'::uuid, 'Shrek', 'Environmental Science',
-   'The Swamp', 'Ogres have layers. So does this syllabus, apparently.',
-   null, null, 'https://i.pravatar.cc/300?img=56', 'Low Library steps (the swamp)',
+  ('d0000000-0000-0000-0000-000000000012'::uuid, 'Owen Bramble', 'Environmental Science',
+   'Portland, OR', 'explains everything in onion-layer metaphors. it''s a whole thing.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=owen-bramble&size=300', 'Low Library steps',
    'GS', 2030),
-  ('d0000000-0000-0000-0000-000000000013'::uuid, 'Harry Styles', 'Music',
-   'Cheshire, UK', 'Treat people with kindness, and bring snacks to group study.',
-   'harrystyles', null, 'https://i.pravatar.cc/300?img=13', 'John Jay lounge',
+  ('d0000000-0000-0000-0000-000000000013'::uuid, 'Desmond Ortiz', 'Business',
+   'Scranton, PA', 'turns every group project into a bit.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=desmond-ortiz&size=300', 'John Jay lounge',
    'CC', 2028),
-  ('d0000000-0000-0000-0000-000000000014'::uuid, 'Taylor Swift', 'English',
-   'Nashville, TN', 'I write the study guides, I write the study guides.',
-   'taylorswift', null, 'https://i.pravatar.cc/300?img=48', 'Butler, top floor, obviously',
+  ('d0000000-0000-0000-0000-000000000014'::uuid, 'Nyx Castellan', 'English',
+   'Salem, MA', 'wears all black, reads everything, judges your font choices.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=nyx-castellan&size=300', 'Butler stacks, lights off',
    'BC', 2027),
-  ('d0000000-0000-0000-0000-000000000015'::uuid, 'Darth Vader', 'Political Science',
-   'Tatooine', 'I find your lack of studying disturbing.',
-   null, null, 'https://i.pravatar.cc/300?img=52', 'Uris basement (the Death Star)',
+  ('d0000000-0000-0000-0000-000000000015'::uuid, 'Silas Kade', 'Political Science',
+   'somewhere cold', 'intense eye contact, surprisingly good study notes.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=silas-kade&size=300', 'Uris basement',
    'SEAS', 2029),
-  ('d0000000-0000-0000-0000-000000000016'::uuid, 'Rihanna', 'Business',
-   'Saint Michael, Barbados', 'Work, work, work, work, work — on this pset.',
-   'badgalriri', null, 'https://i.pravatar.cc/300?img=29', 'Uris Library',
+  ('d0000000-0000-0000-0000-000000000016'::uuid, 'Josephine Park', 'Chemistry',
+   'Seoul, South Korea', 'loses her glasses at least once a week. still aces everything.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=josephine-park&size=300', 'Uris Library',
    'BC', 2028),
-  ('d0000000-0000-0000-0000-000000000017'::uuid, 'Homer Simpson', 'Nuclear Engineering',
-   'Springfield', 'D''oh! Forgot the reading again. Send donuts.',
-   null, null, 'https://i.pravatar.cc/300?img=54', 'The cafeteria, obviously',
+  ('d0000000-0000-0000-0000-000000000017'::uuid, 'Bartholomew Higgins', 'Nuclear Engineering',
+   'Springfield', 'forgets the reading, never forgets snack time.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=bartholomew-higgins&size=300', 'The cafeteria, obviously',
    'GS', 2030),
-  ('d0000000-0000-0000-0000-000000000018'::uuid, 'MrBeast', 'Business',
-   'Greenville, NC', 'Subscribe or I''m not helping with the group project. Kidding. Mostly.',
-   'mrbeast', null, 'https://i.pravatar.cc/300?img=8', 'Wherever the wifi is fastest',
+  ('d0000000-0000-0000-0000-000000000018'::uuid, 'Percival Lockhart', 'Philosophy',
+   'London, UK', 'deduces your major before you tell him.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=percival-lockhart&size=300', 'Low Library, observing everyone',
    'CC', 2028),
-  ('d0000000-0000-0000-0000-000000000019'::uuid, 'Elle Woods', 'Pre-Law',
-   'Bel Air, CA', 'What, like studying is hard? (It kind of is, actually.)',
-   'ellewoods', null, 'https://i.pravatar.cc/300?img=21', 'Law Library, front row',
+  ('d0000000-0000-0000-0000-000000000019'::uuid, 'Freya Lindqvist', 'Pre-Law',
+   'Stockholm, Sweden', 'argues everything. wins most of it.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=freya-lindqvist&size=300', 'Law Library, front row',
    'BC', 2027),
-  ('d0000000-0000-0000-0000-000000000020'::uuid, 'Yoda', 'Philosophy',
-   'Dagobah', 'Study, or study not. There is no cram.',
-   null, null, 'https://i.pravatar.cc/300?img=34', 'Low Library steps, meditating',
+  ('d0000000-0000-0000-0000-000000000020'::uuid, 'Elowen Marsh', 'Philosophy',
+   'off-grid, somewhere remote', 'speaks in riddles, always right anyway.',
+   null, null, 'https://api.dicebear.com/9.x/adventurer/png?seed=elowen-marsh&size=300', 'Low Library steps, meditating',
    'GS', 2030)
 ) as d (id, full_name, major, hometown, bio, instagram, linkedin, photo_url, study_spot,
         school, grad_year)
 where p.id = d.id;
+
+-- ---------------------------------------------------------------------------
+-- In-character profile prompts, 3 per persona -- so the prompts feature has
+-- something to show off in the deck/profile viewer from a fresh seed.
+-- ---------------------------------------------------------------------------
+
+insert into public.profile_prompts (profile_id, prompt, answer)
+values
+  ('d0000000-0000-0000-0000-000000000001', 'favorite professor', 'the one whose slides I''ve basically memorized'),
+  ('d0000000-0000-0000-0000-000000000001', 'a hot take I stand by', 'a well-organized binder is self-care'),
+  ('d0000000-0000-0000-0000-000000000001', 'best class I’ve taken', 'anything with a detailed syllabus'),
+
+  ('d0000000-0000-0000-0000-000000000002', 'favorite food spot near campus', 'tom''s restaurant, obviously'),
+  ('d0000000-0000-0000-0000-000000000002', 'go-to study snack', 'an entire sleeve of pretzels'),
+  ('d0000000-0000-0000-0000-000000000002', 'unpopular opinion', 'butler basement is overrated'),
+
+  ('d0000000-0000-0000-0000-000000000003', 'dream job', 'building things nobody asked for but everyone needs'),
+  ('d0000000-0000-0000-0000-000000000003', 'a green flag in a study partner', 'brings their own charger, unprompted'),
+  ('d0000000-0000-0000-0000-000000000003', 'coffee order', 'whatever''s strongest, no judgment'),
+
+  ('d0000000-0000-0000-0000-000000000004', 'unpopular opinion', 'declaring a major is overrated'),
+  ('d0000000-0000-0000-0000-000000000004', 'fun fact about me', 'I''ve changed my major five times, ask again next week'),
+  ('d0000000-0000-0000-0000-000000000004', 'ideal weekend plans', 'no plans, that''s the plan'),
+
+  ('d0000000-0000-0000-0000-000000000005', 'dream job', 'running for something, anything'),
+  ('d0000000-0000-0000-0000-000000000005', 'a hot take I stand by', 'every group project needs a designated leader (me)'),
+  ('d0000000-0000-0000-0000-000000000005', 'a red flag in a group project', 'no clear chain of command'),
+
+  ('d0000000-0000-0000-0000-000000000006', 'fun fact about me', 'I have a photo of literally everyone in this class'),
+  ('d0000000-0000-0000-0000-000000000006', 'favorite nyc spot outside campus', 'wherever the light is good'),
+  ('d0000000-0000-0000-0000-000000000006', 'best columbia secret', 'the rooftop with the best sunset, not telling which one'),
+
+  ('d0000000-0000-0000-0000-000000000007', 'go-to study snack', 'whatever I baked at 1am the night before'),
+  ('d0000000-0000-0000-0000-000000000007', 'favorite food spot near campus', 'wherever lets me use their kitchen'),
+  ('d0000000-0000-0000-0000-000000000007', 'guilty pleasure', 'eating the study snacks before the study session starts'),
+
+  ('d0000000-0000-0000-0000-000000000008', 'ideal weekend plans', '6am run, then judging everyone else''s sleep schedule'),
+  ('d0000000-0000-0000-0000-000000000008', 'a green flag in a study partner', 'actually shows up when they say they will'),
+  ('d0000000-0000-0000-0000-000000000008', 'go-to study snack', 'protein bar, always'),
+
+  ('d0000000-0000-0000-0000-000000000009', 'most used app', 'one I built myself, obviously'),
+  ('d0000000-0000-0000-0000-000000000009', 'dream job', 'still deciding between three startups I haven''t started yet'),
+  ('d0000000-0000-0000-0000-000000000009', 'a hot take I stand by', 'procrastination is just untapped R&D time'),
+
+  ('d0000000-0000-0000-0000-000000000010', 'fun fact about me', 'I can name every tree on campus, not your name though'),
+  ('d0000000-0000-0000-0000-000000000010', 'best columbia secret', 'there''s a garden most people walk right past'),
+  ('d0000000-0000-0000-0000-000000000010', 'ideal weekend plans', 'hiking, then forgetting I have a pset due monday'),
+
+  ('d0000000-0000-0000-0000-000000000011', 'unpopular opinion', 'I''m not brooding, I''m just really tired'),
+  ('d0000000-0000-0000-0000-000000000011', 'favorite professor', 'the one who never calls on me, bless them'),
+  ('d0000000-0000-0000-0000-000000000011', 'a red flag in a group project', 'unnecessary meetings that could''ve been a text'),
+
+  ('d0000000-0000-0000-0000-000000000012', 'fun fact about me', 'everything is like an onion if you think about it long enough'),
+  ('d0000000-0000-0000-0000-000000000012', 'worst class I’ve taken (no judgment)', 'anything without a field trip'),
+  ('d0000000-0000-0000-0000-000000000012', 'a hot take I stand by', 'group projects have layers, just like onions'),
+
+  ('d0000000-0000-0000-0000-000000000013', 'guilty pleasure', 'turning every study session into a bit'),
+  ('d0000000-0000-0000-0000-000000000013', 'a hot take I stand by', 'a good pun is worth losing a friend over'),
+  ('d0000000-0000-0000-0000-000000000013', 'fun fact about me', 'world''s okayest study buddy, working on it'),
+
+  ('d0000000-0000-0000-0000-000000000014', 'unpopular opinion', 'sunlight is overrated, the library basement is superior'),
+  ('d0000000-0000-0000-0000-000000000014', 'best class I’ve taken', 'anything tragic, the sadder the better'),
+  ('d0000000-0000-0000-0000-000000000014', 'a hot take I stand by', 'your font choice says everything about you'),
+
+  ('d0000000-0000-0000-0000-000000000015', 'unpopular opinion', 'eye contact during a group presentation builds trust'),
+  ('d0000000-0000-0000-0000-000000000015', 'favorite professor', 'the one who respects silence'),
+  ('d0000000-0000-0000-0000-000000000015', 'a hot take I stand by', 'the best notes are the ones no one else can read'),
+
+  ('d0000000-0000-0000-0000-000000000016', 'favorite professor', 'the one who lets us figure it out ourselves'),
+  ('d0000000-0000-0000-0000-000000000016', 'a green flag in a study partner', 'helps me find my glasses, again'),
+  ('d0000000-0000-0000-0000-000000000016', 'fun fact about me', 'I''ve solved harder problems than this pset, probably'),
+
+  ('d0000000-0000-0000-0000-000000000017', 'go-to study snack', 'donuts, family size'),
+  ('d0000000-0000-0000-0000-000000000017', 'favorite food spot near campus', 'wherever has a drive-thru'),
+  ('d0000000-0000-0000-0000-000000000017', 'worst class I’ve taken (no judgment)', 'the one I forgot I was enrolled in'),
+
+  ('d0000000-0000-0000-0000-000000000018', 'unpopular opinion', 'you can tell someone''s major from their backpack'),
+  ('d0000000-0000-0000-0000-000000000018', 'a hot take I stand by', 'the answer was obvious from the syllabus'),
+  ('d0000000-0000-0000-0000-000000000018', 'best columbia secret', 'elementary. I''m not telling you.'),
+
+  ('d0000000-0000-0000-0000-000000000019', 'favorite professor', 'the one who lets me argue both sides'),
+  ('d0000000-0000-0000-0000-000000000019', 'best class I’ve taken', 'anything with a closing argument'),
+  ('d0000000-0000-0000-0000-000000000019', 'a hot take I stand by', 'I will debate you on literally anything'),
+
+  ('d0000000-0000-0000-0000-000000000020', 'unpopular opinion', 'do or do not, there is no all-nighter'),
+  ('d0000000-0000-0000-0000-000000000020', 'a hot take I stand by', 'the answer was inside you all along, mostly'),
+  ('d0000000-0000-0000-0000-000000000020', 'fun fact about me', '900 riddles deep and still not done with the reading')
+on conflict do nothing;
 
 -- ---------------------------------------------------------------------------
 -- Demo enrollments. These fire the auto-join trigger, which creates the section

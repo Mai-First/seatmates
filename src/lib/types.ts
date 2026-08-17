@@ -16,6 +16,7 @@ export type Profile = {
   linkedin: string | null;
   photo_url: string | null;
   show_email: boolean;
+  hidden: boolean;
   notification_prefs: NotificationPrefs;
 };
 

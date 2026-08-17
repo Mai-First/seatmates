@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useFocusEffect } from 'expo-router';
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useRef, useState } from 'react';
 import {
   Animated,
   PanResponder,
@@ -15,6 +15,7 @@ import {
 } from 'react-native';
 import Celebration from '../../components/Celebration';
 import { Button, Loading } from '../../components/ui';
+import { useMyProfile } from '../../lib/auth';
 import { supabase } from '../../lib/supabase';
 import { fontFamily, radius, space, useTheme } from '../../lib/theme';
 import { schoolYearLabel, type DeckCard } from '../../lib/types';
@@ -25,11 +26,28 @@ export default function Swipe() {
   const { colors, type } = useTheme();
   const queryClient = useQueryClient();
   const { width } = useWindowDimensions();
-  const [cursor, setCursor] = useState(0);
+  // Who's been swiped this session, tracked locally rather than as a numeric
+  // index into deck.data. An index breaks the instant deck.data changes
+  // underneath it — a background refetch (window refocus, invalidation from
+  // elsewhere) reorders/shortens the array server-side once a swipe lands,
+  // and a stale index then points at the wrong card: exactly what read as
+  // "flashes back to the previous profile." Filtering a stable local set
+  // out of whatever deck.data currently is makes "the current card" correct
+  // no matter when or how often the array underneath changes.
+  const [swipedIds, setSwipedIds] = useState<Set<string>>(new Set());
   const [match, setMatch] = useState<{ name: string; conversationId: string | null } | null>(null);
+  const profile = useMyProfile();
 
   const deck = useQuery({
     queryKey: ['deck'],
+    // Hidden means invisible to everyone else's deck (PLAN §6) — Hinge-style,
+    // that only makes sense if it also pauses your own swiping both ways.
+    enabled: profile.data?.hidden !== true,
+    // A mid-session background refetch has nothing to offer here (new people
+    // becoming available is exactly what useFocusEffect below already
+    // refreshes for) and only risks reshuffling the array while swipedIds
+    // is filtering it — off entirely, not just a longer staleTime.
+    refetchOnWindowFocus: false,
     queryFn: async (): Promise<DeckCard[]> => {
       const { data, error } = await supabase.rpc('get_swipe_deck');
       if (error) throw error;
@@ -57,8 +75,22 @@ export default function Swipe() {
 
   // ─── Gesture logic below is UNCHANGED from the original screen ───
   const pan = useRef(new Animated.ValueXY()).current;
-  const cards = deck.data ?? [];
-  const card = cards[cursor];
+  const cards = (deck.data ?? []).filter((c) => !swipedIds.has(c.id));
+  const card = cards[0];
+  const nextCard = cards[1];
+
+  // Resetting pan here (imperative, applies instantly) used to run in the
+  // same tick as setSwipedIds (a React state update, deferred to the next
+  // render) — pan would snap back to center a frame before the card
+  // content actually swapped, so the just-swiped card flashed back into
+  // view for a frame. useLayoutEffect (not useEffect) matters here: it
+  // fires synchronously right after the new card commits but before the
+  // screen paints, so the reset and the content swap land in the same
+  // frame instead of two — useEffect's async timing was still letting
+  // that frame slip through often enough to be noticeable.
+  useLayoutEffect(() => {
+    pan.setValue({ x: 0, y: 0 });
+  }, [card?.id, pan]);
 
   const advance = useCallback(
     (direction: 'left' | 'right') => {
@@ -76,10 +108,13 @@ export default function Swipe() {
           },
         },
       );
-      setCursor((c) => c + 1);
-      pan.setValue({ x: 0, y: 0 });
+      setSwipedIds((prev) => {
+        const next = new Set(prev);
+        next.add(current.id);
+        return next;
+      });
     },
-    [card, swipe, pan, queryClient],
+    [card, swipe, queryClient],
   );
 
   const fling = useCallback(
@@ -93,6 +128,19 @@ export default function Swipe() {
     [pan, width, advance],
   );
 
+  // PanResponder.create() only ever runs once — useRef discards every
+  // later render's argument. Its handlers close over whatever `fling` (and
+  // therefore `card`) was on that very first render, so a real drag-release
+  // kept swiping the *original* first card forever while the on-screen card
+  // had already correctly advanced — the just-swiped card would fly off and
+  // never get its position reset, unmasking the peek card underneath in its
+  // smaller "behind" styling. Routing through a ref that's kept current
+  // every render fixes it without recreating the responder itself.
+  const flingRef = useRef(fling);
+  useLayoutEffect(() => {
+    flingRef.current = fling;
+  }, [fling]);
+
   const responder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: (_e, g) =>
@@ -101,8 +149,8 @@ export default function Swipe() {
         useNativeDriver: false,
       }),
       onPanResponderRelease: (_e, g) => {
-        if (g.dx > SWIPE_THRESHOLD) fling('right');
-        else if (g.dx < -SWIPE_THRESHOLD) fling('left');
+        if (g.dx > SWIPE_THRESHOLD) flingRef.current('right');
+        else if (g.dx < -SWIPE_THRESHOLD) flingRef.current('left');
         else
           Animated.spring(pan, {
             toValue: { x: 0, y: 0 },
@@ -112,6 +160,26 @@ export default function Swipe() {
     }),
   ).current;
   // ─── end unchanged gesture logic ───
+
+  if (profile.isLoading) return <Loading />;
+
+  if (profile.data?.hidden) {
+    return (
+      <View style={[styles.emptyDeck, { backgroundColor: colors.bg }]}>
+        <View style={[styles.emptyIcon, { backgroundColor: colors.accentSoft }]}>
+          <Ionicons name="eye-off-outline" size={26} color={colors.primary} />
+        </View>
+        <Text style={[type.h2, { textAlign: 'center' }]}>your profile is hidden</Text>
+        <Text style={[type.sub, { textAlign: 'center', maxWidth: 300 }]}>
+          swiping is paused while you're hidden — you won't see anyone, and no one sees you.
+          turn it back on in account to pick up where you left off.
+        </Text>
+        <View style={{ marginTop: space.xs }}>
+          <Button title="go to account" onPress={() => router.push('/account')} />
+        </View>
+      </View>
+    );
+  }
 
   if (deck.isLoading) return <Loading />;
 
@@ -150,9 +218,9 @@ export default function Swipe() {
   return (
     <View style={[styles.root, { backgroundColor: colors.bg }]}>
       {/* Peek of the next card */}
-      {cards[cursor + 1] && (
+      {nextCard && (
         <View style={[styles.card, styles.cardBehind, { backgroundColor: colors.card }]}>
-          <CardFace card={cards[cursor + 1]} />
+          <CardFace card={nextCard} />
         </View>
       )}
 
@@ -225,6 +293,13 @@ function CardFace({ card }: { card: DeckCard }) {
             source={{ uri: card.photo_url }}
             style={StyleSheet.absoluteFill}
             contentFit="cover"
+            // A 150ms transition turned out to be its own, more noticeable
+            // glitch — a visible fade drawing attention to itself instead
+            // of masking anything. No transition prop = expo-image's plain
+            // instant swap, which is what to compare future attempts
+            // against. cachePolicy alone (no visual effect, just a caching
+            // hint) is left in since it's not implicated in either report.
+            cachePolicy="memory-disk"
           />
         ) : (
           <View style={[StyleSheet.absoluteFill, styles.initialsWrap]}>

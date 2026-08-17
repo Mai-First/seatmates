@@ -1,13 +1,61 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useQueryClient } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { Avatar, Loading } from '../../components/ui';
 import { useAuth, useMyProfile } from '../../lib/auth';
 import { confirm, notify } from '../../lib/dialogs';
 import { supabase } from '../../lib/supabase';
 import { radius, space, useTheme, type Scheme } from '../../lib/theme';
 import { schoolYearLabel } from '../../lib/types';
+
+/** PLAN §6: flagged alongside block/report as something the app needs, never
+ * built until now. A hidden profile drops out of everyone else's swipe deck
+ * — classes, chats, and matches are untouched. */
+function HideProfileRow() {
+  const { colors, type } = useTheme();
+  const { session } = useAuth();
+  const profile = useMyProfile();
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
+  const hidden = profile.data?.hidden ?? false;
+
+  const toggle = async (value: boolean) => {
+    if (!session) return;
+    setSaving(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ hidden: value })
+      .eq('id', session.user.id);
+    setSaving(false);
+    if (error) {
+      notify('could not update', error.message);
+      return;
+    }
+    queryClient.invalidateQueries({ queryKey: ['profile', session.user.id] });
+    queryClient.invalidateQueries({ queryKey: ['deck'] });
+  };
+
+  return (
+    <View style={[styles.row, { borderTopWidth: 1, borderTopColor: colors.border }]}>
+      <Ionicons name="eye-off-outline" size={22} color={colors.primary} />
+      <View style={{ flex: 1, gap: 2 }}>
+        <Text style={type.body}>hide my profile</Text>
+        <Text style={type.sub}>
+          pauses swiping both ways — you won’t show up in anyone’s deck, and yours empties too.
+        </Text>
+      </View>
+      <Switch
+        value={hidden}
+        onValueChange={toggle}
+        disabled={saving}
+        trackColor={{ false: colors.border, true: colors.primary }}
+        thumbColor={colors.white}
+      />
+    </View>
+  );
+}
 
 /** System / Light / Dark, per the redesign brief. Defaults to System. Renders
  * as one row among the settings rows, not a standalone block. */
@@ -196,6 +244,7 @@ export default function Account() {
       <Text style={[type.tiny, styles.sectionHeader]}>profile & classes</Text>
       <View style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
         {profileRows.map(renderRow)}
+        <HideProfileRow />
       </View>
 
       <Text style={[type.tiny, styles.sectionHeader]}>settings & password</Text>

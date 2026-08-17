@@ -109,43 +109,98 @@ code" link on the sign-in screen covers forgotten passwords. Creating an
 account with an already-used email redirects you to sign-in. (Non-Columbia
 addresses are rejected twice: in the UI and by a database trigger.)
 
+### For judges — no Columbia email needed
+
+The app gates real signup to `@columbia.edu` addresses (enforced client-side
+*and* by a database trigger — see [D1](docs/PLAN.md)), so judging without one
+means either signing into an already-populated account, or actually going
+through account creation the way a real student would. Five pre-provisioned
+accounts cover the second path — they pass the domain check with a real
+`@columbia.edu`-shaped address, but nobody's checking that inbox, so sign-in
+(not "create account") is the door in:
+
+| Email | Password |
+|---|---|
+| `judge1@columbia.edu` through `judge5@columbia.edu` | `SeatmatesDemo1` |
+
+Each one has a confirmed login and **no profile yet** — signing in drops you
+straight into the real onboarding flow (profile → schedule → tutorial → tabs),
+identical to what a first-time student sees. Use a different `judgeN` if you
+want a clean slate alongside someone else testing at the same time; the
+account is otherwise disposable — no requirement to clean it up afterward.
+
+Prefer to explore a fully populated account instead of onboarding from
+scratch? Any of the 20 demo personas below works the same way once you know
+its email (`select email from profiles where full_name = 'Elowen Marsh';` from the
+SQL editor) — they don't have set passwords, so that route needs an admin
+password reset first.
+
 ### The seeded world
 
 The shared project comes pre-loaded with a Fall 2026 catalog (9 subjects,
-~900 sections) and eight demo students — Emma, Liam, Sofia, Noah, Maya, Tariq,
-Leona, Diego — enrolled across **COMS W3157, COMS W3134, MATH UN1101,
-ECON UN1105, PSYC UN1001,
-HIST UN1786, ENGL BC1068, BIOL UN2005**, with live-looking chatter in the
-COMS W3157 §001 and MATH UN1101 §001 group chats and four upcoming study
-sessions.
+~900 sections) and **20 wholly made-up demo personas** — not real people,
+not existing fictional characters either, so there's no name/likeness
+question of any kind: Priya Chandrasekaran, Liam O'Brien, Jonah Fitzgerald,
+Dante Reyes, Adrian Voss, Miles Okafor, Charlie Kowalski, Wei Lin, Ada
+Nakamura, Sage Whitfield, Marcus Reid, Owen Bramble, Desmond Ortiz, Nyx
+Castellan, Silas Kade, Josephine Park, Bartholomew Higgins, Percival
+Lockhart, Freya Lindqvist, and Elowen Marsh — enrolled across **COMS W3157,
+COMS W3134, MATH UN1101, ECON UN1105, PSYC UN1001, HIST UN1786, ENGL BC1068,
+BIOL UN2005**. Each one has a full profile: photo (DiceBear-generated
+cartoon avatars, MIT-licensed), bio, study spot, and three in-character
+prompt answers, so the prompts feature has something to show from a fresh
+seed. Two
+section chats (COMS W3157 §001, MATH UN1101 §001) come pre-loaded with
+live-looking chatter, and four study sessions are posted with RSVPs already
+on them.
 
 The seed also installs a **demo greeter**: the moment you enroll in a section
 with demo classmates, two of them right-swipe you and one sends you a friend
 request. That means a single account can exercise every flow with no second
 device.
 
+Testing muddied the demo data (old RSVPs, stray friendships, cluttered group
+chats, a judge account that's been through onboarding)? Re-run the reset —
+it only touches demo personas, the two seeded group chats, and the judge
+accounts, never a real student's data:
+
+```bash
+npx supabase db query --linked --file supabase/reset_demo.sql
+```
+
 ### Ten-minute walkthrough
 
-1. **Onboard.** Sign in → fill the profile (photo optional) → search `W3157`
-   or `3157` or a call number like `13536` → join **COMS W3157 §001** → Done.
+1. **Onboard.** Sign in (or use a judge account, above) → fill the profile
+   (photo required) → add a couple of optional prompt answers → search
+   `W3157` or `3157` or a call number like `13536` → join **COMS W3157 §001**
+   → the one-time tutorial → Done.
 2. **Chats tab.** You're already in *COMS W3157 §001* (auto-join trigger) with
-   seeded messages. Send one.
-3. **Inbox (bell, top right).** A demo classmate has sent you a friend request.
-   **Accept** → open the DM → tap an icebreaker chip → send.
-4. **Swipe tab.** Cards show the class you share. Swipe right on everyone —
-   one of them already right-swiped you, so you'll hit the 🎉 connect screen.
-   *Say hi* opens the DM.
-5. **Study tab.** RSVP to "AP midterm grind." Post your own session — everyone
-   in the course (any section) sees it.
+   seeded messages. Send one, double-tap a message to like it, tap once to
+   reveal its exact time, send a photo or a file, pin the chat, mute it, or
+   give it a custom icon (⋮ menu).
+3. **Inbox (bell, top right).** A demo classmate has sent you a friend
+   request. **Accept** → open the DM → tap an icebreaker chip → send.
+4. **Swipe tab.** Cards show the class you share and prompt answers on the
+   back. Swipe right on everyone — one of them already right-swiped you, so
+   you'll hit the 🎉 connect screen. *Say hi* opens the DM.
+5. **Study tab.** Filter by class, RSVP to "AP midterm grind," check who else
+   is going (people icon), and if you're hosting a session, send everyone
+   RSVP'd an announcement (megaphone icon) — it lands as a notification +
+   push, not a chat message. Post your own session — everyone in the course
+   (any section) sees it. Add it to Google/Apple/Outlook calendar.
 6. **Members list** (people icon in a group chat): add-friend per person —
    deliberately no "add all."
-7. **Account tab.** Edit profile; **My classes** → drop W3157 (chat membership
-   ends, deck empties of its people, DMs survive) → re-add it.
-8. **Block/report:** any profile → Block. They vanish from your deck; DMs stop.
+7. **Account tab.** Edit profile; toggle whether your Columbia email shows on
+   your profile; **hide my profile** to drop out of everyone's swipe deck
+   without leaving your classes; set per-category notification preferences;
+   **my classes** → drop W3157 (chat membership ends, deck empties of its
+   people, DMs survive) → re-add it; **archive this semester** at rollover.
+8. **Block/report:** any profile → Block. They vanish from your deck; DMs
+   stop. Contact info (email/Instagram/LinkedIn) only ever shows once you're
+   friends with someone — never while just browsing.
 9. **Delete account** (Account tab, double confirm): removes the profile,
    matches, messages, and hosted sessions, frees the email for re-signup, and
-   kills the other side's DM thread. Required by App Store guideline 5.1.1(v),
-   verified by the e2e suite.
+   kills the other side's DM thread. Required by App Store guideline 5.1.1(v).
 
 ### Realtime across two accounts
 
@@ -170,6 +225,7 @@ scripts/catalog_to_sql.py   JSON → supabase/seed_catalog.sql
 supabase/migrations/    schema, RLS, triggers, RPCs — append-only
 supabase/seed_catalog.sql   generated Fall 2026 catalog subset (committed)
 supabase/seed.sql       demo students, messages, study sessions, demo greeter
+supabase/reset_demo.sql restores demo data to a clean state, real accounts untouched
 src/app/                expo-router screens (tabs = directories, PLAN §7)
 src/features/           shared feature components (course search/manage)
 src/lib/                supabase client, auth context, theme, row types
@@ -203,7 +259,10 @@ npx supabase db push --include-seed
 
 ## What's deliberately not here (yet)
 
-LLM icebreakers (static list ships; swap in an Edge Function), profile prompt
-questions, meeting times (the Directory stopped publishing them — sections are
-identified by number + instructor + call number, see PLAN A1), in-app
-moderation tooling beyond report routing.
+LLM icebreakers (static list ships; swap in an Edge Function), meeting times
+(the Directory stopped publishing them — sections are identified by number +
+instructor + call number, see PLAN A1), in-app moderation tooling beyond
+report routing, multiple profile photos (one only), and an automated test
+suite (verification today is `tsc --noEmit`, a full `expo export` bundle
+check, and direct queries against the hosted DB — see PLAN §6 and the git
+history for what that's caught in practice).
