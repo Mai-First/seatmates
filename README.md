@@ -163,8 +163,17 @@ redirects you to sign-in.
 
 ### The seeded world
 
-The shared project ships with a Fall 2026 catalog: 9 subjects, roughly 900
-sections.
+The shared project ships with the full Fall 2026 catalog: 4,467 courses across
+339 subjects, 8,441 sections.
+
+**Only eight of those courses have demo students in them.** Join any other
+section and you land in an empty room: no classmates, no chat activity, no
+swipe deck. Search one of these instead:
+
+```
+COMS W3157   COMS W3134   MATH UN1101   ECON UN1105
+PSYC UN1001  HIST UN1786  ENGL BC1068   BIOL UN2005
+```
 
 It also ships **20 invented students**. Not real people, and not existing
 fictional characters either, so no name or likeness question arises:
@@ -268,7 +277,7 @@ src/lib/                     supabase client, auth context, theme, row types
 src/lib/theme.ts             design tokens, ThemeProvider, useTheme (light + dark)
 ```
 
-Widening the catalog beyond the seeded 9 subjects:
+Re-scraping the catalog for a new term:
 
 ```bash
 python3 scripts/scrape_doc.py --term Fall2026 --out data/
