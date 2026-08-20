@@ -313,11 +313,3 @@ database trigger POSTs every notification to Expo's push API. It activates the
 day you make an EAS dev build with a projectId. In Expo Go and on web,
 registration is a no-op and the in-app inbox covers everything.
 
-## Not built yet
-
-LLM icebreakers, where a static list ships today and an Edge Function could
-replace it. Meeting times, which the Directory stopped publishing, leaving
-sections identified by number, instructor, and call number (PLAN A1). Moderation
-tooling beyond report routing. Multiple profile photos, since one is the limit.
-A database test suite, though `.github/workflows/ci.yml` has the pgTAP job
-scaffolded and ready.
