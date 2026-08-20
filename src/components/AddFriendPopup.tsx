@@ -92,8 +92,11 @@ const styles = StyleSheet.create({
     zIndex: 1000,
   },
   card: { width: '100%', maxWidth: 420, borderRadius: radius.lg, padding: space.lg },
+  // Three actions do not fit one line on a narrow phone. Without wrapping,
+  // "cancel" overflowed the card and rendered on top of the page behind it.
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'flex-end',
     alignItems: 'center',
     gap: space.md,
