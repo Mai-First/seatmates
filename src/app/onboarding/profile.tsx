@@ -37,6 +37,18 @@ export default function OnboardingProfile() {
   // so a refetch can never clobber a user's already-flipped-off toggle.
   const [showEmail, setShowEmail] = useState<boolean | null>(null);
   const [busy, setBusy] = useState(false);
+  // Only shown after a failed attempt, then stays live so it clears itself
+  // as each missing field gets filled in — rather than blocking the button
+  // outright with no explanation of what's wrong.
+  const [attempted, setAttempted] = useState(false);
+
+  const missing = [
+    !name.trim() && 'name',
+    !photoUrl && 'photo',
+    !studySpot.trim() && 'study spot',
+    !school && 'school',
+    !gradYear && 'graduation year',
+  ].filter((v): v is string => !!v);
 
   useEffect(() => {
     const p = profile.data;
@@ -83,20 +95,8 @@ export default function OnboardingProfile() {
 
   const save = async () => {
     if (!session) return;
-    if (!name.trim()) {
-      notify('name required', 'classmates need something to call you.');
-      return;
-    }
-    if (!photoUrl) {
-      notify('photo required', 'add a profile photo so classmates know who they’re meeting.');
-      return;
-    }
-    if (!studySpot.trim()) {
-      notify('study spot required', 'tell classmates where you like to study.');
-      return;
-    }
-    if (!school || !gradYear) {
-      notify('school and year required', 'pick your school and graduation year.');
+    if (missing.length > 0) {
+      setAttempted(true);
       return;
     }
     setBusy(true);
@@ -259,12 +259,10 @@ export default function OnboardingProfile() {
         />
       </View>
 
-      <Button
-        title={isEdit ? 'save' : 'continue'}
-        onPress={save}
-        loading={busy}
-        disabled={!name.trim() || !photoUrl || !studySpot.trim() || !school || !gradYear}
-      />
+      {attempted && missing.length > 0 ? (
+        <Text style={{ color: colors.danger }}>missing: {missing.join(', ')}</Text>
+      ) : null}
+      <Button title={isEdit ? 'save' : 'continue'} onPress={save} loading={busy} />
     </ScrollView>
   );
 }
