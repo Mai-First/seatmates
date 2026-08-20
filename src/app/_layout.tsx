@@ -6,9 +6,11 @@ import {
 } from '@expo-google-fonts/instrument-sans';
 import { InstrumentSerif_400Regular_Italic } from '@expo-google-fonts/instrument-serif';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack, useNavigation } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Pressable } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import DialogHost from '../components/DialogHost';
 import { AuthProvider } from '../lib/auth';
@@ -17,6 +19,25 @@ import { ThemeProvider, useTheme } from '../lib/theme';
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 15_000 } },
 });
+
+/** The default header back button only renders when the navigator has
+ *  somewhere to go back to. Open a chat, a profile, or a settings screen by
+ *  direct URL on web and the stack is empty, so the chevron never appears and
+ *  the only way out is the browser's own back button. This always renders one,
+ *  falling back to the tabs when there is no history. */
+function HeaderBack() {
+  const { colors } = useTheme();
+  const navigation = useNavigation();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel="go back"
+      hitSlop={12}
+      onPress={() => (navigation.canGoBack() ? router.back() : router.replace('/'))}>
+      <Ionicons name="chevron-back" size={26} color={colors.primary} />
+    </Pressable>
+  );
+}
 
 /** Inside ThemeProvider so the native header/background follow the scheme. */
 function Navigator() {
@@ -34,6 +55,7 @@ function Navigator() {
           // route segment, "(tabs)". An empty label leaves just the themed
           // chevron (headerTintColor above).
           headerBackTitle: '',
+          headerLeft: () => <HeaderBack />,
           contentStyle: { backgroundColor: colors.bg },
         }}>
         <Stack.Screen name="index" options={{ headerShown: false }} />
