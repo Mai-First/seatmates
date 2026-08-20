@@ -20,10 +20,23 @@ changing a token there re-skins the whole app.
 
 ---
 
-## Judging this without a Columbia email
+## For judges
+
+You need no Columbia email, no Supabase account, and no terminal.
+
+### Open the app
+
+Use the link and credentials in our submission form. If you are reading this
+on GitHub without them, email the team and we will send both.
+
+To run it yourself, see [Run it](#run-it) below. That path needs two Supabase
+values which we supply with the submission, since the backend is not public.
+
+### Sign in
 
 Signup requires an `@columbia.edu` address, enforced in the UI and again by a
-database trigger. Sign in instead. Two doors, both open.
+database trigger, so you cannot create an account. Sign in instead. Two
+doors, both open.
 
 **Door 1: onboard as a new student.** Five accounts, each with a confirmed
 login and no profile yet:
@@ -33,8 +46,8 @@ login and no profile yet:
 | `judge1@columbia.edu` through `judge5@columbia.edu` | `SeatmatesDemo1` |
 
 Signing in drops you into the real onboarding flow: profile, schedule,
-tutorial, tabs. Identical to a first-time student. Pick a different `judgeN` if
-someone else is testing at the same time. Nobody needs to clean them up
+tutorial, tabs. Identical to a first-time student. Pick a different `judgeN`
+if a colleague is testing at the same time. Nobody needs to clean them up
 afterward.
 
 **Door 2: sign in as a populated student.** Thirteen demo personas accept the
@@ -51,12 +64,32 @@ zendaya.demo@columbia.edu
 ```
 
 These land you in a filled-out account: classes joined, group chats with
-history, friends, study sessions. The mailbox names are internal handles left
-over from an earlier seed. On screen you appear under a made-up student name,
-so `taylorswift.demo` shows up as one of the personas below.
+history, friends, study sessions. The mailbox names are internal handles from
+an earlier seed, so on screen you appear under an invented student name.
 
-Start with door 1 if you want to see what a student experiences. Start with
-door 2 if you want to see the app full.
+Start with door 1 to see what a student experiences. Start with door 2 to see
+the app full.
+
+### Then follow the walkthrough
+
+[Ten-minute walkthrough](#ten-minute-walkthrough) covers every feature in
+order, and takes about ten minutes.
+
+Two things that will save you confusion:
+
+**Search one of these eight courses.** The catalog holds 4,467 courses, and
+only eight have demo students in them. Join any other section and you land in
+an empty room with no classmates and no chat, which looks broken but is not.
+
+```
+COMS W3157   COMS W3134   MATH UN1101   ECON UN1105
+PSYC UN1001  HIST UN1786  ENGL BC1068   BIOL UN2005
+```
+
+**Enrolling triggers the demo.** The moment you join a section with demo
+classmates, two of them swipe right on you and a third sends a friend
+request. That is deliberate, and it means one account on one device can reach
+matching, the celebration screen, and the inbox without a second person.
 
 ---
 
@@ -73,8 +106,8 @@ npm install
 
 ### 1. Backend
 
-The team shares one hosted Supabase project. Ask a teammate for the project URL
-and anon key, then:
+The team shares one hosted Supabase project. Teammates: ask each other for the
+project URL and anon key. Judges: both values come with our submission. Then:
 
 ```bash
 cp .env.example .env
@@ -96,10 +129,10 @@ Only for starting a new team or instance, not for joining the existing one.
    npx supabase config push
    ```
 
-   `config push` syncs auth settings from `config.toml`. Watch `otp_length`,
-   which must stay at **6**. The sign-in screen's code input is hardcoded to 6
-   digits, hosted projects default to 8, and the mismatch breaks sign-in
-   without any error message.
+   `config push` syncs auth settings from `config.toml`. Watch `otp_length`.
+   It must stay at **6**, because the sign-in screen's code input accepts
+   exactly six digits and hosted projects default to eight. Get this wrong and
+   sign-in breaks with no error message at all.
 
    The free tier rejects custom email templates on the default built-in mailer,
    so `config push` errors on the template section until you configure real
@@ -109,8 +142,8 @@ Only for starting a new team or instance, not for joining the existing one.
 
 3. Put the project's URL and anon key (Project Settings, then API) in `.env`.
 
-4. Configure real SMTP so the custom template and its 6-digit code can be
-   pushed. The built-in mailer cannot send it on any tier.
+4. Configure real SMTP so you can push the custom template and its 6-digit
+   code. The built-in mailer cannot send it on any tier.
 
    Gmail works and skips domain verification. Most transactional providers only
    deliver to the account owner on their free tier until you verify a domain,
@@ -144,8 +177,8 @@ npx expo start
 - `i` for the iOS simulator
 - Scan the QR code in Expo Go for a real phone
 
-Seeing "Almost there"? Your `.env` is missing or empty. Expo bakes env vars in
-at bundle time, so restart `expo start` after editing it.
+The app shows "Almost there" when `.env` is missing or empty. Expo bakes env
+vars in at bundle time, so restart `expo start` after you edit it.
 
 ---
 
@@ -158,8 +191,8 @@ real email, so use one you can check, and check spam. A 6-digit code verifies
 the address, then you set a password.
 
 After that you sign in with email and password. The "email me a code" link
-covers forgotten passwords. Creating an account with an already-used email
-redirects you to sign-in.
+handles a forgotten one. Try to create a second account on an email that
+already exists and the app sends you to sign-in instead.
 
 ### The seeded world
 
@@ -192,7 +225,7 @@ hometown, a bio, a study spot, and three in-character prompt answers, so the
 prompts feature has something to show from a cold seed.
 
 Two section chats, COMS W3157 §001 and MATH UN1101 §001, arrive with
-live-looking chatter. Four study sessions are posted with RSVPs on them.
+live-looking chatter. Four study sessions already carry RSVPs.
 
 **The demo greeter.** Enroll in a section that has demo classmates and two of
 them right-swipe you, while a third sends a friend request. One account on one
