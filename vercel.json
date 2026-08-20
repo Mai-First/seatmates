@@ -1,0 +1,15 @@
+{
+  "buildCommand": "npx expo export -p web",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci",
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/chat/:id", "destination": "/chat/[id].html" },
+    { "source": "/chat-options/:id", "destination": "/chat-options/[id].html" },
+    { "source": "/chat-members/:id", "destination": "/chat-members/[id].html" },
+    { "source": "/chat-media/:id", "destination": "/chat-media/[id].html" },
+    { "source": "/profile/:id", "destination": "/profile/[id].html" },
+    { "source": "/report/:id", "destination": "/report/[id].html" }
+  ]
+}
