@@ -96,10 +96,10 @@ Only for starting a new team or instance, not for joining the existing one.
    npx supabase config push
    ```
 
-   `config push` syncs auth settings from `config.toml`. Watch `otp_length`,
-   which must stay at **6**. The sign-in screen's code input is hardcoded to 6
-   digits, hosted projects default to 8, and the mismatch breaks sign-in
-   without any error message.
+   `config push` syncs auth settings from `config.toml`. Watch `otp_length`.
+   It must stay at **6**, because the sign-in screen's code input accepts
+   exactly six digits and hosted projects default to eight. Get this wrong and
+   sign-in breaks with no error message at all.
 
    The free tier rejects custom email templates on the default built-in mailer,
    so `config push` errors on the template section until you configure real
@@ -109,8 +109,8 @@ Only for starting a new team or instance, not for joining the existing one.
 
 3. Put the project's URL and anon key (Project Settings, then API) in `.env`.
 
-4. Configure real SMTP so the custom template and its 6-digit code can be
-   pushed. The built-in mailer cannot send it on any tier.
+4. Configure real SMTP so you can push the custom template and its 6-digit
+   code. The built-in mailer cannot send it on any tier.
 
    Gmail works and skips domain verification. Most transactional providers only
    deliver to the account owner on their free tier until you verify a domain,
@@ -144,8 +144,8 @@ npx expo start
 - `i` for the iOS simulator
 - Scan the QR code in Expo Go for a real phone
 
-Seeing "Almost there"? Your `.env` is missing or empty. Expo bakes env vars in
-at bundle time, so restart `expo start` after editing it.
+The app shows "Almost there" when `.env` is missing or empty. Expo bakes env
+vars in at bundle time, so restart `expo start` after you edit it.
 
 ---
 
@@ -158,8 +158,8 @@ real email, so use one you can check, and check spam. A 6-digit code verifies
 the address, then you set a password.
 
 After that you sign in with email and password. The "email me a code" link
-covers forgotten passwords. Creating an account with an already-used email
-redirects you to sign-in.
+handles a forgotten one. Try to create a second account on an email that
+already exists and the app sends you to sign-in instead.
 
 ### The seeded world
 
@@ -192,7 +192,7 @@ hometown, a bio, a study spot, and three in-character prompt answers, so the
 prompts feature has something to show from a cold seed.
 
 Two section chats, COMS W3157 §001 and MATH UN1101 §001, arrive with
-live-looking chatter. Four study sessions are posted with RSVPs on them.
+live-looking chatter. Four study sessions already carry RSVPs.
 
 **The demo greeter.** Enroll in a section that has demo classmates and two of
 them right-swipe you, while a third sends a friend request. One account on one
