@@ -43,7 +43,7 @@ function HideProfileRow() {
       <View style={{ flex: 1, gap: 2 }}>
         <Text style={type.body}>hide my profile</Text>
         <Text style={type.sub}>
-          pauses swiping both ways — you won’t show up in anyone’s deck, and yours empties too.
+          pauses swiping both ways. you won’t show up in anyone’s deck, and yours empties too.
         </Text>
       </View>
       <Switch
@@ -195,7 +195,7 @@ export default function Account() {
       onPress: async () => {
         const ok = await confirm(
           'delete your account?',
-          'this is irreversible — it deletes all of your data on our end.',
+          'this deletes all of your data on our end. you cannot undo it.',
           'delete forever',
           true,
         );

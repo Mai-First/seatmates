@@ -180,7 +180,7 @@ export default function Swipe() {
         </View>
         <Text style={[type.h2, { textAlign: 'center' }]}>your profile is hidden</Text>
         <Text style={[type.sub, { textAlign: 'center', maxWidth: 300 }]}>
-          swiping is paused while you're hidden — you won't see anyone, and no one sees you.
+          swiping pauses while you're hidden. you won't see anyone, and no one sees you.
           turn it back on in account to pick up where you left off.
         </Text>
         <View style={{ marginTop: space.xs }}>

@@ -81,7 +81,7 @@ export default function ReportProfile() {
       if (error) throw error;
     },
     onSuccess: () => {
-      notify('thanks', 'we got it — the team reviews every report.');
+      notify('thanks', 'we got it. the team reviews every report.');
       router.back();
     },
     onError: (e) => notify('could not report', e.message),
@@ -93,7 +93,7 @@ export default function ReportProfile() {
       contentContainerStyle={{ padding: space.lg, gap: space.md }}
       keyboardShouldPersistTaps="handled">
       <Text style={type.sub}>
-        reporting {reported.data?.full_name ?? 'this person'}. tell us what happened — a screenshot
+        reporting {reported.data?.full_name ?? 'this person'}. tell us what happened. a screenshot
         or file helps us review it faster, but isn’t required.
       </Text>
       <Field

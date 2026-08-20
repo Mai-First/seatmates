@@ -59,7 +59,7 @@ export default function NotificationSettings() {
   return (
     <ScrollView style={{ backgroundColor: colors.bg }} contentContainerStyle={styles.body}>
       <Text style={type.sub}>
-        choose what you hear about — in the app and as a push notification. A muted chat stays
+        choose what you hear about, in the app and as a push notification. a muted chat stays
         quiet regardless of the messages setting below.
       </Text>
       {ROWS.map((row) => (

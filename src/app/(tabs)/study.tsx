@@ -128,7 +128,7 @@ export default function Study() {
   const confirmDelete = async (s: StudySession) => {
     const ok = await confirm(
       `delete "${s.title}"?`,
-      'everyone who RSVP’d gets told it was cancelled.',
+      'everyone who RSVP’d hears that you cancelled it.',
       'delete',
       true,
     );
@@ -412,7 +412,7 @@ function AnnounceModal({
         <Pressable style={[styles.calendarCard, { backgroundColor: colors.bg }]}>
           <Text style={type.h2}>announce</Text>
           <Text style={[type.sub, { marginBottom: space.sm }]}>
-            sent as a notification to everyone going — not a chat message.
+            everyone going gets this as a notification, not a chat message.
           </Text>
           <TextInput
             style={[styles.announceInput, { borderColor: colors.border, color: colors.text }]}

@@ -61,7 +61,7 @@ export default function PromptsEditor({ profileId }: { profileId: string }) {
 
   return (
     <View style={{ gap: space.sm }}>
-      <Text style={type.sub}>prompts (optional — add as many as you want)</Text>
+      <Text style={type.sub}>prompts (optional, add as many as you want)</Text>
       {(prompts.data ?? []).map((p) => (
         <View
           key={p.id}

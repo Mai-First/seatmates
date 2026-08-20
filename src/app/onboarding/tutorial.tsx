@@ -14,7 +14,7 @@ const SLIDES = [
   {
     icon: 'chatbubbles-outline',
     title: 'chats',
-    body: 'every section gets a group chat automatically. connect with someone and you get a DM too.',
+    body: 'every section gets a group chat. connect with someone and you get a DM too.',
   },
   {
     icon: 'book-outline',
