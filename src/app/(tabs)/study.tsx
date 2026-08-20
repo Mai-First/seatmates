@@ -248,8 +248,10 @@ export default function Study() {
               </Text>
               {item.description ? <Text style={type.body}>{item.description}</Text> : null}
               <View style={styles.cardFooter}>
-                <Pressable onPress={() => router.push(`/profile/${item.host_id}`)}>
-                  <Text style={type.sub}>
+                <Pressable
+                  style={styles.hostLink}
+                  onPress={() => router.push(`/profile/${item.host_id}`)}>
+                  <Text style={type.sub} numberOfLines={1}>
                     hosted by <Text style={{ color: colors.primary }}>{item.host_name}</Text>
                   </Text>
                 </Pressable>
@@ -458,13 +460,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: space.sm,
     marginTop: space.xs,
   },
+  // Long host names used to run underneath the RSVP pill. The name shrinks and
+  // truncates; the pill keeps its natural width.
+  hostLink: { flex: 1, minWidth: 0 },
   rsvp: {
     borderWidth: 1,
     borderRadius: radius.full,
     paddingHorizontal: 14,
     paddingVertical: 7,
+    flexShrink: 0,
   },
   fab: {
     position: 'absolute',
