@@ -50,7 +50,7 @@ export default function AddFriendPopup({
       <View style={[styles.card, { backgroundColor: colors.bg }]}>
         <Text style={type.h2}>add {personName ?? 'this person'}?</Text>
         <Text style={[type.sub, { marginTop: space.xs }]}>
-          a note starts the conversation — totally optional.
+          a note starts the conversation. skip it if you'd rather.
         </Text>
         <Field
           placeholder="e.g. we’re both in the makefile lab..."

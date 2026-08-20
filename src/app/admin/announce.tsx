@@ -40,7 +40,7 @@ export default function AdminAnnounce() {
       contentContainerStyle={{ padding: space.lg, gap: space.md }}
       keyboardShouldPersistTaps="handled">
       <Text style={type.sub}>
-        goes out to every user immediately — there’s no draft or scheduling.
+        goes out to every user the moment you send it. no draft, no scheduling.
       </Text>
       <Field
         label="announcement"
