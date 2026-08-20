@@ -35,7 +35,7 @@ values which we supply with the submission, since the backend is not public.
 ### Sign in
 
 Signup requires an `@columbia.edu` address, enforced in the UI and again by a
-database trigger, so create-account is closed to you. Sign in instead. Two
+database trigger, so you cannot create an account. Sign in instead. Two
 doors, both open.
 
 **Door 1: onboard as a new student.** Five accounts, each with a confirmed
