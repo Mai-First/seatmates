@@ -6,6 +6,8 @@ Columbia only. Swipe on classmates who share your sections, land in
 per-section group chats, send friend requests, and post Partiful-style study
 sessions.
 
+**Live:** [milasry.github.io/seatmates](https://milasry.github.io/seatmates/)
+
 Built for the Pathfinders Stellic Challenge. Design decisions live in
 [docs/PLAN.md](docs/PLAN.md).
 
@@ -26,11 +28,11 @@ You need no Columbia email, no Supabase account, and no terminal.
 
 ### Open the app
 
-Use the link and credentials in our submission form. If you are reading this
-on GitHub without them, email the team and we will send both.
+**[milasry.github.io/seatmates](https://milasry.github.io/seatmates/)** — the
+web build, always live, nothing to install.
 
-To run it yourself, see [Run it](#run-it) below. That path needs two Supabase
-values which we supply with the submission, since the backend is not public.
+To run it yourself instead, see [Run it](#run-it) below — the two Supabase
+values it needs are already checked into `.env.example`.
 
 ### Sign in
 
@@ -106,15 +108,15 @@ npm install
 
 ### 1. Backend
 
-The team shares one hosted Supabase project. Teammates: ask each other for the
-project URL and anon key. Judges: both values come with our submission. Then:
+The team shares one hosted Supabase project. `.env.example` already has its
+URL and anon key filled in — the anon key is meant to be public, RLS is what
+actually gates the data, so it's safe to have it committed.
 
 ```bash
 cp .env.example .env
 ```
 
-Paste them into `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`,
-and skip to [step 2](#2-app).
+Skip to [step 2](#2-app).
 
 <details>
 <summary><b>Setting up a fresh hosted project from scratch</b></summary>
